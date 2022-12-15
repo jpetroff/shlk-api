@@ -1,0 +1,38 @@
+{
+  "name": "shlk-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc --project ./src",
+    "start": "npm run build && node ./dist/index.js",
+    "start:dev": "nodemon ./src/index.ts",
+    "debug": "node --inspect dist/", 
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jpetroff/shlk-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jpetroff/shlk-api/issues"
+  },
+  "homepage": "https://github.com/jpetroff/shlk-api#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.15",
+    "@types/node": "^18.11.15",
+    "@typescript-eslint/eslint-plugin": "^5.46.1",
+    "@typescript-eslint/parser": "^5.46.1",
+    "eslint": "^8.29.0",
+    "nodemon": "^2.0.20",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.4",
+    "typescript-eslint-parser": "^22.0.0"
+  }
+}
