@@ -11,12 +11,8 @@ module.exports = (env, argv) => {
 	const isProduction = !!(argv.mode == 'production');
 	const config = {
 		context: __dirname,
-		devtool: isProduction ? undefined : 'eval-source-map',
-		entry: {
-			app: path.join(__dirname, 'src/public/js', 'main.tsx'),
-			pages: path.join(__dirname, 'src/public', 'index.html'),
-			styles: path.join(__dirname, 'src/public/css', 'main.less')
-		},
+		devtool: isProduction ? undefined : 'source-map',
+		entry: { app: path.join(__dirname, 'src/public/js', 'index.tsx') },
 		output: {
 			compareBeforeEmit: false,
 			path: path.resolve(__dirname, './dist/public'),
@@ -25,14 +21,14 @@ module.exports = (env, argv) => {
 			sourceMapFilename: '[file].map',
 		},
 		resolve: {
-			extensions: ['.ts', '.tsx', '.js', '.jsx']
+			extensions: ['.ts', '.tsx', '.js', '.jsx', '.less']
 		},
 	
 		plugins: [
 			new MiniCssExtractPlugin({
-				filename: 'css/styles.css'
+				filename: 'css/main.css'
 			}),
-			new NoEmitPlugin(['styles.js', 'pages.js']),
+			new NoEmitPlugin(['main.js', 'pages.js']),
 			new LiveReloadPlugin({
 				appendScriptTag: !isProduction
 			})
@@ -80,19 +76,25 @@ module.exports = (env, argv) => {
 								publicPath: '../assets'
 							}
 						},
+						{ loader: "css-modules-typescript-loader"},
 						{ 
 							loader: 'css-loader',
 							options: {
+								sourceMap: true,
+								importLoaders: 1,
+								esModule: true,
+								modules: 'global'
 							},
 						},
 						{
 							loader: 'less-loader',
 							options: {
+								sourceMap: true,
 								lessOptions: {
 									paths: ['.'],
 									rewriteUrls: 'all',
 									rootpath: '/',
-									sourceMap: { outputSourceFiles: true }
+									// sourceMap: { outputSourceFiles: true }
 								}
 							}
 						}

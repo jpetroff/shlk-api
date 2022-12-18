@@ -1,3 +1,6 @@
+import '../css/main.less';
+import '../index.html';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { HeroInput } from '../components/hero-input/index';
