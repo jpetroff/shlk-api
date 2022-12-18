@@ -13,8 +13,8 @@ class Server {
     const router = express.Router()
 
     router.get('/api/ping', (req, res) => {
-      res.json({
-        message: 'Hello World!' 
+      res.json({ 
+        message: 'Hello World!!'
       })
     })
 

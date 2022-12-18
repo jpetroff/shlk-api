@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Test } from '../components/test/index';
+import { HeroInput } from '../components/hero-input/index';
 
 function App() {
 	return (
-		<Test />
+		<HeroInput />
 	)
 }
 
