@@ -4,15 +4,17 @@ const glob = require('glob');
 const fs = require('fs');
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const NoEmitPlugin = require("no-emit-webpack-plugin");
 var LiveReloadPlugin = require('webpack-livereload-plugin');
 
 module.exports = (env, argv) => {
 	const isProduction = !!(argv.mode == 'production');
 	const config = {
 		context: __dirname,
+
 		devtool: isProduction ? undefined : 'source-map',
+
 		entry: { app: path.join(__dirname, 'src/public/js', 'index.tsx') },
+
 		output: {
 			compareBeforeEmit: false,
 			path: path.resolve(__dirname, './dist/public'),
@@ -20,15 +22,15 @@ module.exports = (env, argv) => {
 			chunkFilename: '[chunkhash].[ext].map',
 			sourceMapFilename: '[file].map',
 		},
+
 		resolve: {
-			extensions: ['.ts', '.tsx', '.js', '.jsx', '.less']
+			extensions: ['.ts', '.tsx', '.js', '.jsx', '.less', '.html']
 		},
 	
 		plugins: [
 			new MiniCssExtractPlugin({
 				filename: 'css/main.css'
 			}),
-			new NoEmitPlugin(['main.js', 'pages.js']),
 			new LiveReloadPlugin({
 				appendScriptTag: !isProduction
 			})
@@ -93,8 +95,7 @@ module.exports = (env, argv) => {
 								lessOptions: {
 									paths: ['.'],
 									rewriteUrls: 'all',
-									rootpath: '/',
-									// sourceMap: { outputSourceFiles: true }
+									rootpath: '/'
 								}
 							}
 						}

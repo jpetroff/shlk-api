@@ -1,6 +1,14 @@
-import server from './server'
+import app from './libs/app'
+import { mongoConnectPromise } from './libs/mongo' 
 
 const port = process.env.PORT || 8002
 
-server.listen(port)
+mongoConnectPromise
+	.then(
+		() => app.start(port as number)
+	)
+	.catch( (error : any) => {
+    throw error 
+  })
+
 
