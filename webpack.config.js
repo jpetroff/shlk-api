@@ -4,11 +4,14 @@ const glob = require('glob');
 const fs = require('fs');
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-var LiveReloadPlugin = require('webpack-livereload-plugin');
+const LiveReloadPlugin = require('webpack-livereload-plugin');
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = (env, argv) => {
-	const isProduction = !!(argv.mode == 'production');
+	const isProduction = !!(process.env.MODE == 'production');
 	const config = {
+		mode: process.env.MODE || 'production',
 		context: __dirname,
 
 		devtool: isProduction ? undefined : 'source-map',
@@ -37,6 +40,7 @@ module.exports = (env, argv) => {
 		], 
 	
 		optimization: {
+
 			splitChunks: {
 				cacheGroups: {
 					commons: {
@@ -45,7 +49,13 @@ module.exports = (env, argv) => {
 						chunks: 'all',
 					},
 				},
-			}
+			},
+
+			minimize: isProduction,
+			minimizer: [
+				new CssMinimizerPlugin(),
+				new TerserPlugin()
+			]
 		},
 	
 		module: {
@@ -78,7 +88,12 @@ module.exports = (env, argv) => {
 								publicPath: '../assets'
 							}
 						},
-						{ loader: "css-modules-typescript-loader"},
+						{ 
+							loader: "css-modules-typescript-loader", 
+							options: {
+								mode: 'emit'
+							}
+						},
 						{ 
 							loader: 'css-loader',
 							options: {

@@ -5,6 +5,7 @@ import { sendDescriptiveRedirect, sendRedirect, sendErrorResponse } from './serv
 import { sanitizeMongo } from './utils'
 
 const appRouter = express.Router()
+const publicDir = path.join(__dirname, '../public')
 
 appRouter.get('/api/ping', (req, res) => {
 	res.json({ 
@@ -13,7 +14,7 @@ appRouter.get('/api/ping', (req, res) => {
 })
 
 appRouter.get('/', (req, res) => {
-	res.sendFile(path.join(__dirname, 'public/index.html'));
+	res.sendFile(path.join(publicDir, 'index.html'));
 })
 
 appRouter.get('/:redirectUrl', (req, res) => {
@@ -45,6 +46,6 @@ appRouter.get('/:redirectUrl', (req, res) => {
 	}
 })
 
-const staticRoute = express.static(path.join(__dirname, 'public'))
+const staticRoute = express.static(publicDir)
 
 export {appRouter, staticRoute}

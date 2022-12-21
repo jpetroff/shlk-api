@@ -1,17 +1,24 @@
 import '../css/main.less';
 import '../index.html';
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { HeroInput } from '../components/hero-input/index';
+import React from 'react'
+import ReactDOM from 'react-dom'
+import {
+  createBrowserRouter,
+  RouterProvider
+} from 'react-router-dom'
+import { Home } from '../apps/Home/index'
 
-function App() {
-	return (
-		<HeroInput />
-	)
-}
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: (
+      <Home />
+    ),
+  }
+]);
 
 ReactDOM.render(
-	<App />,
+	<RouterProvider router={router} />,
 	document.getElementById('app')
 );

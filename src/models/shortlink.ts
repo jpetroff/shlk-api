@@ -2,24 +2,24 @@ import mongoose from 'mongoose'
 import mongooseValidation from 'mongoose-beautiful-unique-validation'
 
 /*
-  GraphQL interface for arguments and request
- */
+GraphQL interface for arguments and request
+*/
 export interface QIShortlink {
-  hash: string;
+	hash: string;
 	location: string;
-  descriptor?: {
-    userTag?: string;
-    descriptionTag: string; 
-  }
+	descriptor?: {
+		userTag?: string;
+		descriptionTag: string; 
+	}
 }
 
 /* 
-  MongoDB object representation for query results
- */
+	MongoDB object representation for query results
+	*/
 export interface ShortlinkDocument extends QIShortlink {
-  _id?: string;
-  createdAt?: string;
-  updatedAt?: string;
+	_id?: string;
+	createdAt?: string;
+	updatedAt?: string;
 }
 
 export type ShortlinkModel = typeof mongoose.Model<ShortlinkDocument>

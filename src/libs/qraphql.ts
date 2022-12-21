@@ -5,5 +5,5 @@ import graphqlResolvers from '../graphql/resolvers'
 export default graphqlHTTP({
 	schema: graphqlSchema,
 	rootValue: graphqlResolvers,
-	graphiql: true,
+	graphiql: process.env.MODE == 'development' ? true : false,
 })

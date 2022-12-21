@@ -1,6 +1,7 @@
 import express from 'express'
 import { appRouter, staticRoute } from './app-router'
 import graphql from './qraphql'
+import Helmet from 'helmet'
 
 
 class App {
@@ -12,6 +13,18 @@ class App {
   }
 
   private mountRoutes (): void {
+    if(process.env.MODE != 'development') {
+      this.express.use(Helmet({ 
+        contentSecurityPolicy: {
+          useDefaults: true,
+          directives: {
+            "script-src": ["'self'", "http://localhost:35729"],
+            "style-src": null,
+          }
+        },
+        crossOriginResourcePolicy: { policy: "cross-origin" }
+      }))
+    }
     this.express.use(staticRoute);
 		this.express.use('/api', graphql)
     this.express.use('/', appRouter)

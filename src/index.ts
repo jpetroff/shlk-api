@@ -1,13 +1,15 @@
 import app from './libs/app'
 import { mongoConnectPromise } from './libs/mongo' 
+import mongoCreds from './mongo_creds.json'
 
-const port = process.env.PORT || 8002
+const port = (process.env.PORT || 8002)
 
 mongoConnectPromise
-	.then(
-		() => app.start(port as number)
+	.then( () => {
+			app.start(port as number)
+		}
 	)
-	.catch( (error : any) => {
+	.catch( (error) => {
     throw error 
   })
 
