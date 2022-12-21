@@ -13,7 +13,7 @@ import Query from './shortlink-queries'
 type Props = {}
 
 type State = {
-	heroInputValue: string
+	location: string
 	generatedShortlink: string | null
 	errorState: {
 		createLinkResult: Error | null
@@ -31,29 +31,30 @@ export class Home extends React.Component<Props, State> {
 		this.baseUrl = window.location.origin
 
     this.state = {
-			heroInputValue: '',
+			location: '',
 			generatedShortlink: null,
 			errorState: {
 				createLinkResult: null
 			}
 		}
 		this.heroInputRef = React.createRef<HTMLInputElement>()
-		_.bindAll(this, 'onChange', 'onSubmit')
+		_.bindAll(this, 'updateLocation', 'submitLocation', 'handleSuccessPaste')
   }
-
-	onChange(str: string) {
-		this.setState({
-			heroInputValue: str,
-			generatedShortlink : null
-		})
-	}
 
 	componentDidMount() {
     if(this.heroInputRef.current) this.heroInputRef.current.focus();
   }
 
-	onSubmit(location: string) {
-		console.log(location)
+	updateLocation(str: string) {
+		this.setState({
+			location: str,
+			generatedShortlink: null
+		})
+	}
+
+	submitLocation() {
+		const location = this.state.location
+		console.log(this.state.location, location)
 		Query.createShortlink(location)
 			.then( (result) => {
 				console.log(result)
@@ -72,22 +73,30 @@ export class Home extends React.Component<Props, State> {
 			})
 	}
 
+	handleSuccessPaste(clipText: string) {
+		this.setState({
+			location: clipText
+		})
+		this.submitLocation()
+	}
+
 	render() {
 		return (
 			<div className={styles.homepage}>
 				<HeroInput 
 					inputRef={this.heroInputRef}
-					onChange={this.onChange}
-					onSubmit={this.onSubmit}
+					onChange={this.updateLocation}
+					onSubmit={this.submitLocation}
 					name="short url"
 					placeholder="Enter URL"
-					value={this.state.heroInputValue}
+					value={this.state.location}
 				/>
 				<ShortlinkDisplay
 					shortlink={this.state.generatedShortlink}
 				/>
 				<SuggestPaste 
 					inputRef={this.heroInputRef}
+					onSuccessPaste={this.handleSuccessPaste}
 				/>
 			</div>
 		)

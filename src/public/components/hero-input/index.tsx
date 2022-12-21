@@ -4,7 +4,7 @@ import styles from './hero-input.less'
 
 type Props = {
 	onChange: (str: string) => void;
-	onSubmit?: (str: string) => void;
+	onSubmit?: () => void;
   placeholder: string;
   name: string;
   value?: string;
@@ -25,7 +25,7 @@ export const HeroInput : React.FC<Props> = function(
 
 	const handleKeyDown = (event: any) => {
 		if (event.keyCode == 13 && _.isFunction(onSubmit)) {
-			onSubmit(event.target.value)
+			onSubmit()
 		}
 	}
 

@@ -23,7 +23,6 @@ class GraphQLHomeQuery {
 						}
 				`}
 		})
-		console.log(response)
 		return response.data.data.createShortlink
 	}
 }
