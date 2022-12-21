@@ -12,9 +12,9 @@ class App {
   }
 
   private mountRoutes (): void {
-    this.express.use('/', appRouter)
     this.express.use(staticRoute);
 		this.express.use('/api', graphql)
+    this.express.use('/', appRouter)
   }
 
 	public start(port: number) {

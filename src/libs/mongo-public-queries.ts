@@ -1,6 +1,8 @@
 /* eslint-disable no-useless-catch */
 import Shortlink, { ShortlinkDocument } from '../models/shortlink'
+import { sanitizeMongo } from './utils'
 import generateHash from './shortlink-hash'
+import _ from 'underscore'
 
 /**
  * Returns created shortlink or null: Promise<null | ShortlinkDocument>
@@ -11,7 +13,7 @@ export async function createShortlink(location: string): Promise<null | Shortlin
 	try {
 		const shortlink = new Shortlink({
 			hash: generateHash(),
-			location
+			location: _.escape(location)
 		})
 		const newShortlink = await shortlink.save()
 		return newShortlink
@@ -34,6 +36,10 @@ export async function createShortlink(location: string): Promise<null | Shortlin
 export async function createShortlinkDescriptor( 
 	args : { location: string, descriptionTag: string, hash?: string, userTag?: string }
 ): Promise<null | ShortlinkDocument> {
+	args.location = _.escape(args.location)
+	args.hash = sanitizeMongo(args.hash)
+	args.userTag = sanitizeMongo(args.userTag)
+	args.descriptionTag = sanitizeMongo(args.descriptionTag)
 
 	const existingShortlinkDescription = await Shortlink.findOne( { descriptor: { userTag: args.userTag, descriptionTag: args.descriptionTag } } )
 	try {
@@ -43,15 +49,15 @@ export async function createShortlinkDescriptor(
 		} else if (existingShortlinkDescription != null) {
 			throw new Error(`Shortlink '${args.userTag}@${args.descriptionTag}' already exists`)
 
-		} else if (args.hash) {
-			const existingShortlinkHash = await getShortlink( {hash: args.hash} )
+		} else if (args.hash != '') {
+			const existingShortlinkHash = await getShortlink( { hash: args.hash } )
 			if(existingShortlinkHash != null && existingShortlinkHash.location != args.location) {
 				throw new Error(`Cannot update: Hash /${args.hash} is taken by another location '${args.location}'`)
 
 			} else if (existingShortlinkHash == null) {
 				const shortlink = new Shortlink({
 					hash: args.hash,
-					location: args.location,
+					location: _.escape(args.location),
 					descriptor: {
 						userTag: args.userTag,
 						descriptionTag: args.descriptionTag
@@ -105,6 +111,9 @@ export async function createShortlinkDescriptor(
 export async function getShortlink( args: {hash?: string, userTag?: string, descriptionTag: string}): Promise<ShortlinkDocument | null>;
 export async function getShortlink(	args: {hash: string} ): Promise<ShortlinkDocument | null> 
 export async function getShortlink(	args: {hash?: string, userTag?: string, descriptionTag?: string} ): Promise<ShortlinkDocument | null> {
+	args.hash = sanitizeMongo(args.hash)
+	args.userTag = sanitizeMongo(args.userTag)
+	args.descriptionTag = sanitizeMongo(args.descriptionTag)
 	try {
 		if (args.hash) {
 			const shortlink = await Shortlink.findOne( { hash: args.hash } )
