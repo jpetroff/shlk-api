@@ -35,7 +35,9 @@ module.exports = (env, argv) => {
 				filename: 'css/main.css'
 			}),
 			new LiveReloadPlugin({
-				appendScriptTag: !isProduction
+				appendScriptTag: !isProduction,
+				hostname: 'localhost',
+				protocol: 'http'
 			})
 		], 
 	

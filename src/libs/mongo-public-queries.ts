@@ -67,7 +67,7 @@ export async function createShortlinkDescriptor(
 				return newShortlink
 
 			} else {
-				const updatedShortlink = await Shortlink.findOneAndUpdate( 
+				const update = await Shortlink.findOneAndUpdate( 
 					{
 						hash: args.hash
 					},
@@ -78,6 +78,7 @@ export async function createShortlinkDescriptor(
 						}
 					}
 				)
+				const updatedShortlink = await Shortlink.findById(update._id)
 				return updatedShortlink
 			}
 
@@ -120,6 +121,7 @@ export async function getShortlink(	args: {hash?: string, userTag?: string, desc
 			return shortlink
 		} else if (args.descriptionTag) {
 			const shortlink = await Shortlink.findOne( { descriptor: { userTag: args.userTag, descriptionTag: args.descriptionTag } } )
+			console.log(shortlink)
 			return shortlink
 		} else {
 			return null

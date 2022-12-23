@@ -4,3 +4,29 @@
 	background-color: white;
 }
 
+:local(.homepage) {
+
+	&.body__layout {
+		display: flex;
+		flex-direction: column;
+		width: ~'calc(100vw * 2 / 3)';
+		max-width: 48rem;
+		margin: 0 auto;
+
+		@media screen and (max-width: @mobileWidth) {
+			margin: 0 1.75rem;
+			width: auto;
+		}
+	}
+
+	.body__layout {
+		&__offset-wrapper {
+			height: 50vh;
+			display: flex;
+			flex-direction: row;
+			align-items: flex-end;
+			width: 100%;
+		}
+	}
+}
+

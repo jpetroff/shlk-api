@@ -1,22 +1,27 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import styles from './Home.less'
+import { HTMLAnyInput } from '../../js/_utils'
 
 import React from 'react'
 import _ from 'underscore'
 
 import { HeroInput } from '../../components/hero-input/index'
 import { ShortlinkDisplay } from '../../components/shortlink-display'
-import { SuggestPaste } from '../../components/suggest-paste'
+import { ShortlinkSlugInput, TextPattern } from '../../components/shortlink-slug-input'
 
 import Query from './shortlink-queries'
+
 
 type Props = {}
 
 type State = {
 	location: string
-	generatedShortlink: string | null
+	generatedShortlink: string | undefined
+	generatedHash: string | undefined
+	userTag: string
+	descriptionTag: string
 	errorState: {
-		createLinkResult: Error | null
+		createLinkResult: Error | undefined
 	}
 }
 
@@ -24,7 +29,7 @@ type State = {
 export class Home extends React.Component<Props, State> {
 	private baseUrl: string
 
-	private heroInputRef: React.RefObject<HTMLInputElement>
+	private heroInputRef: React.RefObject<HTMLAnyInput>
 
 	constructor(props) {
     super(props)
@@ -32,13 +37,17 @@ export class Home extends React.Component<Props, State> {
 
     this.state = {
 			location: '',
-			generatedShortlink: null,
+			generatedShortlink: undefined,
+			generatedHash: undefined,
+			userTag: 'evgn',
+			descriptionTag: '',
 			errorState: {
-				createLinkResult: null
+				createLinkResult: undefined
 			}
 		}
-		this.heroInputRef = React.createRef<HTMLInputElement>()
-		_.bindAll(this, 'updateLocation', 'submitLocation', 'handleSuccessPaste')
+		this.heroInputRef = React.createRef<HTMLAnyInput>()
+		_.bindAll(this, 'updateLocation', 'submitLocation', 'handleSuccessPaste', 'handleDescriptorChange', '_submitDescriptor')
+		this.submitDescriptor = _.debounce(this._submitDescriptor, 500)
   }
 
 	componentDidMount() {
@@ -48,13 +57,14 @@ export class Home extends React.Component<Props, State> {
 	updateLocation(str: string) {
 		this.setState({
 			location: str,
-			generatedShortlink: null
+			generatedShortlink: undefined
 		})
 	}
 
 	submitLocation() {
 		const location = this.state.location
-		console.log(this.state.location, location)
+		if (_.isEmpty(location)) return
+
 		Query.createShortlink(location)
 			.then( (result) => {
 				console.log(result)
@@ -62,8 +72,9 @@ export class Home extends React.Component<Props, State> {
 
 				this.setState({
 					generatedShortlink: `${this.baseUrl}/${result.hash}`,
+					generatedHash: result.hash,
 					errorState: {
-						createLinkResult: null
+						createLinkResult: undefined
 					}
 				})
 			})
@@ -80,23 +91,61 @@ export class Home extends React.Component<Props, State> {
 		this.submitLocation()
 	}
 
+	handleDescriptorChange(value: string, type: string) {
+		if(type == 'userTag') this.setState( {userTag: value} )
+		else if(type == 'descriptionTag') this.setState( {descriptionTag: value} )
+		this.submitDescriptor()
+	}
+
+	public submitDescriptor: (() => void) & _.Cancelable;
+	// debounced in constructor
+	private _submitDescriptor() {
+		console.log(this.state.userTag, this.state.descriptionTag)
+		if(_.isEmpty(this.state.descriptionTag)) { return }
+
+		Query.createShortlinkDescriptor( 
+			{ userTag: this.state.userTag, 
+				descriptionTag: this.state.descriptionTag,
+				location: this.state.location,
+				hash: this.state.generatedHash
+			}
+		)
+			.then( (result) => {
+				console.log(result)
+			})
+			.catch( (err) => {
+				console.error(err)
+			})
+	}
+
+	private _generateTextPattern(): Array<TextPattern | string> {
+		return [
+			'https://shlk.cc/',
+			{ key: 'userTag', value: this.state.userTag, placeholder: 'user' },
+			'@',
+			{ key: 'descriptionTag', value: this.state.descriptionTag, placeholder: 'your-custom-url' },
+		]
+	}
+
 	render() {
 		return (
-			<div className={styles.homepage}>
-				<HeroInput 
-					inputRef={this.heroInputRef}
-					onChange={this.updateLocation}
-					onSubmit={this.submitLocation}
-					name="short url"
-					placeholder="Enter URL"
-					value={this.state.location}
-				/>
+			<div className={`${styles.homepage} body__layout`}>
+				<div className={`body__layout__offset-wrapper`}>
+					<HeroInput 
+						inputRef={this.heroInputRef}
+						onChange={this.updateLocation}
+						onSubmit={this.submitLocation}
+						name="short url"
+						placeholder="Enter URL"
+						value={this.state.location}
+					/>
+				</div>
 				<ShortlinkDisplay
 					shortlink={this.state.generatedShortlink}
 				/>
-				<SuggestPaste 
-					inputRef={this.heroInputRef}
-					onSuccessPaste={this.handleSuccessPaste}
+				<ShortlinkSlugInput
+					text={this._generateTextPattern()}
+					onChange={this.handleDescriptorChange}
 				/>
 			</div>
 		)

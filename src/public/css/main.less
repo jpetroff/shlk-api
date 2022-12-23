@@ -1,8 +1,14 @@
 @import (inline) 'normalize.css'; 
 @import './_constants.less';
 
+.document {
+	font-size: 16px;
+}
+
 body {
 	font-family: @font-face;
 	-webkit-font-smoothing: antialiased;
-	background: white; 
+	font-feature-settings: 'liga','kern';
+	font-size: 1rem;
+	color: @text-color;
 }

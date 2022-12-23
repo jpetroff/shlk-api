@@ -1,0 +1,27 @@
+@import '../../css/_constants.less';
+
+:local(.wrapperClass) {
+	width: inherit;
+	padding-top: 2rem;
+	gap: 0.25rem;
+	font-size: 1.25rem;
+	line-height: 1.75rem;
+	color: @text-color;
+
+	.input-resizable { 
+		padding: 0;
+		min-width: 3rem;
+		position: relative;
+
+		&__real-input { position: absolute; width: 100%; left: 0; border: none; padding: 0; margin: 0;height: inherit; background-color: transparent; z-index: 1; outline:none }
+		&__real-input:focus {border-bottom: 2px solid black;}
+		&__width-sizer_hide { opacity: 0; z-index: 0; }
+		&__width-sizer_show { opacity: 1; z-index: 0; color: #929292 }
+	}
+
+	.input-common-style {
+		padding: 0;
+		line-height: inherit;
+		display: inline-block;
+	}
+}
