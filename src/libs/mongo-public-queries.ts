@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-catch */
 import Shortlink, { ShortlinkDocument } from '../models/shortlink'
-import { sanitizeMongo } from './utils'
+import { sanitizeMongo, prepareURL } from './utils'
 import generateHash from './shortlink-hash'
 import _ from 'underscore'
 
@@ -13,7 +13,7 @@ export async function createShortlink(location: string): Promise<null | Shortlin
 	try {
 		const shortlink = new Shortlink({
 			hash: generateHash(),
-			location: _.escape(location)
+			location: prepareURL(location)
 		})
 		const newShortlink = await shortlink.save()
 		return newShortlink
@@ -27,7 +27,7 @@ export async function createShortlink(location: string): Promise<null | Shortlin
  * If shortlink already exists tries to update or throws error if duplicate is detected
  * Returns created shortlink or null: Promise<null | ShortlinkDocument> 
  *
- * @param {object} arguments {
+ * 	@param {object} arguments {
  * 	@param {string} location Full URL
  * 	@param {string} descriptionTag Custom URL slug instead of random hash
  * 	@param {string} userTag Full URL
@@ -36,7 +36,7 @@ export async function createShortlink(location: string): Promise<null | Shortlin
 export async function createShortlinkDescriptor( 
 	args : { location: string, descriptionTag: string, hash?: string, userTag?: string }
 ): Promise<null | ShortlinkDocument> {
-	args.location = _.escape(args.location)
+	args.location = prepareURL(args.location)
 	args.hash = sanitizeMongo(args.hash)
 	args.userTag = sanitizeMongo(args.userTag)
 	args.descriptionTag = sanitizeMongo(args.descriptionTag)

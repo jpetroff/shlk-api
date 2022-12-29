@@ -16,3 +16,25 @@ export function sanitizeMongo( dirtyData: string | { [key: string]: any } | unde
 	}
   return dirtyData;
 }
+
+export function clearURLTracking (url: URL) : URL {
+  const trackingParams = [
+    'fbclid',
+    'utm_source', 'utm_medium', 'utm_content', 'utm_campaign', 'utm_term',
+    '_ga', 'dclid', 'gclid', 'msclkid', 'sessionid'
+  ]
+
+  trackingParams.forEach( (param) => url.searchParams.delete(param) )
+  return url
+}
+
+export function prepareURL( _url: string ): string {
+  let url = _url.trim()
+  const protocolRegex = new RegExp('^(https?|ftp)://')
+
+  if(!protocolRegex.test(url)) url = 'https://'+url
+
+  let URLObj = new URL(url)
+
+  return _.escape(clearURLTracking(URLObj).toString())
+}

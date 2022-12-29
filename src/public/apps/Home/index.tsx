@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import styles from './Home.less'
-import { HTMLAnyInput } from '../../js/_utils'
+import { HTMLAnyInput, modifyURLSlug } from '../../js/_utils'
 
 import React from 'react'
 import _ from 'underscore'
@@ -56,23 +56,24 @@ export class Home extends React.Component<Props, State> {
 
 	updateLocation(str: string) {
 		this.setState({
-			location: str,
+			location: str.trim(),
 			generatedShortlink: undefined
 		})
 	}
 
 	submitLocation() {
-		const location = this.state.location
+		const location = this.state.location.trim()
 		if (_.isEmpty(location)) return
 
 		Query.createShortlink(location)
 			.then( (result) => {
-				console.log(result)
+				console.log('[Home] submitLocation\n', result)
 				if(!result || !result.hash) throw new Error(`Unexpected error: shortlink for '${location}' was not created. Please, try again`)
 
 				this.setState({
 					generatedShortlink: `${this.baseUrl}/${result.hash}`,
 					generatedHash: result.hash,
+					location: result.location || this.state.location,
 					errorState: {
 						createLinkResult: undefined
 					}
@@ -80,7 +81,7 @@ export class Home extends React.Component<Props, State> {
 			})
 			.catch( (err) => {
 				this.setState({errorState: {createLinkResult: err}})
-				console.log(err) 
+				console.error(err) 
 			})
 	}
 
@@ -92,15 +93,15 @@ export class Home extends React.Component<Props, State> {
 	}
 
 	handleDescriptorChange(value: string, type: string) {
-		if(type == 'userTag') this.setState( {userTag: value} )
-		else if(type == 'descriptionTag') this.setState( {descriptionTag: value} )
+		if(type == 'userTag') this.setState( {userTag: modifyURLSlug(value)} )
+		else if(type == 'descriptionTag') this.setState( {descriptionTag: modifyURLSlug(value)} )
 		this.submitDescriptor()
 	}
 
 	public submitDescriptor: (() => void) & _.Cancelable;
 	// debounced in constructor
 	private _submitDescriptor() {
-		console.log(this.state.userTag, this.state.descriptionTag)
+		console.log('[Home] submitDescriptor\n', this.state.userTag, this.state.descriptionTag)
 		if(_.isEmpty(this.state.descriptionTag)) { return }
 
 		Query.createShortlinkDescriptor( 
@@ -110,9 +111,6 @@ export class Home extends React.Component<Props, State> {
 				hash: this.state.generatedHash
 			}
 		)
-			.then( (result) => {
-				console.log(result)
-			})
 			.catch( (err) => {
 				console.error(err)
 			})
@@ -120,7 +118,7 @@ export class Home extends React.Component<Props, State> {
 
 	private _generateTextPattern(): Array<TextPattern | string> {
 		return [
-			'https://shlk.cc/',
+			this.baseUrl+'/',
 			{ key: 'userTag', value: this.state.userTag, placeholder: 'user' },
 			'@',
 			{ key: 'descriptionTag', value: this.state.descriptionTag, placeholder: 'your-custom-url' },

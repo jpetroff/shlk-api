@@ -1,6 +1,6 @@
 import _ from 'underscore'
 import { GraphQLClient, gql } from 'graphql-request'
-import { validateLocation, AnyObject } from '../../js/_utils'
+import { validateURL, AnyObject } from '../../js/_utils'
 
 class GraphQLHomeQuery {
 	private queryUrl : string
@@ -13,7 +13,7 @@ class GraphQLHomeQuery {
 	}
 
 	public async createShortlink (location: string) : Promise<AnyObject | null> {
-		if (validateLocation(location) == false) {
+		if (validateURL(location) == false) {
 			throw new Error(`Not a valid URL: '${location}'`)
 		}
 		const query = gql`
@@ -22,26 +22,14 @@ class GraphQLHomeQuery {
 		){
 			createShortlink(location: $location) {
 				hash
+				location
 			}
 		}
 		`
 
 		const response = await this.gqlClient.request(query, { location })
-		console.log(response)
+		console.log('[GQL] createShortlink\n', response)
 		return response.createShortlink
-
-		/* const response = await axios({
-			url: this.queryUrl,
-			method: 'post',
-			data: {query: `
-					mutation {
-						createShortlink(location: "${location}") {
-							hash
-						}
-					}
-			`}
-		})
-		return response.data.data.createShortlink */
 	}
 
 	public async createShortlinkDescriptor (
@@ -68,25 +56,8 @@ class GraphQLHomeQuery {
 		`
 
 		const response = await this.gqlClient.request(query, { userTag, descriptionTag, location, hash })
+		console.log('[GQL] createShortlinkDescriptor\n', response)
 		return response.createDescriptiveShortlink
-		
-		/* const response = await axios({
-			url: this.queryUrl,
-			method: 'post',
-			data: {query: `
-					mutation {
-						createDescriptiveShortlink(userTag: "${userTag}", descriptionTag: "${descriptionTag}", location: "${location}", hash: "${hash}") {
-							hash
-							location
-							descriptor {
-								userTag
-								descriptionTag
-							}
-						}
-					}
-			`}
-		})
-		return response.data.data.createDescriptiveShortlink */
 	}
 }
 
