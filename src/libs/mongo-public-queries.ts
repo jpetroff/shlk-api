@@ -3,6 +3,7 @@ import Shortlink, { ShortlinkDocument } from '../models/shortlink'
 import { sanitizeMongo, prepareURL } from './utils'
 import generateHash from './shortlink-hash'
 import _ from 'underscore'
+import { Query } from 'mongoose'
 
 /**
  * Returns created shortlink or null: Promise<null | ShortlinkDocument>
@@ -130,3 +131,13 @@ export async function getShortlink(	args: {hash?: string, userTag?: string, desc
 		throw error
 	}
 }
+
+export async function __wipeDB() : Promise<Query<any, ShortlinkDocument>|null> {
+	if(process.env.MODE == 'development') {
+		const res = await Shortlink.deleteMany()
+		return res
+	} else {
+		throw new Error('Forbidden')
+	}
+}
+

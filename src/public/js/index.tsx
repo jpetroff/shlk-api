@@ -1,5 +1,6 @@
-import '../css/main.less';
-import '../index.html';
+import '../css/main.less'
+import '../index.html'
+import './modernizr_build.js'
 
 import React from 'react'
 import ReactDOM from 'react-dom'

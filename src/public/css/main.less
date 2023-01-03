@@ -5,10 +5,22 @@
 	font-size: 16px;
 }
 
+@font-face {
+	font-family: 'Mori';
+	src: 	url('/src/public/assets/fonts/PPMori-SemiBold.eot');
+	src: 	url('/src/public/assets/fonts/PPMori-SemiBold.woff') format('woff'),
+				url('/src/public/assets/fonts/PPMori-SemiBold.woff2') format('woff2');
+	font-weight: normal;
+	font-style: normal;
+}
+
 body {
 	font-family: @font-face;
 	-webkit-font-smoothing: antialiased;
 	font-feature-settings: 'liga','kern';
+	-moz-osx-font-smoothing: grayscale;
+	text-rendering: optimizeLegibility;
+
 	font-size: 1rem;
 	color: @text-color;
 }

@@ -60,3 +60,16 @@ export type AnyObject = {
 }
 
 export type HTMLAnyInput = HTMLInputElement & HTMLTextAreaElement
+
+/* 
+  JS Media Query descriptions
+  From ../css/_constants.less
+ */
+
+export const MediaQueries = {
+  mobile: `(max-width: 480px)`
+}
+
+export function testShortcutPasteWithKeyboard () : boolean {
+  return !(Modernizr.touchevents && Modernizr.mq(MediaQueries.mobile))
+}

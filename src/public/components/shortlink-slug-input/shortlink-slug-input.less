@@ -6,7 +6,59 @@
 	gap: 0.25rem;
 	font-size: 1.25rem;
 	line-height: 1.75rem;
-	color: @text-color;
+	color: @black-30;
+	display: flex;
+	flex-direction: column;
+	gap: 0.125rem;
+	padding: 1.25rem 1rem;
+
+	.slug-input__label{
+		.t-micricopy_13-16;
+		color: @black-30;
+	}
+
+	.slug-input__copy_pseudolink {
+		.t-text_16-20;
+	}
+
+	.slug-input__action-wrapper {
+		background: transparent;
+		padding: 0.125rem 0.25rem;
+		border-radius: 0.25rem;
+		display: flex;
+		align-items: baseline;
+		gap: 1.25rem;
+		margin-left: -0.25rem;
+	}
+
+	// .slug-input__action-wrapper_has-shortlink {
+	// 	transition: all 0.1s ease-in;
+	// 	cursor: pointer;
+
+	// 	.slug-input__copy_pseudolink {
+	// 		transition: all 0.1s ease-in;
+	// 		position: relative;
+	// 		top: 0;
+	// 	}
+
+	// 	&:hover { 
+	// 		background-color: @black-95;
+	// 		.slug-input__text { color: @black-10; }
+	// 	}
+
+	// 	&:hover .slug-input__copy_pseudolink { color: @red-50; top: -0.125rem; }
+	// 	&:active .slug-input__copy_pseudolink { color: @red-40; top: -0.125rem; }
+	// }
+
+	// &_hide {display: none;}
+
+	.input-common-style {
+		.t-header_24-32;
+		color: @black-30;
+		padding: 0;
+		line-height: inherit;
+		display: inline-block;
+	}
 
 	.input-resizable { 
 		padding: 0;
@@ -14,14 +66,8 @@
 		position: relative;
 
 		&__real-input { position: absolute; width: 100%; left: 0; border: none; padding: 0; margin: 0;height: inherit; background-color: transparent; z-index: 1; outline:none }
-		&__real-input:focus {border-bottom: 2px solid black;}
+		&__real-input:focus {border-bottom: 2px solid @black-30;}
 		&__width-sizer_hide { opacity: 0; z-index: 0; }
-		&__width-sizer_show { opacity: 1; z-index: 0; color: #929292 }
-	}
-
-	.input-common-style {
-		padding: 0;
-		line-height: inherit;
-		display: inline-block;
+		&__width-sizer_show { opacity: 1; z-index: 0; color: @black-70 }
 	}
 }

@@ -1,0 +1,17 @@
+@import '../../css/_constants.less';
+
+:local(.wrapperClass) {
+	position: relative;
+	padding-top: 1.75rem;
+	padding-left: 2rem;
+	padding-right: 2rem;
+
+	@media @mq-mobile {
+		padding: 1rem;
+		padding-bottom: 0;
+	}
+
+	.app-header__logo {display: none;}
+	@media @mq-mobile { .app-header__logo_m {display: block; } }
+	@media @mq-not-mobile { .app-header__logo_d {display: block;} }
+}

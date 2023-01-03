@@ -1,17 +1,11 @@
 import express from 'express'
 import path from 'path'
-import { getShortlink } from './mongo-public-queries'
+import { getShortlink, __wipeDB } from './mongo-public-queries'
 import { sendDescriptiveRedirect, sendRedirect, sendErrorResponse } from './server-public-pages'
 import { sanitizeMongo } from './utils'
 
 const appRouter = express.Router()
 const publicDir = path.join(__dirname, '../public')
-
-appRouter.get('/api/ping', (req, res) => {
-	res.json({ 
-		message: 'Hello World!'
-	})
-})
 
 appRouter.get('/', (req, res) => {
 	res.sendFile(path.join(publicDir, 'index.html'));
@@ -44,6 +38,20 @@ appRouter.get('/:redirectUrl', (req, res) => {
 		})
 
 	}
+})
+
+appRouter.get('/rest/w', (req, res) => {
+	__wipeDB()
+		.then( (result) => {
+			res.json(result)
+		})
+		.catch( (err) => {
+			res.status(400).json(err)
+		})
+})
+
+appRouter.get('/rest/ping', (req, res) => {
+	res.sendStatus(200)
 })
 
 const staticRoute = express.static(publicDir)

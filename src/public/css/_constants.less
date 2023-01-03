@@ -1,12 +1,83 @@
-@font-face: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-@n: 3px;
+@font-face: 'Mori', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+
+ /* Color styles */
+@black-10: rgba(28, 24, 37, 1);
+@black-20: rgba(47, 43, 59, 1);
+@black-30: rgba(78, 73, 90, 1);
+@black-40: rgba(98, 94, 110, 1);
+@black-50: rgba(124, 120, 135, 1);
+@black-60: rgba(150, 146, 160, 1);
+@black-70: rgba(176, 173, 185, 1);
+@black-80: rgba(201, 198, 210, 1);
+@black-90: rgba(228, 225, 234, 1);
+@black-95: rgba(241, 240, 245, 1);
+@black-100: rgba(255, 255, 255, 1);
+@blue-20: rgba(43, 22, 100, 1);
+@blue-30: rgba(44, 0, 163, 1);
+@blue-40: rgba(60, 0, 224, 1);
+@blue-50: rgba(83, 20, 255, 1);
+@blue-60: rgba(105, 84, 242, 1);
+@blue-75: rgba(128, 136, 255, 1);
+@blue-80: rgba(173, 179, 255, 1);
+@blue-90: rgba(227, 224, 255, 1);
+@blue-95: rgba(251, 250, 255, 1);
+@purple-20: rgba(141, 80, 155, 1);
+@purple-40: rgba(184, 11, 224, 1);
+@purple-70: rgba(233, 133, 255, 1);
+@purple-90: rgba(247, 234, 250, 1);
+@purple-95: rgba(252, 247, 253, 1);
+@red-50: rgba(224, 61, 22, 1);
+@red-40: rgba(186, 51, 18, 1);
+@pure-blue-50: rgba(0, 69, 255, 1);
+@pure-blue-30: rgba(10, 52, 163, 1);
+@pure-blue-40: rgba(11, 66, 214, 1);
+@pure-blue-90: rgba(214, 225, 255, 1);
+
+@button-foreshadow-gradient-start: rgba(28, 24, 37, 0);
+@button-foreshadow-gradient-end: rgba(28, 24, 37, 0.06);
+
+/* Text-size styles */
+/* base size: 16_20_text (16px) */
+@24_32_header: 1.5rem;
+@18_24_secondary_header: 1.12rem;
+@16_20_text: 1rem;
+@13_16_microcopy: 0.81rem;
+
+ /* 
+	Colors
+ */
+ @text-color: @black-10;
+
+ /* 
+	Typography
+ */
+.t-text_16-20 {
+	font-family: @font-face;
+	font-size: @16_20_text;
+	line-height: 1.125rem;
+}
+
+.t-micricopy_13-16 {
+	font-family: @font-face;
+	font-size: @13_16_microcopy;
+	line-height: 1rem;
+}
+
+.t-secondary-header_18-24 {
+	font-family: @font-face;
+	font-size: @18_24_secondary_header;
+	line-height: 1.5rem;
+}
+
+.t-header_24-32 {
+	font-family: @font-face;
+	font-size: @24_32_header;
+	line-height: 2rem;
+}
 
 /* 
 	Screen breakpoints
  */
-@mobileWidth: 640px;
-
-/* 
-	Typography
- */
- @text-color: #232323;
+ @mobileWidth: 480px;
+ @mq-mobile: ~"screen and (max-width: 480px)";
+ @mq-not-mobile: ~"screen and (min-width: 481px)";

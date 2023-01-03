@@ -1,6 +1,49 @@
 @import '../../css/_constants.less'; 
 
-:local(.wrapperClass) {
-	font-size: 28px;
-	padding-top: 1rem;
+:local(.wrapperClass).shortlink-display {
+	.t-header_24-32;
+	padding: 1.25rem 1rem;
+	display: flex;
+	border-bottom: 2px solid @black-90;
+
+	.shortlink-display__action-wrapper {
+		background: transparent;
+		padding: 0.125rem 0.25rem;
+		border-radius: 0.25rem;
+		display: flex;
+		align-items: baseline;
+		gap: 1.25rem;
+		margin-left: -0.25rem;
+	}
+
+	.shortlink-display__action-wrapper_has-shortlink {
+		transition: all 0.1s ease-in;
+		cursor: pointer;
+
+		.shortlink-display__copy_pseudolink {
+			transition: all 0.1s ease-in;
+			position: relative;
+			top: 0;
+		}
+
+		&:hover { 
+			background-color: @black-95;
+			.shortlink-display__text { color: @black-10; }
+		}
+
+		&:hover .shortlink-display__copy_pseudolink { color: @red-50; top: -0.125rem; }
+		&:active .shortlink-display__copy_pseudolink { color: @red-40; top: -0.125rem; }
+	}
+
+	.shortlink-display__text {
+		color: @black-30;
+	}
+
+	&_empty .shortlink-display__text {
+		color: @black-70
+	}
+
+	.shortlink-display__copy_pseudolink {
+		.t-text_16-20;
+	}
 }

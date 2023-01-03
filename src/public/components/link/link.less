@@ -1,0 +1,37 @@
+@import '../../css/_constants.less';
+
+:local(.wrapperClass) {
+	box-sizing: border-box;
+
+	&.link {
+		text-decoration: none !important;
+		cursor: pointer;
+
+		&_app, &:visited {
+			color: @pure-blue-50;
+		}
+		&_user {
+			color: @blue-50;
+		}
+		&_user:visited {
+			color: @purple-20;
+		}
+
+		&:hover {
+			color: @red-50;
+		}
+		&:active {
+			color: @red-40;
+		}
+
+		&_disabled, 
+		&_disabled:visited,
+		&_disabled:active,
+		&_disabled:hover {
+			color: @black-70;
+			cursor: not-allowed;
+		}
+
+	}
+}
+

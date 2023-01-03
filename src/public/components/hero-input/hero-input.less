@@ -1,7 +1,7 @@
 @import '../../css/_constants.less';
 
 :local(#labelId) {
-	color: inherit;
+	box-sizing: border-box;
 }
 
 :local(.wrapperClass) {
@@ -9,39 +9,49 @@
 	width: 100%;
 	display: flex;
 	flex-direction: row;
-	gap: 0.5rem;
-	padding: 0.25rem;
-	border: 2px solid black;
-	border-radius: 8px;
+	border: 2px solid @pure-blue-50;
+	border-radius: 0.5rem;
 	position: relative;
+	box-sizing: border-box;
+
+	&_focus {
+		box-shadow: 0 0 0 0.125rem @blue-90;
+		background-color: @blue-95;
+	}
 
 	.hero-input {
+		.t-secondary-header_18-24;
 		background-color: transparent;
+		border-radius: 0.5rem;
 		border: none;
 		flex-grow: 1;
 		flex-shrink: 1;
-		min-width: none;
+		min-width: 4rem;
 		outline: none;
-		height: 2.5rem;
-		line-height: 2.5rem;
 		display: block;
-		padding: 0.5rem;
+		padding: 1rem;
+		padding-right: 0;
 		z-index: 1;
+
+		&__actions {
+			display: flex;
+			padding: 0.5rem;
+			gap: 0.5rem;
+		}
 	}
 
-	.button_ghost {
-		background: none;
-		border: none;
-	}
+	&_empty .hero-input__clear { display: none; }
+	&_can-shortcut-paste .hero-input__paste { display: none; }
+	&_not-empty .hero-input__paste { display: none; }
+	&_empty .hero-input__create { display: none; }
 
 	.placeholder {
+		.t-secondary-header_18-24;
 		position: absolute;
 		z-index: 0;
-		color: #b2b2b2;
-		height: 2.5rem;
-		line-height: 2.5rem;
-		top: 0.25rem;
-		left: 0.75rem;
+		color: @black-50;
+		top: 1rem;
+		left: 1rem;
 
 		&_show { visibility: visible;}
 		&_hide { visibility: hidden;}

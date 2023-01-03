@@ -105,7 +105,8 @@
   //   "./node_modules/@types/node/index.d.ts"
   // ],
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "assets/**/*"
   ],
   "exclude": [
     "node_modules",

@@ -2,6 +2,10 @@ import _ from 'underscore'
 import React from 'react'
 import styles from './hero-input.less'
 
+import Button, { ButtonSize, ButtonType } from '../button'
+import { Cross, Enter } from '../icons'
+import { testShortcutPasteWithKeyboard } from '../../js/_utils'
+
 type Props = {
 	onChange: (str: string) => void;
 	onSubmit: () => void;
@@ -11,7 +15,7 @@ type Props = {
 	inputRef?: React.RefObject<HTMLInputElement>
 }
 
-export const HeroInput : React.FC<Props> = function(
+const HeroInput : React.FC<Props> = function(
 	{
 		onChange,
 		onSubmit,
@@ -48,8 +52,18 @@ export const HeroInput : React.FC<Props> = function(
 	const onFocus = () => setFocus(true)
 	const onBlur = () => setFocus(false)
 
+	let wrapperMods : Array<string> = []
+
+	if(isFocus) wrapperMods.push(styles.wrapperClass+'_focus')
+	if(testShortcutPasteWithKeyboard()) wrapperMods.push(styles.wrapperClass+'_can-shortcut-paste')
+	if(value && value != '') {
+		wrapperMods.push(styles.wrapperClass+'_not-empty')
+	} else {
+		wrapperMods.push(styles.wrapperClass+'_empty')
+	}
+
 	return (
-		<div className={styles.wrapperClass}>
+		<div className={`${styles.wrapperClass} ${wrapperMods.join(' ')}`}>
 			<input className={`hero-input`} id={styles.labelId}
 				ref={inputRef}
 				onChange={event => onChange(event.target.value)}
@@ -59,19 +73,39 @@ export const HeroInput : React.FC<Props> = function(
 				name={name}
 				value={value}
 				/>
-			<label 
-				htmlFor={styles.labelId}
-				className={`button button_ghost`}
-				onClick={handleClear}
-				>Clear</label>
-			<label 
-				htmlFor={styles.labelId} 
-				className={`button button_ghost`}
-				onClick={handlePaste}
-				>Paste</label>
+				<div className={`hero-input__actions`}>
+					<label htmlFor={styles.labelId}>
+						<Button 
+							className={'hero-input__clear'}
+							icon={Cross}
+							type={ButtonType.GHOST_PRIMARY}
+							size={ButtonSize.LARGE}
+							onClick={handleClear}
+							/>
+					</label>						
+					<label htmlFor={styles.labelId}>
+						<Button 
+							className={'hero-input__paste'}
+							label='Paste'
+							type={ButtonType.PRIMARY}
+							size={ButtonSize.LARGE}
+							onClick={handlePaste}
+							/>
+					</label>
+					<Button
+						icon={Enter}
+						className={'hero-input__create'}
+						label='Create'
+						type={ButtonType.PRIMARY}
+						size={ButtonSize.LARGE}
+						onClick={onSubmit}
+						/>
+				</div>
 			<div 
 				className={`placeholder placeholder_${(value != '') ? 'hide' : 'show'}`}
 				>{placeholder}</div>
 		</div>
 	);
 }
+
+export default HeroInput
