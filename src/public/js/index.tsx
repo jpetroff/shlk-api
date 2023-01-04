@@ -1,3 +1,5 @@
+
+require.context('../assets/', true)
 import '../css/main.less'
 import '../index.html'
 import './modernizr_build.js'

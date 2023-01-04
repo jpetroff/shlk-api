@@ -31,6 +31,7 @@ module.exports = (env, argv) => {
 		},
 
 		resolve: {
+			roots: [path.join(__dirname, 'src/public')],
 			extensions: ['.ts', '.tsx', '.js', '.jsx', '.less', '.html'],
 			alias: {
 
@@ -80,21 +81,23 @@ module.exports = (env, argv) => {
 				*/
 				{
 					test: /\.svg$/,
-					exclude: /node_modules/,
-					loader: 'svg-react-loader'
+					exclude: /(node_modules|favicon)/,
+					loader: 'svg-react-loader',
 				},
 
 				/* 
 					Asset loader
 				*/
 				{
-					test: /\.(woff2?|eot|gif|png|jpe?g)$/,
+					test: /\.(woff2?|eot|gif|png|jpe?g|webmanifest|xml|svg|ico)$/,
 					loader: 'file-loader',
+					exclude: /assets\/svg/,
 					options: {
+						esModule: false,
 						outputPath: 'assets/',
 						name(resourcePath, resourceQuery) {		
 							const newPathBreakdown = path.dirname(resourcePath).split(path.sep)
-							console.log('\n]n[!!!!!!!!]',newPathBreakdown,'\n\n', path.sep)
+							// console.log('\n]n[!!!!!!!!]',newPathBreakdown,'\n\n', path.sep)
 							const prefixPath = _.rest(newPathBreakdown, _.indexOf(newPathBreakdown, 'assets') + 1).join(path.sep)
 							return `${prefixPath}/[name].[ext]`;
 						}
@@ -167,18 +170,21 @@ module.exports = (env, argv) => {
 						{
 							loader: 'file-loader',
 							options: {
+								esModule: false,
 								name: "[name].[ext]",
 							}
 						},
 						{
 							loader: 'extract-loader',
 							options: {
+								esModule: false,
 								publicPath: path.join(__dirname, 'dist/public')
 							}
 						},
 						{
 								loader: "html-loader",
 								options: {
+									esModule: false,
 									sources: false,
 								}
 						}

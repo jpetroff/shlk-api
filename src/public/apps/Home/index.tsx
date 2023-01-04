@@ -84,14 +84,14 @@ export class Home extends React.Component<Props, State> {
 				createLinkResult: undefined
 			}
 		}
-		if(args.descriptionTag) {
-			const userTag = args.userTag ? args.userTag+'@' : ''
-			const descriptionTag = args.descriptionTag
-			const slugInputText = this._generateTextPattern()
+		if(!_.isEmpty(args.descriptionTag)) {
+			const userTagPart = args.userTag ? args.userTag+'@' : ''
+			const descriptionTagPart = args.descriptionTag
 			newState = {
 				...newState,
-				generatedDescriptiveShortlink: `${this.baseUrl}/${userTag}${descriptionTag}`,
-				slugInputText
+				userTag: args.userTag,
+				descriptionTag: args.descriptionTag,
+				generatedDescriptiveShortlink: `${this.baseUrl}/${userTagPart}${descriptionTagPart}`
 			}
 		}
 		this.setState(newState)
