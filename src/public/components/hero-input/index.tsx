@@ -4,7 +4,8 @@ import styles from './hero-input.less'
 
 import Button, { ButtonSize, ButtonType } from '../button'
 import { Cross, Enter } from '../icons'
-import { testShortcutPasteWithKeyboard } from '../../js/_utils'
+import { testShortcutPasteWithKeyboard } from '../../js/utils'
+import clipboardTools from '../../js/clipboard-tools'
 
 type Props = {
 	onChange: (str: string) => void;
@@ -34,14 +35,11 @@ const HeroInput : React.FC<Props> = function(
 		}
 	}
 
-	const handlePaste = () => {
-		if(_.isFunction(navigator.clipboard.readText)) {
-			navigator.clipboard.readText().then((clipText) => {
-				if (clipText != '') {
-					onChange(clipText)
-					onSubmit()
-				}
-			})
+	const handlePaste = async () => {
+		const clipText = await clipboardTools.paste()
+		if(clipText && clipText != '') {
+			onChange(clipText)
+			onSubmit()
 		}
 	}
 

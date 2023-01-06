@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import styles from './Home.less'
-import { HTMLAnyInput, modifyURLSlug } from '../../js/_utils'
+import { modifyURLSlug, validateURL } from '../../js/utils'
+import { HTMLAnyInput, AnyObject } from '../../js/constants'
+import config from '../../js/config.development'
+import { WithRouterProps } from '../../js/router-hoc'
 
 import React from 'react'
 import _, { result } from 'underscore'
@@ -9,12 +12,17 @@ import HeroInput from '../../components/hero-input/index'
 import { ShortlinkDisplay } from '../../components/shortlink-display'
 import { ShortlinkSlugInput, TextPattern } from '../../components/shortlink-slug-input'
 
-import Query from './shortlink-queries'
-import LSC from './localstorage-cache'
+import Query from '../../js/shortlink-queries'
+import LSC from '../../js/localstorage-cache'
 
 import { Header } from '../Header'
 
-type Props = {}
+import {} from 'react-router-dom'
+
+type Props = {
+	router?: WithRouterProps
+	extension?: AnyObject
+}
 
 type State = {
 	location: string
@@ -41,10 +49,11 @@ export class Home extends React.Component<Props, State> {
 
 	constructor(props) {
     super(props)
-		this.baseUrl = window.location.origin
+		this.baseUrl = config.serviceUrl
 
+		const [ predefinedLocation ] = this.checkUrlParams(['l'], props.router)
     this.state = {
-			location: '',
+			location: _.unescape(predefinedLocation || ''),
 			generatedShortlink: undefined,
 			generatedDescriptiveShortlink: undefined,
 			generatedHash: undefined,
@@ -59,11 +68,35 @@ export class Home extends React.Component<Props, State> {
 		this.heroInputRef = React.createRef<HTMLAnyInput>()
 		_.bindAll(this, 'updateLocation', 'submitLocation', 'handleSuccessPaste', 'handleDescriptorChange', '_submitDescriptor', 'saveLSCache')
 		this.submitDescriptor = _.debounce(this._submitDescriptor, 500)
+		this.updateDeferredLOcation = _.once( () => this.props.extension?.activeTabUrl && this.setState({ location: this.props.extension.activeTabUrl}) )
   }
 
+	// @TODO: refactor — make splitting function in utils
+	checkUrlParams(queryParam: string[], router?: WithRouterProps) : Array<string | null> {
+		if(!router) return []
+		const searchParams = new URLSearchParams(router.location.search)
+		let result : Array<string | null> = []
+		_.forEach(queryParam, (param) => {
+			result.push(searchParams.get(param))
+		})
+		_.map(result, (item) => {
+			if(item != null) return decodeURIComponent(item)
+		})
+		return result 
+	}
+
 	componentDidMount() {
-    if(this.heroInputRef.current) this.heroInputRef.current.focus();
+    if(this.heroInputRef.current) this.heroInputRef.current.focus()
+		if(validateURL(this.state.location)) this.submitLocation()
   }
+
+	componentDidUpdate() {
+		console.log('UPD', this.props)
+		if(
+			this.props.extension?.activeTabUrl != this.state.location
+		) this.updateDeferredLOcation()
+	}
+	private updateDeferredLOcation : () => void
 
 	updateLocation(str: string) {
 		this.setState({
@@ -98,8 +131,8 @@ export class Home extends React.Component<Props, State> {
 		_.defer(this.saveLSCache)
 	}
 
-	private retrieveLSCache() : boolean {
-		const cachedURL = LSC.checkShortlinkCache( {url: this.state.location} )
+	private async retrieveLSCache() : Promise<boolean> {
+		const cachedURL = await LSC.checkShortlinkCache( {url: this.state.location} )
 
 		if(cachedURL == null || !cachedURL.hash) return false
 
@@ -128,31 +161,29 @@ export class Home extends React.Component<Props, State> {
 		})
 	}
 
-	submitLocation() {
+	async submitLocation() {
+		this._clearErrorState()
 		const location = this.state.location.trim()
 		if (_.isEmpty(location)) return
-
-		if(this.retrieveLSCache()) return
+		
+		const cachedResult = await this.retrieveLSCache()
+		if(cachedResult) return
 
 		this.setState({loadingState: {createLinkIsLoading: true}})
-		Query.createShortlink(location)
-			.then( (result) => {
-				console.log('[Home] submitLocation\n', result)
-				if(!result || !result.hash) throw new Error(`Unexpected error: shortlink for '${location}' was not created. Please, try again`)
+		try {
+			const result = await Query.createShortlink(location)
+			console.log('[Home] submitLocation\n', result)
+			if(!result || !result.hash) throw new Error(`Unexpected error: shortlink for '${location}' was not created. Please, try again`)
 
-				this.setShortlinkState({
-					location: result.location,
-					hash: result.hash
-				})
+			this.setShortlinkState({
+				location: result.location,
+				hash: result.hash
 			})
-			.catch( (err) => {
-				this.setState({errorState: {createLinkResult: err}})
-				console.error(err) 
-			})
-			.then( () => {
-				this._clearErrorState()
-				this.setState({loadingState: {createLinkIsLoading: false}})
-			})
+		} catch (err) {
+			this.setState({errorState: {createLinkResult: err}})
+			console.error(err) 
+		}
+		this.setState({loadingState: {createLinkIsLoading: false}})
 	}
 
 	handleSuccessPaste(clipText: string) {
@@ -171,40 +202,38 @@ export class Home extends React.Component<Props, State> {
 	}
 
 	public submitDescriptor: (() => void) & _.Cancelable;
-	private _submitDescriptor() {
+	private async _submitDescriptor() {
+		this._clearErrorState()
 		console.log('[Home] submitDescriptor\n', this.state.userTag, this.state.descriptionTag)
 		if(_.isEmpty(this.state.descriptionTag)) { return }
 
-		if(this.retrieveLSCache()) return
+		if(await this.retrieveLSCache()) return
 		
-		Query.createShortlinkDescriptor( 
-			{ userTag: this.state.userTag, 
-				descriptionTag: this.state.descriptionTag,
-				location: this.state.location,
-				hash: this.state.generatedHash
-			}
-		)
-			.then( (result) => {
-				if(!result || !result.descriptor) return;
-				this.setShortlinkState({
-					location: result.location,
-					hash: result.hash,
-					userTag: result.descriptor.userTag,
-					descriptionTag: result.descriptor.descriptionTag
-				})				
-			})
-			.catch( (err) => {
-				console.error(err)
-			})
-			.then( () => {
-				this._clearErrorState()
-				this.setState({loadingState: {createDescriptiveLinkIsLoading: false}})
-			})
+		try {
+			const result = await Query.createShortlinkDescriptor( 
+				{ userTag: this.state.userTag, 
+					descriptionTag: this.state.descriptionTag,
+					location: this.state.location,
+					hash: this.state.generatedHash
+				}
+			)
+
+			if(!result || !result.descriptor) return;
+			this.setShortlinkState({
+				location: result.location,
+				hash: result.hash,
+				userTag: result.descriptor.userTag,
+				descriptionTag: result.descriptor.descriptionTag
+			})		
+		} catch (err) {
+			console.error(err)
+		}
+		this.setState({loadingState: {createDescriptiveLinkIsLoading: false}})
 	}
 
 	private _generateTextPattern(): Array<TextPattern | string> {
 		return [
-			this.baseUrl.replace(/^https?:\/\//ig, '')+'/',
+			config.displayServiceUrl+'/',
 			{ key: 'userTag', value: this.state.userTag, placeholder: 'user' },
 			'@',
 			{ key: 'descriptionTag', value: this.state.descriptionTag, placeholder: 'your-custom-url' },
@@ -231,6 +260,7 @@ export class Home extends React.Component<Props, State> {
 						/>
 					</div>
 					<ShortlinkDisplay
+						placeholder={config.displayServiceUrl}
 						shortlink={this.state.generatedShortlink}
 						isLoading={this.state.loadingState.createLinkIsLoading}
 					/>

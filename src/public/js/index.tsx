@@ -10,13 +10,16 @@ import {
   createBrowserRouter,
   RouterProvider
 } from 'react-router-dom'
+import { withRouter } from './router-hoc'
 import { Home } from '../apps/Home/index'
+
+const Home_R = withRouter(Home)
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      <Home />
+      <Home_R />
     ),
   }
 ]);

@@ -3,7 +3,7 @@ import React from 'react'
 
 import { Logo, LogoC } from '../../components/icons'
 
-import { MediaQueries } from '../../js/_utils'
+import constants from '../../js/constants'
 
 type Props = {}
 
@@ -14,7 +14,7 @@ export class Header extends React.Component<Props, State> {
 
 	constructor(props) {
 		super(props)
-		this.isMobile = Modernizr.mq(MediaQueries.mobile)
+		this.isMobile = Modernizr.mq(constants.MediaQueries.mobile)
 	}
 
 	render() {

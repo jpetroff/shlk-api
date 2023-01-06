@@ -1,6 +1,8 @@
 import _ from 'underscore'
 import { GraphQLClient, gql } from 'graphql-request'
-import { validateURL, AnyObject } from '../../js/_utils'
+import { validateURL } from './utils'
+import { AnyObject } from './constants'
+import config from './config.development'
 
 class GraphQLHomeQuery {
 	private queryUrl : string
@@ -8,7 +10,7 @@ class GraphQLHomeQuery {
 	private gqlClient : GraphQLClient
 
 	constructor() {
-		this.queryUrl = window.location.origin + '/api'
+		this.queryUrl = config.serviceUrl + '/api'
 		this.gqlClient = new GraphQLClient(this.queryUrl, { headers: {} })
 	}
 

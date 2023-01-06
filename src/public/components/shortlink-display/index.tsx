@@ -2,25 +2,28 @@ import styles from './shortlink-display.less'
 import React from 'react'
 import _ from 'underscore'
 import Link, { LinkColors } from '../link'
+import clipboardTools from '../../js/clipboard-tools'
 
 type Props = {
 	shortlink: string | undefined
 	isLoading?: boolean
+	placeholder?: string
+	hashLength?: number
 }
 
 export const ShortlinkDisplay : React.FC<Props> = function(
 	{
+		placeholder,
+		hashLength,
 		shortlink,
 		isLoading = false
 	} : Props
 ) {
 
 	function copyOnClick() {
-		if(_.isFunction(navigator.clipboard.writeText) && shortlink) {
-			navigator.clipboard.writeText(shortlink)
-		} 
-		// for IE?
-		// else if (_.isFunction(window.clipboardData.setData)) { window.clipboardData.setData("Text", shortlink) }
+		if(shortlink) {
+			clipboardTools.copy(shortlink)
+		}
 	}
 
 	const globalClass = 'shortlink-display'
@@ -28,7 +31,7 @@ export const ShortlinkDisplay : React.FC<Props> = function(
 	let shortlinkDisplayMods : Array<string> = []
 	if(_.isEmpty(shortlink)) shortlinkDisplayMods.push(globalClass+'_empty')
 
-	const placeholderText = window.location.host + '/____'
+	const placeholderText = placeholder + '/____'
 	let linkLabel : string = '← Copy shortlink'
 	if(isLoading) linkLabel = 'Loading...'
 	if(_.isEmpty(shortlink)) linkLabel = '← Link will appear here'

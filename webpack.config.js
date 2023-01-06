@@ -10,6 +10,9 @@ const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
+const sourceDir = 'src/public';
+const outputDir = 'dist/public';
+
 module.exports = (env, argv) => {
 	const isProduction = !!(process.env.MODE == 'production');
 	const config = {
@@ -19,19 +22,19 @@ module.exports = (env, argv) => {
 		devtool: isProduction ? undefined : 'source-map',
 
 		entry: { 
-			app: path.join(__dirname, 'src/public/js', 'index.tsx')
+			app: path.join(__dirname, sourceDir, 'js', 'index.tsx')
 		},
 
 		output: {
 			compareBeforeEmit: false,
-			path: path.resolve(__dirname, './dist/public'),
+			path: path.join(__dirname, outputDir),
 			filename: 'js/[name].js',
 			chunkFilename: '[chunkhash].[ext].map',
 			sourceMapFilename: '[file].map',
 		},
 
 		resolve: {
-			roots: [path.join(__dirname, 'src/public')],
+			roots: [path.join(__dirname, sourceDir)],
 			extensions: ['.ts', '.tsx', '.js', '.jsx', '.less', '.html'],
 			alias: {
 
@@ -94,11 +97,10 @@ module.exports = (env, argv) => {
 					exclude: /assets\/svg/,
 					options: {
 						esModule: false,
-						outputPath: 'assets/',
 						name(resourcePath, resourceQuery) {		
 							const newPathBreakdown = path.dirname(resourcePath).split(path.sep)
 							// console.log('\n]n[!!!!!!!!]',newPathBreakdown,'\n\n', path.sep)
-							const prefixPath = _.rest(newPathBreakdown, _.indexOf(newPathBreakdown, 'assets') + 1).join(path.sep)
+							const prefixPath = _.rest(newPathBreakdown, _.indexOf(newPathBreakdown, path.basename(outputDir)) + 1).join(path.sep)
 							return `${prefixPath}/[name].[ext]`;
 						}
 					}
@@ -178,7 +180,7 @@ module.exports = (env, argv) => {
 							loader: 'extract-loader',
 							options: {
 								esModule: false,
-								publicPath: path.join(__dirname, 'dist/public')
+								publicPath: path.join(__dirname, outputDir)
 							}
 						},
 						{
