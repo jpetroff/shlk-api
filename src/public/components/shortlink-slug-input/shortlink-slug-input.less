@@ -1,10 +1,8 @@
 @import '../../css/_constants.less';
 
-:local(.wrapperClass) {
+:local(.wrapperClass)_slug-input {
 	padding-top: 2rem;
 	gap: 0.25rem;
-	font-size: 1.25rem;
-	line-height: 1.75rem;
 	color: @black-30;
 	display: flex;
 	flex-direction: column;
@@ -12,16 +10,21 @@
 	padding: 1.25rem 1rem;
 	border-top: 2px solid @black-90;
 
-	.slug-input__label{
+	@media @mq-mobile {
+		padding: 0.75rem 0;
+
+		.__mobile-convenience-state & {
+			padding-left: 1.25rem;
+			padding-right: 0.75rem;
+		}
+	}
+
+	&__label{
 		.t-micricopy_13-16;
 		color: @black-30;
 	}
 
-	.slug-input__copy_pseudolink {
-		.t-text_16-20;
-	}
-
-	.slug-input__action-wrapper {
+	&__action-wrapper {
 		background: transparent;
 		padding: 0.125rem 0.25rem;
 		border-radius: 0.25rem;
@@ -30,12 +33,17 @@
 		gap: 1.25rem;
 		margin-left: -0.25rem;
 	}
+	@media @mq-mobile {
+		.__mobile-convenience-state &__action-wrapper {
+			flex-grow: 1;
+		}
+	}
 
-	// .slug-input__action-wrapper_has-shortlink {
+	// &__action-wrapper_has-shortlink {
 	// 	transition: all 0.1s ease-in;
 	// 	cursor: pointer;
 
-	// 	.slug-input__copy_pseudolink {
+	// 	&__copy_pseudolink {
 	// 		transition: all 0.1s ease-in;
 	// 		position: relative;
 	// 		top: 0;
@@ -43,31 +51,71 @@
 
 	// 	&:hover { 
 	// 		background-color: @black-95;
-	// 		.slug-input__text { color: @black-10; }
+	// 		&__text { color: @black-10; }
 	// 	}
 
-	// 	&:hover .slug-input__copy_pseudolink { color: @red-50; top: -0.125rem; }
-	// 	&:active .slug-input__copy_pseudolink { color: @red-40; top: -0.125rem; }
+	// 	&:hover &__copy_pseudolink { color: @red-50; top: -0.125rem; }
+	// 	&:active &__copy_pseudolink { color: @red-40; top: -0.125rem; }
 	// }
 
 	// &_hide {display: none;}
 
-	.input-common-style {
+	&__input-common-style {
 		.t-header_24-32;
 		color: @black-30;
 		padding: 0;
 		line-height: inherit;
 		display: inline-block;
 	}
+	@media @mq-mobile {
+		&__input-common-style {
+			.t-secondary-header_18-24;
+		}
+	}
 
-	.input-resizable { 
+	&__input-resizable { 
 		padding: 0;
-		min-width: 3rem;
+		min-width: 0.25rem;
 		position: relative;
+		display: inline-block;
 
 		&__real-input { position: absolute; width: 100%; left: 0; border: none; padding: 0; margin: 0;height: inherit; background-color: transparent; z-index: 1; outline:none }
 		&__real-input:focus {border-bottom: 2px solid @black-30;}
 		&__width-sizer_hide { opacity: 0; z-index: 0; }
 		&__width-sizer_show { opacity: 1; z-index: 0; color: @black-70 }
+	}
+
+	&__copy_pseudolink {
+		.t-text_16-20;
+	}
+	@media @mq-mobile {
+		&__copy_pseudolink {
+			display: none;
+		}
+	}
+
+	&__copy-button {
+		display: none;
+	}
+	@media @mq-mobile {
+		&__copy-button {
+			display: flex;
+		}
+	}
+
+	@media @mq-mobile {
+		&__content-wrapper {
+			display: flex;
+			flex-direction: row;
+			gap: 0.5rem;
+			align-items: center;
+		}
+	}
+
+	@media @mq-not-mobile {
+		&__mlbr { display: none; }
+	}
+	@media @mq-mobile {
+		&__lbr {display: none;}
 	}
 }

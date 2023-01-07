@@ -1,5 +1,6 @@
 import _ from 'underscore'
 import constants from './constants'
+import './modernizr_build.js'
 
 export function validateURL(str: string) : boolean {
 	return constants.regexWeburl.test(str)
@@ -12,6 +13,10 @@ export function modifyURLSlug (str: string) : string {
 	return str
 }
 
-export function testShortcutPasteWithKeyboard () : boolean {
+export function canShortcutPasteWithKeyboard () : boolean {
   return !(Modernizr.touchevents && Modernizr.mq(constants.MediaQueries.mobile))
+}
+
+export function checkMobileMQ () : boolean {
+	return Modernizr.mq(constants.MediaQueries.mobile)
 }

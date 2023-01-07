@@ -23,6 +23,7 @@ type Props = {
 	type: ButtonType
 	onClick?: React.ReactEventHandler<HTMLAnchorElement>
 	isDisabled?: boolean,
+	isLoading?: boolean
 	isCaret?: boolean
 } & JSX.IntrinsicElements["a"]
 
@@ -42,7 +43,7 @@ const Button : React.FC<Props> = function(
 	if(args.isDisabled) buttonClassMods.push(globalClass+'_disabled')
 	if(!args.label && args.icon) buttonClassMods.push(globalClass+'_icon-only')
 
-	const htmlAnchorProps = _.omit(args, 'size', 'type', 'isDisabled', 'isCaret', 'label', 'icon')
+	const htmlAnchorProps = _.omit(args, 'size', 'type', 'isDisabled', 'isCaret', 'label', 'icon', 'isLoading')
 
 	return (
 		<a {...htmlAnchorProps} 

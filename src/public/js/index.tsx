@@ -2,10 +2,9 @@
 require.context('../assets/', true)
 import '../css/main.less'
 import '../index.html'
-import './modernizr_build.js'
 
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import {
   createBrowserRouter,
   RouterProvider
@@ -24,7 +23,6 @@ const router = createBrowserRouter([
   }
 ]);
 
-ReactDOM.render(
-	<RouterProvider router={router} />,
-	document.getElementById('app')
-);
+const container = document.getElementById('app')
+const root = createRoot(container)
+root.render(<RouterProvider router={router} />)

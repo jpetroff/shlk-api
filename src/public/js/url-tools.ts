@@ -44,6 +44,24 @@ class LinkTools {
 
 		throw new Error(`URL ${result} is not valid`)
 	}
+
+	/* 
+		For query array [ 'param1', 'param2', ... ]
+		Returns corresponding query values or null [ 'value1', null, ...  ]
+	 */
+	queryUrlSearchParams(queryParam: string[], searchParamsString?: string) : Array<string | null> {
+		if(!searchParamsString) return Array.from({length: _.size(queryParam)}, () => null)
+
+		const searchParams = new URLSearchParams(searchParamsString)
+		let result : Array<string | null> = []
+		_.forEach(queryParam, (param) => {
+			result.push(searchParams.get(param))
+		})
+		_.map(result, (item) => {
+			if(item != null) return decodeURIComponent(item)
+		})
+		return result 
+	}
 }
 
 export default new LinkTools()

@@ -1,11 +1,21 @@
 @import '../../css/_constants.less'; 
 
-:local(.wrapperClass).shortlink-display {
+:local(.wrapperClass)_shortlink-display {
 	.t-header_24-32;
 	padding: 1.25rem 1rem;
 	display: flex;
 
-	.shortlink-display__action-wrapper {
+	@media @mq-mobile {
+		padding: 0.75rem 0;
+		align-items: center;
+
+		.__mobile-convenience-state & {
+			padding-left: 1.25rem;
+			padding-right: 0.75rem;
+		}
+	}
+
+	&__action-wrapper {
 		background: transparent;
 		padding: 0.125rem 0.25rem;
 		border-radius: 0.25rem;
@@ -14,35 +24,63 @@
 		gap: 1.25rem;
 		margin-left: -0.25rem;
 	}
-
-	.shortlink-display__action-wrapper_has-shortlink {
-		transition: all 0.1s ease-in;
-		cursor: pointer;
-
-		.shortlink-display__copy_pseudolink {
+	@media @mq-mobile {
+		&__action-wrapper {
+			flex-grow: 1;
+			align-items: center;
+			padding: 0;
+			margin: 0;
+			min-height: 2.5rem;
+		}
+	}
+	@media @mq-not-mobile {
+		&__action-wrapper_has-shortlink {
 			transition: all 0.1s ease-in;
-			position: relative;
-			top: 0;
-		}
+			cursor: pointer;
 
-		&:hover { 
-			background-color: @black-95;
-			.shortlink-display__text { color: @black-10; }
+			&__copy_pseudolink {
+				transition: all 0.1s ease-in;
+				position: relative;
+				top: 0;
+			}
+			&:hover { 
+				background-color: @black-95;
+				&__text { color: @black-10; }
+			}
+			&:hover &__copy_pseudolink { color: @red-50; top: -0.125rem; }
+			&:active &__copy_pseudolink { color: @red-40; top: -0.125rem; }
 		}
-
-		&:hover .shortlink-display__copy_pseudolink { color: @red-50; top: -0.125rem; }
-		&:active .shortlink-display__copy_pseudolink { color: @red-40; top: -0.125rem; }
 	}
 
-	.shortlink-display__text {
+	&__text {
 		color: @black-30;
 	}
-
-	&_empty .shortlink-display__text {
+	&_empty &__text {
 		color: @black-70
 	}
+	@media @mq-mobile {
+		&__text { 
+			flex-grow: 1;
+		}
+	}
 
-	.shortlink-display__copy_pseudolink {
+	
+
+	&__copy-pseudolink {
 		.t-text_16-20;
+	}
+	@media @mq-mobile {
+		&__copy-pseudolink {
+			display: none;
+		}
+	}
+
+	&__copy-button {
+		display: none;
+	}
+	@media @mq-mobile {
+		&__copy-button {
+			display: flex;
+		}
 	}
 }
