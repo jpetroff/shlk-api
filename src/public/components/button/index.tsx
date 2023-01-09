@@ -1,6 +1,6 @@
 import styles from './button.less'
-import React from 'react'
-import _ from 'underscore'
+import * as React from 'react'
+import * as _ from 'underscore'
 
 import Icon, { ReactIcon, IconSize, CaretRight } from '../icons'
 
@@ -12,8 +12,7 @@ export enum ButtonSize {
 export enum ButtonType {
 	PRIMARY = 'primary',
 	GHOST = 'ghost',
-	SECONDARY = 'secondary',
-	GHOST_PRIMARY = 'ghost_primary'
+	SECONDARY = 'secondary'
 }
 
 type Props = {
@@ -35,19 +34,20 @@ const BtnIcnMap = _.object(
 const Button : React.FC<Props> = function(
 	args : Props
 ) {
-	const globalClass = 'button'
+	const globalClass = styles.wrapperClass+'_button'
 
 	let buttonClassMods : Array<string> = []
 	buttonClassMods.push(globalClass + '_' + args.size)
 	buttonClassMods.push(globalClass + '_' + args.type)
-	if(args.isDisabled) buttonClassMods.push(globalClass+'_disabled')
+	if(args.isDisabled || args.isLoading) buttonClassMods.push(globalClass+'_disabled')
+	if(args.isLoading) buttonClassMods.push(globalClass+'_loading')
 	if(!args.label && args.icon) buttonClassMods.push(globalClass+'_icon-only')
 
 	const htmlAnchorProps = _.omit(args, 'size', 'type', 'isDisabled', 'isCaret', 'label', 'icon', 'isLoading')
 
 	return (
 		<a {...htmlAnchorProps} 
-			className={`${args.className} ${globalClass} ${buttonClassMods.join(' ')} ${styles.wrapperClass}`}>
+			className={`${args.className || ''} ${globalClass} ${buttonClassMods.join(' ')}`}>
 				{args.icon && 
 					<Icon 
 						className={`${globalClass}__icon`}

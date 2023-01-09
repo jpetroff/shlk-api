@@ -1,5 +1,5 @@
 import styles from './icons.less'
-import React from 'react'
+import * as React from 'react'
 
 import LogoSvg from '../../assets/svg/logo.svg'
 import LogoCSvg from '../../assets/svg/logo-compact.svg'

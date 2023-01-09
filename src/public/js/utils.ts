@@ -1,4 +1,4 @@
-import _ from 'underscore'
+import * as _ from 'underscore'
 import constants from './constants'
 import './modernizr_build.js'
 

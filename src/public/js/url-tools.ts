@@ -1,6 +1,6 @@
-import _ from 'underscore'
+import * as _ from 'underscore'
 import constants from './constants'
-import config from './config.development'
+const config = require('./config')
 
 interface DescriptiveShortlink {
 	userTag?: string
@@ -32,8 +32,9 @@ class LinkTools {
 	}
 
 	generateDescriptiveShortlink( { userTag, descriptionTag } : DescriptiveShortlink ) : string {
-		const userTagPart = userTag ? userTag + '@' : ''
-		return `${this.baseUrl}/${userTagPart}${descriptionTag}`
+		const userTagPart = userTag ? userTag : ''
+		const descriptionTagPart = '@' + descriptionTag
+		return `${this.baseUrl}/${userTagPart}${descriptionTagPart}`
 	}
 
 	fixProtocol( url: string ) : string {

@@ -9,6 +9,7 @@
 	gap: 0.125rem;
 	padding: 1.25rem 1rem;
 	border-top: 2px solid @black-90;
+	vertical-align: baseline;
 
 	@media @mq-mobile {
 		padding: 0.75rem 0;
@@ -69,7 +70,7 @@
 	}
 	@media @mq-mobile {
 		&__input-common-style {
-			.t-secondary-header_18-24;
+			// .t-secondary-header_18-24;
 		}
 	}
 
@@ -79,26 +80,26 @@
 		position: relative;
 		display: inline-block;
 
-		&__real-input { position: absolute; width: 100%; left: 0; border: none; padding: 0; margin: 0;height: inherit; background-color: transparent; z-index: 1; outline:none }
+		&__real-input { position: absolute; width: 100%; left: 0; border: none; padding: 0; margin: 0; height: auto; background-color: transparent; z-index: 1; outline:none; border-radius: 0; }
 		&__real-input:focus {border-bottom: 2px solid @black-30;}
 		&__width-sizer_hide { opacity: 0; z-index: 0; }
 		&__width-sizer_show { opacity: 1; z-index: 0; color: @black-70 }
 	}
 
-	&__copy_pseudolink {
+	& &__copy_pseudolink {
 		.t-text_16-20;
 	}
 	@media @mq-mobile {
-		&__copy_pseudolink {
+		& &__copy_pseudolink {
 			display: none;
 		}
 	}
 
-	&__copy-button {
+	& &__copy_button {
 		display: none;
 	}
 	@media @mq-mobile {
-		&__copy-button {
+		& &__copy_button {
 			display: flex;
 		}
 	}

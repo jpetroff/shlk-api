@@ -1,37 +1,58 @@
 @import '../../css/_constants.less';
 
-:local(.wrapperClass) {
+.link-loading-gradient {
+	background: linear-gradient(to right, 
+			rgba(@black-60, 1) 0%,
+			rgba(@black-60, 1) 30%,
+			rgba(@black-60, 0.1) 48%,
+			rgba(@black-60, 0.1) 52%,
+			rgba(@black-60, 1) 70%,
+			rgba(@black-60, 1) 100%
+		);
+}
+.link-loading-mixin {
+	background-size: 200% 100%;
+	-webkit-background-clip: text;
+	background-clip: text;
+	animation: loading 2s linear infinite;
+	color: transparent;
+}
+
+:local(.wrapperClass)_link {
 	box-sizing: border-box;
+	text-decoration: none !important;
+	cursor: pointer;
+	outline: @pure-blue-70;
 
-	&.link {
-		text-decoration: none !important;
-		cursor: pointer;
+	&_app, &:visited {
+		color: @pure-blue-50;
+	}
+	&_user {
+		color: @blue-50;
+	}
+	&_user:visited {
+		color: @purple-20;
+	}
 
-		&_app, &:visited {
-			color: @pure-blue-50;
-		}
-		&_user {
-			color: @blue-50;
-		}
-		&_user:visited {
-			color: @purple-20;
-		}
+	&:hover, .link-block & {
+		color: @red-50;
+	}
+	&:active, .link-block & {
+		color: @red-40;
+	}
 
-		&:hover {
-			color: @red-50;
-		}
-		&:active {
-			color: @red-40;
-		}
+	&_disabled, 
+	&_disabled:visited,
+	&_disabled:active,
+	&_disabled:hover {
+		color: @black-60;
+		cursor: not-allowed;
+	}
 
-		&_disabled, 
-		&_disabled:visited,
-		&_disabled:active,
-		&_disabled:hover {
-			color: @black-70;
-			cursor: not-allowed;
-		}
-
+	&_loading {
+		color: transparent;
+		.link-loading-gradient;
+		.link-loading-mixin;
 	}
 }
 

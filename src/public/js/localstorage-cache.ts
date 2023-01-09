@@ -1,4 +1,4 @@
-import _ from 'underscore'
+import * as _ from 'underscore'
 import proxyStorage from './proxy-storage'
 
 export type ShortlinkLocal = {
@@ -17,7 +17,7 @@ class LocalStorageLinkCache {
 	public storeShortlink( args: ShortlinkLocal) : boolean {
 		if (!proxyStorage.canUse()) return false
 
-		const urlKey = _.escape(args.url)
+		const urlKey = encodeURI(args.url)
 		const storageItem : ShortlinkLocalStorage = {
 			...args,
 			createdAt: (new Date()).toISOString()
@@ -29,7 +29,7 @@ class LocalStorageLinkCache {
 	public async checkShortlinkCache( args: ShortlinkLocal) : Promise<ShortlinkLocalStorage | null> {
 		if (!proxyStorage.canUse()) return null
 
-		const urlKey = _.escape(args.url)
+		const urlKey = encodeURI(args.url)
 		const existingShortlink = await proxyStorage.getItem(urlKey)
 		if(existingShortlink != null) {
 			return JSON.parse(existingShortlink)

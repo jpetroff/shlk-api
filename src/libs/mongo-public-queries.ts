@@ -58,7 +58,7 @@ export async function createShortlinkDescriptor(
 			} else if (existingShortlinkHash == null) {
 				const shortlink = new Shortlink({
 					hash: args.hash,
-					location: _.escape(args.location),
+					location: args.location,
 					descriptor: {
 						userTag: args.userTag,
 						descriptionTag: args.descriptionTag
@@ -133,7 +133,7 @@ export async function getShortlink(	args: {hash?: string, userTag?: string, desc
 }
 
 export async function __wipeDB() : Promise<Query<any, ShortlinkDocument>|null> {
-	if(process.env.MODE == 'development') {
+	if(process.env.NODE_ENV == 'development') {
 		const res = await Shortlink.deleteMany()
 		return res
 	} else {

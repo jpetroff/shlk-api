@@ -24,7 +24,7 @@ class App {
   }
 
   private mountRoutes (): void {
-    if(process.env.MODE != 'development') {
+    if(process.env.NODE_ENV != 'development') {
       this.express.use(Helmet(helmetOpts))
     }
     this.express.use(staticRoute);

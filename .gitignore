@@ -128,3 +128,6 @@ dist
 
 # authentication files
 mongo_creds.json
+
+deploy
+stats.json

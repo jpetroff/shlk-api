@@ -3,7 +3,7 @@ require.context('../assets/', true)
 import '../css/main.less'
 import '../index.html'
 
-import React from 'react'
+import * as React from 'react'
 import { createRoot } from 'react-dom/client'
 import {
   createBrowserRouter,

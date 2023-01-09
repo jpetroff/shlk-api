@@ -1,6 +1,6 @@
 import styles from './shortlink-slug-input.less'
-import _ from 'underscore'
-import React from 'react'
+import * as _ from 'underscore'
+import * as React from 'react'
 import Link, { LinkColors } from '../link'
 import Button, { ButtonSize, ButtonType } from '../button'
 
@@ -24,6 +24,7 @@ type Props = {
 	show?: boolean
 	generatedLink?: string
 	isLoading?: boolean
+	hasCta?: boolean
 }
 
 export const ShortlinkSlugInput : React.FC<Props> = (
@@ -32,7 +33,8 @@ export const ShortlinkSlugInput : React.FC<Props> = (
 		onChange,
 		show = true,
 		isLoading = false,
-		generatedLink
+		generatedLink,
+		hasCta = true
 	} : Props
 ) => {
 
@@ -67,9 +69,9 @@ export const ShortlinkSlugInput : React.FC<Props> = (
 							if (_.isString(chunk)) {
 								switch(chunk) {
 									case SlugInputSpecialChars.mobileLineBreak : 
-										return (<br className={`${globalClass}__mlbr`} />)
+										return (<br key={index} className={`${globalClass}__mlbr`} />)
 									case SlugInputSpecialChars.lineBreak : 
-										return (<br className={`${globalClass}__lbr`} />)
+										return (<br key={index} className={`${globalClass}__lbr`} />)
 									default : 
 										return (<span key={index} className={`${globalClass}_text-filler ${globalClass}__input-common-style`}>{chunk}</span>)
 								}
@@ -102,10 +104,10 @@ export const ShortlinkSlugInput : React.FC<Props> = (
 				{
 					(isLoading || !_.isEmpty(generatedLink)) &&
 					<Button
-						className={`${globalClass}__copy-button`}
+						className={`${globalClass}__copy_button`}
 						label={btnLabel}
 						size={ButtonSize.LARGE}
-						type={ButtonType.PRIMARY}
+						type={hasCta ? ButtonType.PRIMARY : ButtonType.SECONDARY}
 						isDisabled={_.isEmpty(generatedLink)}
 						isLoading={isLoading}
 						onClick={handleCopy}

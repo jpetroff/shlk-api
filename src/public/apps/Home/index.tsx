@@ -2,15 +2,16 @@
 import styles from './Home.less'
 import { checkMobileMQ, modifyURLSlug, validateURL } from '../../js/utils'
 import { HTMLAnyInput, AnyObject } from '../../js/constants'
-import config from '../../js/config.development'
 import { WithRouterProps } from '../../js/router-hoc'
 
-import React from 'react'
-import _ from 'underscore'
+import * as React from 'react'
+import * as _ from 'underscore'
 
 import HeroInput from '../../components/hero-input/index'
 import ShortlinkDisplay from '../../components/shortlink-display'
 import ShortlinkSlugInput, { TextPattern, SlugInputSpecialChars } from '../../components/shortlink-slug-input'
+import Snackbar from '../../components/snackbar'
+
 import linkTools from '../../js/url-tools'
 import clipboardTools from '../../js/clipboard-tools'
 
@@ -19,7 +20,7 @@ import LSC from '../../js/localstorage-cache'
 
 import Header from '../Header'
 
-import {} from 'react-router-dom'
+const config = require('../../js/config')
 
 enum globalCommands {
 	submitAndCopy = 0
@@ -38,6 +39,7 @@ type State = {
 	userTag: string
 	descriptionTag: string
 	errorState: {
+		errorStack: any[]
 		createLinkResult?: Error
 		createDescriptiveLinkResult?: Error
 	}
@@ -63,7 +65,9 @@ export class Home extends React.Component<Props, State> {
 			generatedHash: undefined,
 			userTag: 'evgn',
 			descriptionTag: '',
-			errorState: {},
+			errorState: {
+				errorStack: []
+			},
 			loadingState: {
 				createLinkIsLoading: false,
 				createDescriptiveLinkIsLoading: false
@@ -82,10 +86,6 @@ export class Home extends React.Component<Props, State> {
 				this.heroInputRef.current &&
 				!checkMobileMQ
 			) this.heroInputRef.current.focus()
-
-		if(this.heroInputRef.current) {
-			this.heroInputRef.current.addEventListener('click', this._onHeroInputElementClick)
-		}
 
 		if(validateURL(this.state.location)) {
 			this.submitLocation()
@@ -114,7 +114,6 @@ export class Home extends React.Component<Props, State> {
 	}
 
 	private onGlobalKeypress(event: KeyboardEvent) {
-		console.log('keypress', event)
 		if(event.ctrlKey && event.shiftKey && event.code == 'KeyC' ) {
 			this.handleGlobalCommand(globalCommands.submitAndCopy)
 		}
@@ -159,7 +158,7 @@ export class Home extends React.Component<Props, State> {
 			generatedHash: args.hash,
 			location: args.location,
 			errorState: {
-				createLinkResult: undefined
+				errorStack: []
 			}
 		}
 		if(!_.isEmpty(args.descriptionTag)) {
@@ -225,7 +224,11 @@ export class Home extends React.Component<Props, State> {
 				hash: result.hash
 			})
 		} catch (err) {
-			this.setState({errorState: {createLinkResult: err}})
+			this.setState({errorState: {
+					errorStack: [].concat([err], this.state.errorState.errorStack),
+					createDescriptiveLinkResult: err
+				}
+			})
 			console.error(err) 
 		}
 		this.setState({loadingState: {createLinkIsLoading: false}})
@@ -250,7 +253,13 @@ export class Home extends React.Component<Props, State> {
 	private async _submitDescriptor() {
 		this._clearErrorState()
 		console.log('[Home] submitDescriptor\n', this.state.userTag, this.state.descriptionTag)
-		if(_.isEmpty(this.state.descriptionTag)) { return }
+		if(_.isEmpty(this.state.descriptionTag)) { 
+			this.setState({
+				generatedDescriptiveShortlink: undefined,
+				loadingState: {createDescriptiveLinkIsLoading: false}
+			})
+			return
+		}
 
 		if(await this.retrieveLSCache()) return
 		
@@ -271,6 +280,11 @@ export class Home extends React.Component<Props, State> {
 				descriptionTag: result.descriptor.descriptionTag
 			})		
 		} catch (err) {
+			this.setState({errorState: {
+					errorStack: [].concat([err], this.state.errorState.errorStack),
+					createLinkResult: err
+				}
+			})
 			console.error(err)
 		}
 		this.setState({loadingState: {createDescriptiveLinkIsLoading: false}})
@@ -287,19 +301,16 @@ export class Home extends React.Component<Props, State> {
 	}
 
 	private _clearErrorState(): void {
-		this.setState({ errorState: {} })
+		this.setState({ errorState: { errorStack: [] } })
 	}
 
 	private _setMobileConvenienceInput(mode: boolean) {
-		console.trace()
-		console.log('_setMobileConvenienceInput', checkMobileMQ() && this.state.mobileConvenienceInput != mode)
 		if(checkMobileMQ() && this.state.mobileConvenienceInput != mode) {
 			this.setState({ mobileConvenienceInput: mode })
 		}
 	}
 
 	private _onHeroInputElementClick(event: Event) : void {
-		console.log(event)
 		this._setMobileConvenienceInput(true)
 	}
 
@@ -319,12 +330,15 @@ export class Home extends React.Component<Props, State> {
 									name="URL"
 									placeholder="Type or paste a link"
 									value={this.state.location}
+									onFocus={this._onHeroInputElementClick}
+									hasCta={!this.state.generatedShortlink || this.state.generatedShortlink == ''}
 								/>
 							</div>
 							<ShortlinkDisplay
 								placeholder={config.displayServiceUrl}
 								shortlink={this.state.generatedShortlink}
 								isLoading={this.state.loadingState.createLinkIsLoading}
+								hasCta={(!!this.state.generatedShortlink || this.state.generatedShortlink != '') && (!this.state.generatedDescriptiveShortlink)}
 							/>
 							{this.state.generatedShortlink && 
 								<ShortlinkSlugInput
@@ -333,7 +347,21 @@ export class Home extends React.Component<Props, State> {
 									show={this.state.generatedShortlink ? true : false}
 									generatedLink={this.state.generatedDescriptiveShortlink}
 									isLoading={this.state.loadingState.createDescriptiveLinkIsLoading}
+									hasCta={!this.state.generatedDescriptiveShortlink || this.state.generatedDescriptiveShortlink != ''}
 								/>
+							}
+						</div>
+						<div className={`${globalClass}__snackbar-container`}>
+							{
+								this.state.errorState.errorStack.map(
+									(error, index) => {
+										return (
+											<Snackbar 
+												message={error.message}
+												/>
+										)
+									}
+								)
 							}
 						</div>
 					</div>

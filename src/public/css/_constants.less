@@ -28,13 +28,21 @@
 @purple-95: rgba(252, 247, 253, 1);
 @red-50: rgba(224, 61, 22, 1);
 @red-40: rgba(186, 51, 18, 1);
-@pure-blue-50: rgba(0, 69, 255, 1);
 @pure-blue-30: rgba(10, 52, 163, 1);
 @pure-blue-40: rgba(11, 66, 214, 1);
+@pure-blue-50: rgba(0, 69, 255, 1);
+@pure-blue-60: rgba(95, 132, 231, 1);
+@pure-blue-70: rgba(126, 158, 241, 1);
 @pure-blue-90: rgba(214, 225, 255, 1);
+@pure-blue-95: rgba(245, 248, 255, 1);
 
 @button-foreshadow-gradient-start: rgba(28, 24, 37, 0);
 @button-foreshadow-gradient-end: rgba(28, 24, 37, 0.06);
+@button-foreshadow-gradient-end-intensive: rgba(28, 24, 37, 0.12);
+
+/* Effect styles */
+@hero-input-highlight:  0px 0px 0px rgb(173, 196, 255);
+
 
 /* Text-size styles */
 /* base size: 16_20_text (16px) */
@@ -81,3 +89,49 @@
  @mobileWidth: 480px;
  @mq-mobile: ~"screen and (max-width: 480px)";
  @mq-not-mobile: ~"screen and (min-width: 481px)";
+ 
+
+ /* 
+	Loading text animation
+ */
+
+ @keyframes loading {
+	0% {
+		background-position: 100%;
+	}
+	100% {
+		background-position: -100%;
+	}
+}
+
+/* 
+	Shadows
+*/
+
+@shadow-light-10: 0 2px 7px -5px rgba(@black-30, 0.4);
+@shadow-light-20: 0 3.3px 10px -5px rgba(@black-30, 0.4);
+@shadow-light-30: 0 5px 15px -5px rgba(@black-30, 0.36);
+@shadow-light-40: 0 10px 20px -5px rgba(@black-30, 0.36);
+@shadow-light-50: 0 15px 25px -5px rgba(@black-30, 0.32);
+
+@thin-shadow-stroke: 0 0 0 1px rgba(@black-30, 0.10);
+
+.shadow-light-10 {
+	box-shadow: 0 2px 7px -5px rgba(@black-30, 0.4)
+}
+
+.shadow-light-20 {
+	box-shadow: 0 3.3px 10px -5px rgba(@black-30, 0.4)
+}
+
+.shadow-light-30 {
+	box-shadow: 0 5px 15px -5px rgba(@black-30, 0.36)
+}
+
+.shadow-light-40 {
+	box-shadow: 0 10px 20px -5px rgba(@black-30, 0.36)
+}
+
+.shadow-light-50 {
+	box-shadow: 0 15px 25px -5px rgba(@black-30, 0.32)
+}

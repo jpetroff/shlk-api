@@ -36,5 +36,5 @@ export function prepareURL( _url: string ): string {
 
   let URLObj = new URL(url)
 
-  return _.escape(clearURLTracking(URLObj).toString())
+  return clearURLTracking(URLObj).toString()
 }

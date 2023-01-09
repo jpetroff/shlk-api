@@ -1,6 +1,6 @@
-import _ from 'underscore'
+import * as _ from 'underscore'
 import constants from './constants'
-import config from './config.development'
+const config = require('./config')
 
 class ClipboardTools {
 	readonly enabled : boolean
@@ -23,9 +23,7 @@ class ClipboardTools {
 	copy(clipText: string) {
 		if(this.enabled && clipText) {
 			navigator.clipboard.writeText(clipText)
-		} 
-		// for IE?
-		// else if (_.isFunction(window.clipboardData.setData)) { window.clipboardData.setData("Text", shortlink) }
+		}
 	}
 }
 

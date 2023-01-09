@@ -1,5 +1,5 @@
-import _ from 'underscore'
-import React from 'react'
+import * as _ from 'underscore'
+import * as React from 'react'
 import styles from './hero-input.less'
 
 import Button, { ButtonSize, ButtonType } from '../button'
@@ -17,6 +17,7 @@ type Props = {
 	onFocus?: (event: Event) => void
 	onBlur?: (event: Event) => void
 	mobileTip?: string
+	hasCta?: boolean
 }
 
 const HeroInput : React.FC<Props> = function(
@@ -25,11 +26,12 @@ const HeroInput : React.FC<Props> = function(
 		onSubmit,
 		name,
 		placeholder,
-		value = "",
+		value = '',
 		inputRef,
 		onFocus,
 		onBlur,
-		mobileTip
+		mobileTip,
+		hasCta = true
 	} : Props
 ) {
 
@@ -57,8 +59,8 @@ const HeroInput : React.FC<Props> = function(
 		if(doubleClick) event.preventDefault()
 	}
 
-	const handleFocus = () => setFocus(true)
-	const handleBlur = () => setFocus(false)
+	const handleFocus = (event) => { setFocus(true); onFocus && onFocus(event) }
+	const handleBlur = (event) => { setFocus(false); onBlur && onBlur(event) }
 
 	const globalClass = styles.wrapperClass+'_hero-input'
 	let wrapperMods : Array<string> = []
@@ -82,11 +84,12 @@ const HeroInput : React.FC<Props> = function(
 				name={name}
 				value={value}
 				autoComplete='off'
+				type='url'
 				/>
 			<label htmlFor={inputId} className={`${globalClass}__actions ${globalClass}__clear`}>
 				<Button 
 					icon={Cross}
-					type={ButtonType.GHOST_PRIMARY}
+					type={ButtonType.GHOST}
 					size={ButtonSize.LARGE}
 					onClick={handleClear}
 					/>
@@ -98,7 +101,7 @@ const HeroInput : React.FC<Props> = function(
 				<label htmlFor={inputId} className={`${globalClass}__paste`}>
 					<Button 
 						label='Paste'
-						type={ButtonType.PRIMARY}
+						type={ButtonType.SECONDARY}
 						size={ButtonSize.LARGE}
 						onClick={handlePaste}
 						/>
@@ -107,7 +110,7 @@ const HeroInput : React.FC<Props> = function(
 					icon={Enter}
 					className={`${globalClass}__create`}
 					label='Create'
-					type={ButtonType.PRIMARY}
+					type={hasCta ? ButtonType.PRIMARY : ButtonType.SECONDARY}
 					size={ButtonSize.LARGE}
 					onClick={onSubmit}
 					/>

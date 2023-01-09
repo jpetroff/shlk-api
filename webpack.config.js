@@ -14,9 +14,10 @@ const sourceDir = 'src/public';
 const outputDir = 'dist/public';
 
 module.exports = (env, argv) => {
-	const isProduction = !!(process.env.MODE == 'production');
+	const isProduction = !!(process.env.NODE_ENV == 'production');
+	console.log(`\n\n\nisProduction:${isProduction}\n\n\n`)
 	const config = {
-		mode: process.env.MODE || 'production',
+		mode: process.env.NODE_ENV || 'production',
 		context: __dirname,
 
 		devtool: isProduction ? undefined : 'source-map',
@@ -63,10 +64,24 @@ module.exports = (env, argv) => {
 			splitChunks: {
 				cacheGroups: {
 					commons: {
-						test: /[\\/]node_modules[\\/]/,
+						// test: /[\\/]node_modules[\\/]/,
+						test(module) {
+							return (
+								module.resource &&
+								/[\\/]node_modules[\\/]/.test(module.resource) &&
+								!(/[\\/]node_modules[\\/]graphql/.test(module.resource))
+							)
+						},
 						name: 'libs',
 						chunks: 'all',
 					},
+					graphql: {
+						test: /[\\/]node_modules[\\/]graphql/,
+						name: 'graphql',
+						chunks: 'all',
+						reuseExistingChunk: true,
+						usedExports: true
+					}
 				},
 			},
 

@@ -1,5 +1,5 @@
 import styles from './Header.less'
-import React from 'react'
+import * as React from 'react'
 
 import { Logo, LogoC } from '../../components/icons'
 

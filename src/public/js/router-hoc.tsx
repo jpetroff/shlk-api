@@ -1,5 +1,5 @@
-import { useLocation, useNavigate, useParams } from 'react-router'
-import React from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import * as React from 'react'
 
 export interface WithRouterProps {
 	location: ReturnType<typeof useLocation>;

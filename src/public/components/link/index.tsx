@@ -1,6 +1,6 @@
 import styles from './link.less'
-import React from 'react'
-import _ from 'underscore'
+import * as React from 'react'
+import * as _ from 'underscore'
 import Icon, { ReactIcon, IconSize } from '../icons'
 
 export enum LinkColors {
@@ -15,33 +15,24 @@ type Props = {
 	iconSize?: IconSize
 	iconRight?: boolean
 	isDisabled?: boolean
-	parentHover?: boolean
 	isLoading?: boolean
 } & JSX.IntrinsicElements['a']
 
 const Link : React.FC<Props> = (
- _args: Props
+ args: Props
 ) => {
-	const args = _.clone(_args)
-	_.defaults(args, {
-		isDisabled: false,
-		isLoading: false, 
-		colorScheme: LinkColors.APP
-	})
-
 	if(_.isEmpty(args.label)) return (<></>)
 
-	const globalClass = 'link'
+	const globalClass = styles.wrapperClass+'_link'
 	let linkMods : Array<string> = []
 	linkMods.push(globalClass+'_'+args.colorScheme)
 	if(args.isLoading) linkMods.push(globalClass+'_loading')
 	if(args.isDisabled || args.isLoading) linkMods.push(globalClass+'_disabled')
-	if(args.parentHover) linkMods.push(globalClass+'_parent-hover')
 
-	const htmlAnchorAttributes = _.omit(args, 'colorScheme', 'label', 'icon', 'iconSize', 'isDisabled', 'iconRight', 'isLoading', 'parentHover')
+	const htmlAnchorAttributes = _.omit(args, 'colorScheme', 'label', 'icon', 'iconSize', 'isDisabled', 'iconRight', 'isLoading')
 	return (
 		<a {...htmlAnchorAttributes}
-			className={`${styles.wrapperClass} ${globalClass} ${linkMods.join(' ')} ${args.className}`}
+			className={`${globalClass} ${linkMods.join(' ')} ${args.className || ''}`}
 		>
 			{args.icon && !args.iconRight && 
 				<Icon useIcon={args.icon} size={args.iconSize || IconSize.SMALL} />
@@ -54,6 +45,12 @@ const Link : React.FC<Props> = (
 			}
 		</a>
 	)
+}
+
+Link.defaultProps = {
+	isDisabled: false,
+	isLoading: false, 
+	colorScheme: LinkColors.APP
 }
 
 export default Link
