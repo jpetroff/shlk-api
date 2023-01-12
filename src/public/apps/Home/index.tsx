@@ -16,9 +16,12 @@ import linkTools from '../../js/url-tools'
 import clipboardTools from '../../js/clipboard-tools'
 
 import Query from '../../js/shortlink-queries'
-import LSC from '../../js/localstorage-cache'
+import LSC, {ShortlinkLocalStorage} from '../../js/localstorage-cache'
 
 import Header from '../Header'
+import { HistoryWidget } from '../History'
+import Footer from '../Footer'
+
 
 const config = require('../../js/config')
 
@@ -39,7 +42,7 @@ type State = {
 	userTag: string
 	descriptionTag: string
 	errorState: {
-		errorStack: any[]
+		lastError?: Error
 		createLinkResult?: Error
 		createDescriptiveLinkResult?: Error
 	}
@@ -48,6 +51,7 @@ type State = {
 		createDescriptiveLinkIsLoading?: boolean
 	}
 	mobileConvenienceInput: boolean
+	cachedShortlinks: ShortlinkLocalStorage[]
 }
 
 
@@ -65,14 +69,13 @@ export class Home extends React.Component<Props, State> {
 			generatedHash: undefined,
 			userTag: 'evgn',
 			descriptionTag: '',
-			errorState: {
-				errorStack: []
-			},
+			errorState: {},
 			loadingState: {
 				createLinkIsLoading: false,
 				createDescriptiveLinkIsLoading: false
 			},
-			mobileConvenienceInput: false
+			mobileConvenienceInput: false,
+			cachedShortlinks: []
 		}
 		this.heroInputRef = React.createRef<HTMLAnyInput>()
 		// _.bindAll(this, 'updateLocation', 'submitLocation', 'handleSuccessPaste', 'handleDescriptorChange', '_submitDescriptor', 'saveLSCache')
@@ -96,6 +99,8 @@ export class Home extends React.Component<Props, State> {
 		}
 
 		this.handleGlobalEvents(true)
+
+		this.loadAllCachedShortlinks()
   }
 
 	componentWillUnmount(): void {
@@ -120,8 +125,10 @@ export class Home extends React.Component<Props, State> {
 	}
 
 	componentDidUpdate() {
-		if(this.props.extension?.activeTabUrl != this.state.location) 
-			this.updateDeferredLocation()
+		if(this.props.extension && this.props.extension.activeTabUrl != this.state.location) {
+			this.setState({ location: this.props.extension.activeTabUrl})
+			// this.updateDeferredLocation()
+		}
 
 		if(!_.isEmpty(this.state.location))
 			this._setMobileConvenienceInput(true)
@@ -157,9 +164,7 @@ export class Home extends React.Component<Props, State> {
 			generatedShortlink: linkTools.generateShortlinkFromHash(args.hash),
 			generatedHash: args.hash,
 			location: args.location,
-			errorState: {
-				errorStack: []
-			}
+			errorState: {}
 		}
 		if(!_.isEmpty(args.descriptionTag)) {
 			newState = {
@@ -201,6 +206,20 @@ export class Home extends React.Component<Props, State> {
 			userTag: this.state.userTag,
 			descriptionTag: this.state.descriptionTag
 		})
+		this.loadAllCachedShortlinks()
+	}
+
+	private async loadAllCachedShortlinks() {
+		const aMonthAgo = new Date()
+		aMonthAgo.setMonth(aMonthAgo.getMonth() - 1)
+		const result = await LSC.getAll({
+			sortByDate: true, 
+			clearThreshold: aMonthAgo,
+			limit: 3
+		})
+		if(result) this.setState({
+			cachedShortlinks: result
+		})
 	}
 
 	async submitLocation() {
@@ -225,7 +244,7 @@ export class Home extends React.Component<Props, State> {
 			})
 		} catch (err) {
 			this.setState({errorState: {
-					errorStack: [].concat([err], this.state.errorState.errorStack),
+					lastError: err,
 					createDescriptiveLinkResult: err
 				}
 			})
@@ -281,7 +300,7 @@ export class Home extends React.Component<Props, State> {
 			})		
 		} catch (err) {
 			this.setState({errorState: {
-					errorStack: [].concat([err], this.state.errorState.errorStack),
+					lastError: err,
 					createLinkResult: err
 				}
 			})
@@ -301,7 +320,7 @@ export class Home extends React.Component<Props, State> {
 	}
 
 	private _clearErrorState(): void {
-		this.setState({ errorState: { errorStack: [] } })
+		this.setState({ errorState: {} })
 	}
 
 	private _setMobileConvenienceInput(mode: boolean) {
@@ -350,21 +369,23 @@ export class Home extends React.Component<Props, State> {
 									hasCta={!this.state.generatedDescriptiveShortlink || this.state.generatedDescriptiveShortlink != ''}
 								/>
 							}
+							<div className={`${globalClass}__snackbar-container`}>
+								{ this.state.errorState.lastError && 
+									<Snackbar 
+										message={this.state.errorState.lastError.message}
+										canDismiss={true}
+										timer={5000}
+										onDismiss={this._clearErrorState}
+										/>
+								}
+							</div>
 						</div>
-						<div className={`${globalClass}__snackbar-container`}>
-							{
-								this.state.errorState.errorStack.map(
-									(error, index) => {
-										return (
-											<Snackbar 
-												message={error.message}
-												/>
-										)
-									}
-								)
-							}
+
+						<div className={`${globalClass}__footer-wrapper`}>
+							<HistoryWidget list={this.state.cachedShortlinks} />
 						</div>
 					</div>
+					<Footer />
 				</div>
 		)
 	}

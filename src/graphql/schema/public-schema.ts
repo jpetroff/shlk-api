@@ -1,7 +1,6 @@
-import { buildSchema } from 'graphql'
+// import { buildSchema } from 'graphql'
 
-export default buildSchema(`
-
+export default `
 	type ShortlinkDescriptor {
 		userTag: String
 		descriptionTag: String
@@ -38,8 +37,7 @@ export default buildSchema(`
 	}
 
 	schema {
-    query: Query
-    mutation: Mutation
-  }
-
-`)
+		query: Query
+		mutation: Mutation
+	}
+`

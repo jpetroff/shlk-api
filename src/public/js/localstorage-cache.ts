@@ -37,6 +37,39 @@ class LocalStorageLinkCache {
 			return null
 		}
 	}
+
+	public async getAll(args: {
+		sortByDate?: boolean
+		clearThreshold?: Date,
+		limit?: number
+	}) : Promise<ShortlinkLocalStorage[] | null> {
+		const storageContent = await proxyStorage.getAllItems(true)
+		if(!storageContent) return null
+		let result : ShortlinkLocalStorage[] = []
+		_.each(storageContent, (item) => {
+			if(
+				_.isObject(item) && 
+				!_.isEmpty(item) && 
+				_.keys(item).includes('url')
+			) {
+				result.push(item as ShortlinkLocalStorage)
+			}
+		})
+
+		if(args.sortByDate) {
+			result = _.sortBy(result, (item) => {
+				return Date.now() - (new Date(item.createdAt)).valueOf()
+			})
+		}
+		if(args.clearThreshold) {
+			const cmpValue = new Date(args.clearThreshold).valueOf()
+			result = _.reject(result, (item) => {
+				return new Date(item.createdAt).valueOf() < cmpValue
+			})
+		}
+		if(args.limit) return _.first(result, args.limit)
+		return result
+	}
 }
 
 export default new LocalStorageLinkCache()

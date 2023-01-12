@@ -14,6 +14,22 @@ export const proxyStorage = {
 	canUse() {
 		if(window.localStorage) return true
 		return false
+	},
+
+	async getAllItems(parse: boolean = true) : Promise<any[] | string[] | void> {
+		let result : string[] = []
+		const keys = _.keys(window.localStorage)
+		_.each(keys, (key) => {
+			const retrievedItem = window.localStorage.getItem(key)
+			if (parse) {
+				try {
+					result.push(JSON.parse(retrievedItem as string))
+				} catch {}
+			} else {
+				result.push(retrievedItem as string)
+			}
+		})
+		return result
 	}
 
 }

@@ -2,6 +2,7 @@ import styles from './link.less'
 import * as React from 'react'
 import * as _ from 'underscore'
 import Icon, { ReactIcon, IconSize } from '../icons'
+import classNames from 'classnames'
 
 export enum LinkColors {
 	USER = 'user',
@@ -10,7 +11,7 @@ export enum LinkColors {
 
 type Props = {
 	colorScheme?: LinkColors
-	label: string
+	label?: string
 	icon?: ReactIcon
 	iconSize?: IconSize
 	iconRight?: boolean
@@ -21,24 +22,25 @@ type Props = {
 const Link : React.FC<Props> = (
  args: Props
 ) => {
-	if(_.isEmpty(args.label)) return (<></>)
 
 	const globalClass = styles.wrapperClass+'_link'
-	let linkMods : Array<string> = []
-	linkMods.push(globalClass+'_'+args.colorScheme)
-	if(args.isLoading) linkMods.push(globalClass+'_loading')
-	if(args.isDisabled || args.isLoading) linkMods.push(globalClass+'_disabled')
+	const linkClasses = classNames({
+		[`${globalClass}`]: true,
+		[`${globalClass}_${args.colorScheme}`]: true,
+		[`${globalClass}_loading`]: args.isLoading,
+		[`${globalClass}_disabled`]: args.isDisabled || args.isLoading
+	})
 
 	const htmlAnchorAttributes = _.omit(args, 'colorScheme', 'label', 'icon', 'iconSize', 'isDisabled', 'iconRight', 'isLoading')
 	return (
 		<a {...htmlAnchorAttributes}
-			className={`${globalClass} ${linkMods.join(' ')} ${args.className || ''}`}
+			className={`${linkClasses} ${args.className || ''}`}
 		>
 			{args.icon && !args.iconRight && 
 				<Icon useIcon={args.icon} size={args.iconSize || IconSize.SMALL} />
 			}
 
-			{args.label}
+			{args.label}{args.children}
 
 			{args.icon && args.iconRight && 
 				<Icon useIcon={args.icon} size={args.iconSize || IconSize.SMALL} />

@@ -1,0 +1,164 @@
+@import '../../css/_constants.less';
+
+@swap-duration: 1000ms;
+
+:export {
+	swapDuration: @swap-duration
+}
+
+:local(.widgetWrapper)_history-widget {
+	box-sizing: border-box;
+	display: flex;
+	.t-micricopy_13-16;
+	flex-direction: column;
+	gap: 0.25rem;
+	margin: 1.25rem 0;
+
+	@media @mq-mobile {
+		& {
+			box-sizing: border-box;
+			border-radius: 0.5rem;
+			box-shadow: inset 0 0 0 2px @black-90;
+			padding-top: 0.75rem;
+			gap: 0;
+		}
+	}
+
+	&__link-block {
+		display: flex;
+		flex-direction: column;
+		width: 33%;
+		overflow: hidden;
+		box-sizing: border-box;
+		box-shadow: -1px 0 0 0 @black-90;
+		gap: 0.125rem;
+
+		&:first-child { box-shadow: none; }
+		@media @mq-mobile {
+			&:first-child { box-shadow: none !important;}
+		}
+
+		&:hover {
+			box-shadow: @shadow-light-10, @thin-shadow-stroke;
+			border-radius: 2px;
+		}
+
+		&:hover + & {
+			box-shadow: none;
+		}
+	}
+	@media @mq-mobile {
+		&__link-block {
+			width: auto;
+			box-shadow: 0 -1px 0 0 @black-90;
+
+			&:hover, &:hover + & { box-shadow: 0 -1px 0 0 @black-90; }
+		}
+	}
+
+	&__link-list {
+		display: flex;
+		flex-direction: row;
+	}
+	@media @mq-mobile {
+		&__link-list {
+			flex-direction: column;
+		}
+	}
+
+
+	&__full-link {
+		display: flex;
+		flex-direction: row;
+		padding: 0 1rem 0.75rem 1rem;
+		gap: 0.25rem;
+		align-items: center;
+
+		&__span {
+			display: flex;
+			height: 1rem;
+			text-overflow: ellipsis;
+			overflow: hidden;
+		}
+	}
+	@media @mq-mobile {
+		&__full-link {
+			padding-top: 0.125rem;
+		}
+	}
+
+	&__shortlink {
+		display: flex;
+		flex-direction: row;
+		gap: 0.25rem;
+		align-items: center;
+		.t-text_16-20;
+		padding: 0.75rem 1rem 0 1rem;
+	}
+	@media @mq-mobile {
+		&__shortlink {
+			padding-bottom: 0.125rem;
+		}
+	}
+
+	&__action-hint,
+	&__separator {
+		display: flex;
+		opacity: 0;
+		color: @black-50;
+		.t-micricopy_13-16;
+		height: 1rem;
+		position: relative;
+		overflow: hidden;
+		flex-shrink: 0;
+		transition: opacity 0.1s ease-in-out;
+	}
+	&__shortlink:hover &__action-hint,
+	&__shortlink:hover &__separator,
+	&__full-link:hover &__action-hint,
+	&__full-link:hover &__separator {
+		opacity: 1;
+	}
+
+	&__shortlink_anim-active &__action-hint,
+	&__shortlink_anim-active &__separator {
+		opacity: 1 !important;
+	}
+	@media @mq-mobile {
+		&__action-hint,
+		&__separator {
+			opacity: 1 !important;
+		}
+	}
+	&__action-hint__animated-inner {
+		position: relative;
+		display: flex;
+		animation-timing-function: ease-in;
+		animation-duration: @swap-duration;
+		animation-timing-function: ease-in-out;
+	}
+	&__shortlink_anim-active &__action-hint__animated-inner {
+		animation-name: test-swap;
+	}
+
+	&__header {
+		.t-micricopy_13-16;
+		color: @black-50;
+		padding: 0 1rem;
+	}
+}
+
+@keyframes test-swap {
+	0% {
+		top: 0rem;
+	}
+	12% {
+		top: -1rem;
+	}
+	88% {
+		top: -1rem;
+	}
+	100% {
+		top: 0;
+	}
+}

@@ -1,6 +1,6 @@
 import express from 'express'
 import { appRouter, staticRoute } from './app-router'
-import graphql from './qraphql'
+import graphqlYogaServer from './qraphql-yoga'
 import Helmet, { HelmetOptions } from 'helmet'
 
 const helmetOpts : HelmetOptions = {
@@ -28,7 +28,7 @@ class App {
       this.express.use(Helmet(helmetOpts))
     }
     this.express.use(staticRoute);
-		this.express.use('/api', graphql)
+		this.express.use('/api', graphqlYogaServer)
     this.express.use('/', appRouter)
   }
 

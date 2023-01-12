@@ -6,6 +6,7 @@ import LogoCSvg from '../../assets/svg/logo-compact.svg'
 import AvatarSvg from '../../assets/svg/icon/avatar.svg'
 import CaretRightSvg from '../../assets/svg/icon/caret-right.svg'
 import CrossSvg from '../../assets/svg/icon/cross.svg'
+import CrossSvg_16 from '../../assets/svg/icon/cross_16.svg'
 import EnterSvg from '../../assets/svg/icon/enter.svg'
 
 
@@ -15,6 +16,7 @@ export const Avatar = AvatarSvg
 export const CaretRight = CaretRightSvg
 export const Cross = CrossSvg
 export const Enter = EnterSvg
+export const Cross_16 = CrossSvg_16
 
 export enum IconSize {
 	SMALL = 'small',
