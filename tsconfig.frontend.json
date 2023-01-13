@@ -9,8 +9,6 @@
     "moduleResolution": "node"
   },
   "include": [
-    "src/public/**/*",
-    "src/declarations.d.ts",
-    "assets/**/*"
+    "src/**/*.d.ts"
   ]
 }
