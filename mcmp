@@ -30,7 +30,7 @@ interface CssExports {
 export const cssExports: CssExports;
 export default cssExports;
 	`);
-	fs.writeFileSync(path.join(newDir, `${name}.less`), `@import '${path.relative(newDir,lessDir)}/_constants.less';`);
+	fs.writeFileSync(path.join(newDir, `${name}.less`), `@import (reference) '${path.relative(newDir,lessDir)}/_constants.less';`);
 	console.log(`
 Created new component in ${newDir}
 	`)

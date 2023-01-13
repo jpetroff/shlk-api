@@ -5,7 +5,7 @@ import { randomBytes } from 'crypto';
 // With options (default values)
 const generateHash = new RandomHash({
 	length: 4,
-	charset: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789uw',
+	charset: 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ123456789uwetag',
 	rng: randomBytes
 });
 

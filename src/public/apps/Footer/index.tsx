@@ -10,7 +10,7 @@ const Footer : React.FC<{}> = () => {
 		<div className={`${globalClass}`} >
 			<div className={`${globalClass}__item`}>
 				<Flag className={`${globalClass}__flag-icon`} />
-				<span>Tehty Suomessa</span>
+				<span>Valmistettu Suomessa</span>
 			</div>
 			<div className={`${globalClass}__item`}>
 				Personal project made by <Link href="https://portfolio.designpr.one">designpr.one</Link>
