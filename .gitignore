@@ -131,3 +131,4 @@ mongo_creds.json
 
 deploy
 stats.json
+*.tar.gz
