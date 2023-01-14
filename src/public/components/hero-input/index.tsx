@@ -48,7 +48,7 @@ const HeroInput : React.FC<Props> = function(
 		const clipText = await clipboardTools.paste()
 		if(clipText && clipText != '') {
 			onChange(clipText)
-			onSubmit()
+			_.defer(onSubmit)
 		}
 	}
 

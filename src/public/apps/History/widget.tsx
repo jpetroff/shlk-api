@@ -8,7 +8,8 @@ import LinkTools from '../../js/url-tools'
 import classNames from 'classnames'
 
 type Props = {
-  list: ShortlinkLocalStorage[]
+  list: ShortlinkLocalStorage[],
+  totalCount?: number
 }
 
 enum ActionLabels {
@@ -19,7 +20,8 @@ enum ActionLabels {
 
 const HistoryWidget : React.FC<Props> = (
   {
-    list
+    list,
+    totalCount = 0
   } : Props
 ) => {
   const globalClass = styles.widgetWrapper+'_history-widget'
@@ -40,6 +42,7 @@ const HistoryWidget : React.FC<Props> = (
     return () => { clearTimeout(timeout)}
   }, [activeKey])
 
+  if(totalCount == 0) return(<></>)
   return (
     <div 
       className={`${widgetClasses}`}
@@ -65,7 +68,8 @@ const HistoryWidget : React.FC<Props> = (
             <Link 
               onClick={(event) => handleClick(shortlink, key, event)}
               className={`${globalClass}__shortlink ${activeKey == key ? globalClass+'__shortlink_anim-active' : ''}`} 
-              label={displayShortlink}>
+            >
+              <span className={`${globalClass}__shortlink__span`}>{displayShortlink}</span>
               <span className={`${globalClass}__separator`} >·</span>
               <span className={`${globalClass}__action-hint`}>
                 <span className={`${globalClass}__action-hint__animated-inner`}>

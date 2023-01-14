@@ -137,6 +137,8 @@ export class Home extends React.Component<Props, State> {
       generatedShortlink: undefined,
       generatedDescriptiveShortlink: undefined,
       generatedHash: undefined,
+      userTag: 'evgn',
+      descriptionTag: ''
     })
     if(isClearPress) this._setMobileConvenienceInput(false)
   }
@@ -379,7 +381,7 @@ export class Home extends React.Component<Props, State> {
             </div>
 
             <div className={`${globalClass}__footer-wrapper`}>
-              <HistoryWidget list={this.state.cachedShortlinks} />
+              <HistoryWidget list={this.state.cachedShortlinks} totalCount={this.state.cachedShortlinks.length} />
             </div>
           </div>
           <Footer />
