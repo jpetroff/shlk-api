@@ -58,7 +58,8 @@ const Button : React.FC<Props> = function(
     } 
 
     if(_.isFunction(args.onClick)) {
-      _.delay(() => args.onClick(event), 100)
+      // _.delay(() => args.onClick(event), 100)
+      args.onClick(event)
     }
 
     if(args.flyover) setShowFlyover(true)

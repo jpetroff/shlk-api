@@ -3,6 +3,7 @@ import * as _ from 'underscore'
 import * as React from 'react'
 import Link, { LinkColors } from '../link'
 import Button, { ButtonSize, ButtonType } from '../button'
+import classNames from 'classnames'
 
 export type TextPattern = {
   key: string
@@ -25,6 +26,7 @@ type Props = {
   generatedLink?: string
   isLoading?: boolean
   hasCta?: boolean
+  error?: boolean
 }
 
 export const ShortlinkSlugInput : React.FC<Props> = (
@@ -34,22 +36,26 @@ export const ShortlinkSlugInput : React.FC<Props> = (
     show = true,
     isLoading = false,
     generatedLink,
-    hasCta = true
+    hasCta = true,
+    error = false
   } : Props
 ) => {
 
   const globalClass = styles.wrapperClass+'_slug-input'
+  const slugInputClasses = classNames({
+    [`${globalClass}`]: true,
+    [`${globalClass}_error`]: error,
+    [`${globalClass}_hide`]: !show
+  })
+  const activeActionWrapperClass = !_.isEmpty(generatedLink) ? globalClass+'__action-wrapper_has-shortlink' : ''
 
-  const hideClass = show ? '' : globalClass + '_hide';
-
-  let linkLabel : string = '← Copy custom shortlink'
+  let linkLabel : string = 'Copy custom shortlink'
   if(_.isEmpty(generatedLink)) linkLabel = ''
-  if(isLoading) linkLabel = 'Loading...'
+  if(isLoading) linkLabel = 'Loading'
 
   let btnLabel : string = 'Copy'
   if(isLoading) linkLabel = 'Loading'
 
-  const activeActionWrapperClass = !_.isEmpty(generatedLink) ? globalClass+'__action-wrapper_has-shortlink' : ''
 
   function handleCopy () {
     if(_.isFunction(navigator.clipboard.writeText) && generatedLink) {
@@ -58,8 +64,8 @@ export const ShortlinkSlugInput : React.FC<Props> = (
   }
 
   return (
-    <div className={`${globalClass} ${hideClass}`}>
-      <div className={`${globalClass}__label`}>Customize link further with a custom slug</div>
+    <div className={`${slugInputClasses}`}>
+      <div className={`${globalClass}__label`}>Make a custom link</div>
       <div className={`${globalClass}__content-wrapper`}>
         <div className={`${globalClass}__action-wrapper ${activeActionWrapperClass}`} 
         onClick={handleCopy}
@@ -76,8 +82,6 @@ export const ShortlinkSlugInput : React.FC<Props> = (
                     return (<span key={index} className={`${globalClass}_text-filler ${globalClass}__input-common-style`}>{chunk}</span>)
                 }
               } else {
-                const mobileBreakClass = chunk.mobileLineBreak ? `${globalClass}_mlbreak` : ''
-                const lineBreakClass = chunk.lineBreak ? `${globalClass}_lbreak` : ''
                 return (
                   <span key={index} className={`${globalClass}__input-resizable`}>
                     <input 
@@ -96,7 +100,7 @@ export const ShortlinkSlugInput : React.FC<Props> = (
             href='#'
             className={`${globalClass}__copy_pseudolink`}
             colorScheme={LinkColors.APP}
-            isDisabled={_.isEmpty(generatedLink)}
+            isDisabled={_.isEmpty(generatedLink) || error}
             isLoading={isLoading}
             label={linkLabel}
             flyover='Copied!'
@@ -109,7 +113,7 @@ export const ShortlinkSlugInput : React.FC<Props> = (
             label={btnLabel}
             size={ButtonSize.LARGE}
             type={hasCta ? ButtonType.PRIMARY : ButtonType.SECONDARY}
-            isDisabled={_.isEmpty(generatedLink)}
+            isDisabled={_.isEmpty(generatedLink) || error}
             isLoading={isLoading}
             onClick={handleCopy}
             flyover='Copied!'

@@ -4,14 +4,16 @@ import * as _ from 'underscore'
 import Link, { LinkColors } from '../link'
 import Button, { ButtonSize, ButtonType } from '../button'
 import clipboardTools from '../../js/clipboard-tools'
-import linkTools from '../../js/url-tools'
+import { Flyover } from '../tooltip'
+import classNames from 'classnames'
 
 type Props = {
   shortlink: string | undefined
   isLoading?: boolean
   placeholder?: string
   hashLength?: number,
-  hasCta?: boolean
+  hasCta?: boolean,
+  error?: boolean
 }
 
 export const ShortlinkDisplay : React.FC<Props> = function(
@@ -20,54 +22,61 @@ export const ShortlinkDisplay : React.FC<Props> = function(
     hashLength,
     shortlink,
     isLoading = false,
-    hasCta = true
+    hasCta = true,
+    error = false
   } : Props
 ) {
+  const [showFlyover, setShowFlyover] = React.useState(false)
 
   function copyOnClick() {
-    if(shortlink) {
+    if(shortlink && clipboardTools.enabled) {
       clipboardTools.copy(shortlink)
+      setShowFlyover(true)
     }
   }
 
   const globalClass = styles.wrapperClass+'_shortlink-display'
+  const shortlinkClasses = classNames({
+    [`${globalClass}`]: true,
+    [`${globalClass}_empty`]: _.isEmpty(shortlink),
+    [`${globalClass}_error`]: error
+  })
 
-  let shortlinkDisplayMods : Array<string> = []
-  if(_.isEmpty(shortlink)) shortlinkDisplayMods.push(globalClass+'_empty')
+  const placeholderText = (<>{placeholder}/<span className={globalClass+'__text_placeholder-spacing'}>{'\u25ca\u25ca\u25ca\u25ca'}</span></>)
 
-  const placeholderText = placeholder + '/____'
-
-  let linkLabel : string = '← Copy shortlink'
-  if(isLoading) linkLabel = 'Loading'
-  if(_.isEmpty(shortlink)) linkLabel = '← Link will appear here'
+  let linkLabel : string = 'Copy shortlink'
 
   let btnLabel : string = 'Copy'
   if(isLoading) linkLabel = 'Loading'
 
   const displayShortlink : string = (new String(shortlink)).replace(/^https?\:\/\//ig,'')
 
-  const activeActionWrapperClass = !_.isEmpty(shortlink) ? 'shortlink-display__action-wrapper_has-shortlink' : ''
+  const activeActionWrapperClass = !_.isEmpty(shortlink) ? globalClass+'__action-wrapper_has-shortlink' : ''
+  const placeholderLoadingClass = isLoading ? globalClass+'__text_loading' : ''
 
   return (
-    <div className={`${globalClass} ${shortlinkDisplayMods.join(' ')}`} 
-      onClick={copyOnClick}
-    >
-      <div className={`${globalClass}__action-wrapper ${activeActionWrapperClass}`} 
-        onClick={copyOnClick}
-      >
-        <span className={`${globalClass}__text`}>
-          {shortlink ? displayShortlink : placeholderText}
-        </span>
+    <div className={`${shortlinkClasses}`}>
+      <div className={`${globalClass}__content-wrapper`}>
+        <div className={`${globalClass}__label`}>Get your shortened link</div>
+        <div className={`${globalClass}__action-wrapper ${activeActionWrapperClass} link-block`} 
+          onClick={copyOnClick}
+        >
+          <span className={`${globalClass}__text ${placeholderLoadingClass}`}>
+            {shortlink ? displayShortlink : placeholderText}
+          </span>
 
-        <Link 
-          href='#'
-          className={`${globalClass}__copy-pseudolink`}
-          colorScheme={LinkColors.APP}
-          isDisabled={_.isEmpty(shortlink)}
-          isLoading={isLoading}
-          label={linkLabel}
-          flyover={'Copied!'}
-          />
+          {!_.isEmpty(shortlink) && 
+            <Link 
+              href='#'
+              className={`${globalClass}__copy-pseudolink`}
+              colorScheme={LinkColors.APP}
+              flyover={'Copied!'}
+            >
+              {linkLabel}
+              {showFlyover && <Flyover label={'Copied!'} onDone={() => setShowFlyover(false)} />}
+            </Link>
+            }
+        </div>
       </div>
       {
         (isLoading || !_.isEmpty(shortlink)) &&

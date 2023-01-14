@@ -17,6 +17,7 @@ import clipboardTools from '../../js/clipboard-tools'
 
 import Query from '../../js/shortlink-queries'
 import LSC, {ShortlinkLocalStorage} from '../../js/localstorage-cache'
+import GracefulError, { GracefulErrorType } from './errors'
 
 import Header from '../Header'
 import { HistoryWidget } from '../History'
@@ -26,367 +27,362 @@ import Footer from '../Footer'
 const config = require('../../js/config')
 
 enum globalCommands {
-	submitAndCopy = 0
+  submitAndCopy = 0
 }
 
 type Props = {
-	router?: WithRouterProps
-	extension?: AnyObject
+  router?: WithRouterProps
+  extension?: AnyObject
 }
 
 type State = {
-	location: string
-	generatedShortlink: string | undefined
-	generatedDescriptiveShortlink: string | undefined
-	generatedHash: string | undefined
-	userTag: string
-	descriptionTag: string
-	errorState: {
-		lastError?: Error
-		createLinkResult?: Error
-		createDescriptiveLinkResult?: Error
-	}
-	loadingState: {
-		createLinkIsLoading?: boolean
-		createDescriptiveLinkIsLoading?: boolean
-	}
-	mobileConvenienceInput: boolean
-	cachedShortlinks: ShortlinkLocalStorage[]
+  location: string
+  generatedShortlink: string | undefined
+  generatedDescriptiveShortlink: string | undefined
+  generatedHash: string | undefined
+  userTag: string
+  descriptionTag: string
+  errorState: {
+    lastError?: GracefulErrorType
+    createLinkResult?: boolean
+    createDescriptiveLinkResult?: boolean
+  }
+  loadingState: {
+    createLinkIsLoading?: boolean
+    createDescriptiveLinkIsLoading?: boolean
+  }
+  mobileConvenienceInput: boolean
+  cachedShortlinks: ShortlinkLocalStorage[]
 }
 
 
 export class Home extends React.Component<Props, State> {
-	private heroInputRef: React.RefObject<HTMLAnyInput>
+  private heroInputRef: React.RefObject<HTMLAnyInput>
 
-	constructor(props) {
+  constructor(props) {
     super(props)
 
-		const [ predefinedLocation ] = linkTools.queryUrlSearchParams(['l'], props.router?.location?.search)
+    const [ predefinedLocation ] = linkTools.queryUrlSearchParams(['l'], props.router?.location?.search)
     this.state = {
-			location: _.unescape(predefinedLocation || ''),
-			generatedShortlink: undefined,
-			generatedDescriptiveShortlink: undefined,
-			generatedHash: undefined,
-			userTag: 'evgn',
-			descriptionTag: '',
-			errorState: {},
-			loadingState: {
-				createLinkIsLoading: false,
-				createDescriptiveLinkIsLoading: false
-			},
-			mobileConvenienceInput: false,
-			cachedShortlinks: []
-		}
-		this.heroInputRef = React.createRef<HTMLAnyInput>()
-		// _.bindAll(this, 'updateLocation', 'submitLocation', 'handleSuccessPaste', 'handleDescriptorChange', '_submitDescriptor', 'saveLSCache')
-		_.bindAll(this, ..._.functions(this))
-		this.submitDescriptor = _.debounce(this._submitDescriptor, 500)
-		this.updateDeferredLocation = _.once( () => this.props.extension?.activeTabUrl && this.setState({ location: this.props.extension.activeTabUrl}) )
+      location: _.unescape(predefinedLocation || ''),
+      generatedShortlink: undefined,
+      generatedDescriptiveShortlink: undefined,
+      generatedHash: undefined,
+      userTag: 'evgn',
+      descriptionTag: '',
+      errorState: {},
+      loadingState: {
+        createLinkIsLoading: false,
+        createDescriptiveLinkIsLoading: false
+      },
+      mobileConvenienceInput: false,
+      cachedShortlinks: []
+    }
+    this.heroInputRef = React.createRef<HTMLAnyInput>()
+    _.bindAll(this, ..._.functions(this))
+    this.submitDescriptor = _.debounce(this._submitDescriptor, 500)
   }
 
-	componentDidMount() {
+  componentDidMount() {
     if(
-				this.heroInputRef.current &&
-				!checkMobileMQ
-			) this.heroInputRef.current.focus()
+        this.heroInputRef.current &&
+        !checkMobileMQ
+      ) this.heroInputRef.current.focus()
 
-		if(validateURL(this.state.location)) {
-			this.submitLocation()
-		}
+    if(validateURL(this.state.location)) {
+      this.submitLocation()
+    }
 
-		if(!_.isEmpty(this.state.location)) {
-			this._setMobileConvenienceInput(true)
-		}
+    if(!_.isEmpty(this.state.location)) {
+      this._setMobileConvenienceInput(true)
+    }
 
-		this.handleGlobalEvents(true)
+    this.handleGlobalEvents(true)
 
-		this.loadAllCachedShortlinks()
+    this.loadAllCachedShortlinks()
   }
 
-	componentWillUnmount(): void {
-		this.handleGlobalEvents(false)
-		if(this.heroInputRef.current) {
-			this.heroInputRef.current.removeEventListener('click', this._onHeroInputElementClick)
-		}
-	}
+  componentWillUnmount(): void {
+    this.handleGlobalEvents(false)
+    if(this.heroInputRef.current) {
+      this.heroInputRef.current.removeEventListener('click', this._onHeroInputElementClick)
+    }
+  }
 
-	private handleGlobalEvents(bind : boolean = true) {
-		if(bind) {
-			window.addEventListener('keypress', this.onGlobalKeypress)
-		} else {
-			window.removeEventListener('keypress', this.onGlobalKeypress)
-		}
-	}
+  private handleGlobalEvents(bind : boolean = true) {
+    if(bind) {
+      window.addEventListener('keypress', this.onGlobalKeypress)
+    } else {
+      window.removeEventListener('keypress', this.onGlobalKeypress)
+    }
+  }
 
-	private onGlobalKeypress(event: KeyboardEvent) {
-		if(event.ctrlKey && event.shiftKey && event.code == 'KeyC' ) {
-			this.handleGlobalCommand(globalCommands.submitAndCopy)
-		}
-	}
+  private onGlobalKeypress(event: KeyboardEvent) {
+    if(event.ctrlKey && event.shiftKey && event.code == 'KeyC' ) {
+      this.handleGlobalCommand(globalCommands.submitAndCopy)
+    }
+  }
 
-	componentDidUpdate() {
-		if(this.props.extension && this.props.extension.activeTabUrl != this.state.location) {
-			this.setState({ location: this.props.extension.activeTabUrl})
-			// this.updateDeferredLocation()
-		}
+  componentDidUpdate() {
+    if(this.props.extension && this.props.extension.activeTabUrl != this.state.location) {
+      this.setState({ location: this.props.extension.activeTabUrl})
+    }
+  }
 
-		if(!_.isEmpty(this.state.location))
-			this._setMobileConvenienceInput(true)
-	}
-	// _.once wrapper for update function
-	private updateDeferredLocation : () => void
+  updateLocation(str: string, isClearPress: boolean = false) {
+    this._clearErrorState()
+    this.setState({
+      location: str.trim(),
+      generatedShortlink: undefined,
+      generatedDescriptiveShortlink: undefined,
+      generatedHash: undefined,
+    })
+    if(isClearPress) this._setMobileConvenienceInput(false)
+  }
 
-	updateLocation(str: string, isClearPress: boolean = false) {
-		console.log(isClearPress)
-		this.setState({
-			location: str.trim(),
-			generatedShortlink: undefined,
-			generatedDescriptiveShortlink: undefined,
-			generatedHash: undefined,
-		})
-		if(isClearPress) this._setMobileConvenienceInput(false)
-	}
+  public async handleGlobalCommand(command: number) {
+    console.log('global command:', command)
+    switch(command) {
+      case globalCommands.submitAndCopy: {
+        await this.submitLocation()
+        clipboardTools.copy(this.state.generatedShortlink || '')
+        return
+      }
+    }
+  }
 
-	public async handleGlobalCommand(command: number) {
-		console.log('global command:', command)
-		switch(command) {
-			case globalCommands.submitAndCopy: {
-				await this.submitLocation()
-				clipboardTools.copy(this.state.generatedShortlink || '')
-				return
-			}
-		}
-	}
+  private setShortlinkState( args: { location: string, hash: string, userTag?: string, descriptionTag?: string} ) {
+    console.log(args)
+    let newState: any = {
+      generatedShortlink: linkTools.generateShortlinkFromHash(args.hash),
+      generatedHash: args.hash,
+      location: args.location,
+      errorState: {}
+    }
+    if(!_.isEmpty(args.descriptionTag)) {
+      newState = {
+        ...newState,
+        userTag: args.userTag,
+        descriptionTag: args.descriptionTag,
+        generatedDescriptiveShortlink: linkTools.generateDescriptiveShortlink({ userTag: args.userTag, descriptionTag: args.descriptionTag || '' })
+      }
+    }
+    this.setState(newState)
+    _.defer(this.saveLSCache)
+  }
 
-	private setShortlinkState( args: { location: string, hash: string, userTag?: string, descriptionTag?: string} ) {
-		console.log(args)
-		let newState: any = {
-			generatedShortlink: linkTools.generateShortlinkFromHash(args.hash),
-			generatedHash: args.hash,
-			location: args.location,
-			errorState: {}
-		}
-		if(!_.isEmpty(args.descriptionTag)) {
-			newState = {
-				...newState,
-				userTag: args.userTag,
-				descriptionTag: args.descriptionTag,
-				generatedDescriptiveShortlink: linkTools.generateDescriptiveShortlink({ userTag: args.userTag, descriptionTag: args.descriptionTag || '' })
-			}
-		}
-		this.setState(newState)
-		_.defer(this.saveLSCache)
-	}
+  private async retrieveLSCache() : Promise<boolean> {
+    const locationUrl = linkTools.fixProtocol(this.state.location.trim())
+    const cachedURL = await LSC.checkShortlinkCache( {url: locationUrl} )
+    console.log('cache try', locationUrl, window.localStorage[locationUrl])
 
-	private async retrieveLSCache() : Promise<boolean> {
-		const cachedURL = await LSC.checkShortlinkCache( {url: this.state.location} )
+    if(cachedURL == null || !cachedURL.hash) return false
 
-		if(cachedURL == null || !cachedURL.hash) return false
+    if(
+      this.state.userTag != cachedURL.userTag ||
+      (this.state.descriptionTag != '' && this.state.descriptionTag != cachedURL.descriptionTag)
+    ) return false 
 
-		if(
-			this.state.userTag != cachedURL.userTag ||
-			(this.state.descriptionTag != '' && this.state.descriptionTag != cachedURL.descriptionTag)
-		) return false 
+    console.log('[LS] Retrieved object:\n',cachedURL)
+    this.setShortlinkState({
+      location: cachedURL.url,
+      hash: cachedURL.hash,
+      userTag: cachedURL.userTag,
+      descriptionTag: cachedURL.descriptionTag
+    })
+    return true
+  }
 
-		console.log('[LS] Retrieved object:\n',cachedURL)
-		this.setShortlinkState({
-			location: cachedURL.url,
-			hash: cachedURL.hash,
-			userTag: cachedURL.userTag,
-			descriptionTag: cachedURL.descriptionTag
-		})
-		return true
-	}
+  private saveLSCache() {
+    if(!this.state.generatedHash) console.error('Empty hash to be saved!')
+    LSC.storeShortlink({
+      url: this.state.location.trim(),
+      hash: this.state.generatedHash,
+      userTag: this.state.userTag,
+      descriptionTag: this.state.descriptionTag
+    })
+    this.loadAllCachedShortlinks()
+  }
 
-	private saveLSCache() {
-		if(!this.state.generatedHash) console.error('Empty hash to be saved!')
-		LSC.storeShortlink({
-			url: this.state.location,
-			hash: this.state.generatedHash,
-			userTag: this.state.userTag,
-			descriptionTag: this.state.descriptionTag
-		})
-		this.loadAllCachedShortlinks()
-	}
+  private async loadAllCachedShortlinks() {
+    const aMonthAgo = new Date()
+    aMonthAgo.setMonth(aMonthAgo.getMonth() - 1)
+    const result = await LSC.getAll({
+      sortByDate: true, 
+      clearThreshold: aMonthAgo,
+      limit: 3
+    })
+    if(result) this.setState({
+      cachedShortlinks: result
+    })
+  }
 
-	private async loadAllCachedShortlinks() {
-		const aMonthAgo = new Date()
-		aMonthAgo.setMonth(aMonthAgo.getMonth() - 1)
-		const result = await LSC.getAll({
-			sortByDate: true, 
-			clearThreshold: aMonthAgo,
-			limit: 3
-		})
-		if(result) this.setState({
-			cachedShortlinks: result
-		})
-	}
+  async submitLocation() {
+    this._clearErrorState()
 
-	async submitLocation() {
-		this._clearErrorState()
+    try {
+      const locationUrl = linkTools.fixProtocol(this.state.location.trim())
+      if (_.isEmpty(locationUrl)) return
+      
+      const cachedResult = await this.retrieveLSCache()
+      if(cachedResult) return
 
-		const location = this.state.location.trim()
-		if (_.isEmpty(location)) return
-		
-		const cachedResult = await this.retrieveLSCache()
-		if(cachedResult) return
+      this.setState({loadingState: {createLinkIsLoading: true}})
+      const result = await Query.createShortlink(locationUrl)
+      console.log('[Home] submitLocation\n', result)
+      if(!result || !result.hash) throw new Error(`Unexpected error: shortlink for '${locationUrl}' was not created. Please, try again`)
 
-		this.setState({loadingState: {createLinkIsLoading: true}})
-		try {
-			const locationUrl = linkTools.fixProtocol(location)
-			const result = await Query.createShortlink(locationUrl)
-			console.log('[Home] submitLocation\n', result)
-			if(!result || !result.hash) throw new Error(`Unexpected error: shortlink for '${locationUrl}' was not created. Please, try again`)
+      this.setShortlinkState({
+        location: result.location,
+        hash: result.hash
+      })
+    } catch (err) {
+      this.setState({errorState: {
+          lastError: GracefulError.process(err) || undefined,
+          createLinkResult: true
+        }
+      })
+      console.error(err) 
+    }
+    this.setState({loadingState: {createLinkIsLoading: false}})
+  }
 
-			this.setShortlinkState({
-				location: result.location,
-				hash: result.hash
-			})
-		} catch (err) {
-			this.setState({errorState: {
-					lastError: err,
-					createDescriptiveLinkResult: err
-				}
-			})
-			console.error(err) 
-		}
-		this.setState({loadingState: {createLinkIsLoading: false}})
-	}
+  handleSuccessPaste(clipText: string) {
+    this._clearErrorState()
+    this.setState({
+      location: clipText
+    })
+    this.submitLocation()
+  }
 
-	handleSuccessPaste(clipText: string) {
-		this.setState({
-			location: clipText
-		})
-		this.submitLocation()
-	}
+  handleDescriptorChange(value: string, type: string) {
+    this._clearErrorState()
+    if(type == 'userTag') this.setState( {userTag: modifyURLSlug(value)} )
+    else if(type == 'descriptionTag') this.setState( {descriptionTag: modifyURLSlug(value)} )
 
-	handleDescriptorChange(value: string, type: string) {
-		if(type == 'userTag') this.setState( {userTag: modifyURLSlug(value)} )
-		else if(type == 'descriptionTag') this.setState( {descriptionTag: modifyURLSlug(value)} )
+    this.setState({loadingState: {createDescriptiveLinkIsLoading: true}})
+    this.submitDescriptor()
+  }
 
-		this.setState({loadingState: {createDescriptiveLinkIsLoading: true}})
-		this.submitDescriptor()
-	}
+  public submitDescriptor: (() => void) & _.Cancelable;
+  private async _submitDescriptor() {
+    this._clearErrorState()
+    console.log('[Home] submitDescriptor\n', this.state.userTag, this.state.descriptionTag)
+    if(_.isEmpty(this.state.descriptionTag)) { 
+      this.setState({
+        generatedDescriptiveShortlink: undefined,
+        loadingState: {createDescriptiveLinkIsLoading: false}
+      })
+      return
+    }
 
-	public submitDescriptor: (() => void) & _.Cancelable;
-	private async _submitDescriptor() {
-		this._clearErrorState()
-		console.log('[Home] submitDescriptor\n', this.state.userTag, this.state.descriptionTag)
-		if(_.isEmpty(this.state.descriptionTag)) { 
-			this.setState({
-				generatedDescriptiveShortlink: undefined,
-				loadingState: {createDescriptiveLinkIsLoading: false}
-			})
-			return
-		}
+    if(await this.retrieveLSCache()) return
+    
+    try {
+      const result = await Query.createShortlinkDescriptor( 
+        { userTag: this.state.userTag, 
+          descriptionTag: this.state.descriptionTag,
+          location: this.state.location,
+          hash: this.state.generatedHash
+        }
+      )
 
-		if(await this.retrieveLSCache()) return
-		
-		try {
-			const result = await Query.createShortlinkDescriptor( 
-				{ userTag: this.state.userTag, 
-					descriptionTag: this.state.descriptionTag,
-					location: this.state.location,
-					hash: this.state.generatedHash
-				}
-			)
+      if(!result || !result.descriptor) return;
+      this.setShortlinkState({
+        location: result.location,
+        hash: result.hash,
+        userTag: result.descriptor.userTag,
+        descriptionTag: result.descriptor.descriptionTag
+      })		
+    } catch (err) {
+      this.setState({errorState: {
+          lastError: GracefulError.process(err) || undefined,
+          createDescriptiveLinkResult: true
+        }
+      })
+    }
+    this.setState({loadingState: {createDescriptiveLinkIsLoading: false}})
+  }
 
-			if(!result || !result.descriptor) return;
-			this.setShortlinkState({
-				location: result.location,
-				hash: result.hash,
-				userTag: result.descriptor.userTag,
-				descriptionTag: result.descriptor.descriptionTag
-			})		
-		} catch (err) {
-			this.setState({errorState: {
-					lastError: err,
-					createLinkResult: err
-				}
-			})
-			console.error(err)
-		}
-		this.setState({loadingState: {createDescriptiveLinkIsLoading: false}})
-	}
+  private _generateTextPattern(): Array<TextPattern | string> {
+    return [
+      linkTools.displayServiceUrl+'/',
+      { key: 'userTag', value: this.state.userTag, placeholder: 'user' },
+      '@',
+      SlugInputSpecialChars.mobileLineBreak,
+      { key: 'descriptionTag', value: this.state.descriptionTag, placeholder: 'your-custom-url' },
+    ]
+  }
 
-	private _generateTextPattern(): Array<TextPattern | string> {
-		return [
-			linkTools.displayServiceUrl+'/',
-			{ key: 'userTag', value: this.state.userTag, placeholder: 'user' },
-			'@',
-			SlugInputSpecialChars.mobileLineBreak,
-			{ key: 'descriptionTag', value: this.state.descriptionTag, placeholder: 'your-custom-url' },
-		]
-	}
+  private _clearErrorState(): void {
+    this.setState({ errorState: {} })
+  }
 
-	private _clearErrorState(): void {
-		this.setState({ errorState: {} })
-	}
+  private _setMobileConvenienceInput(mode: boolean) {
+    if(checkMobileMQ() && this.state.mobileConvenienceInput != mode) {
+      this.setState({ mobileConvenienceInput: mode })
+    }
+  }
 
-	private _setMobileConvenienceInput(mode: boolean) {
-		if(checkMobileMQ() && this.state.mobileConvenienceInput != mode) {
-			this.setState({ mobileConvenienceInput: mode })
-		}
-	}
+  private _onHeroInputElementClick(event: Event) : void {
+    this._setMobileConvenienceInput(true)
+  }
 
-	private _onHeroInputElementClick(event: Event) : void {
-		this._setMobileConvenienceInput(true)
-	}
+  render() {
+    const globalClass = styles.homepage+'_app-body'
+    const mobileConvenienceClass = this.state.mobileConvenienceInput ? '__mobile-convenience-state' : ''
+    return (
+        <div className={`${globalClass}`}>
+          <Header />
+          <div className={`${globalClass}__layout`}>
+            <div className={`${globalClass}__shortlink-block ${mobileConvenienceClass}`}>
+              <div className={`${globalClass}__offset-wrapper`}>
+                <HeroInput 
+                  inputRef={this.heroInputRef}
+                  onChange={this.updateLocation}
+                  onSubmit={this.submitLocation}
+                  name="URL"
+                  placeholder="Type or paste a link"
+                  value={this.state.location}
+                  onFocus={this._onHeroInputElementClick}
+                  hasCta={!this.state.generatedShortlink || this.state.generatedShortlink == ''}
+                />
+              </div>
+              <ShortlinkDisplay
+                placeholder={config.displayServiceUrl}
+                shortlink={this.state.generatedShortlink}
+                isLoading={this.state.loadingState.createLinkIsLoading}
+                hasCta={(!!this.state.generatedShortlink || this.state.generatedShortlink != '') && (!this.state.generatedDescriptiveShortlink)}
+                error={this.state.errorState.createLinkResult}
+              />
+              {this.state.generatedShortlink && 
+                <ShortlinkSlugInput
+                  text={this._generateTextPattern()}
+                  onChange={this.handleDescriptorChange}
+                  show={this.state.generatedShortlink ? true : false}
+                  generatedLink={this.state.generatedDescriptiveShortlink}
+                  isLoading={this.state.loadingState.createDescriptiveLinkIsLoading}
+                  hasCta={!this.state.generatedDescriptiveShortlink || this.state.generatedDescriptiveShortlink != ''}
+                  error={this.state.errorState.createDescriptiveLinkResult}
+                />
+              }
+              <div className={`${globalClass}__snackbar-container`}>
+                { this.state.errorState.lastError && 
+                  <Snackbar 
+                    message={this.state.errorState.lastError.message}
+                    canDismiss={true}
+                    onDismiss={this._clearErrorState}
+                    />
+                }
+              </div>
+            </div>
 
-	render() {
-		const globalClass = styles.homepage+'_app-body'
-		const mobileConvenienceClass = this.state.mobileConvenienceInput ? '__mobile-convenience-state' : ''
-		return (
-				<div className={`${globalClass}`}>
-					<Header />
-					<div className={`${globalClass}__layout`}>
-						<div className={`${globalClass}__shortlink-block ${mobileConvenienceClass}`}>
-							<div className={`${globalClass}__offset-wrapper`}>
-								<HeroInput 
-									inputRef={this.heroInputRef}
-									onChange={this.updateLocation}
-									onSubmit={this.submitLocation}
-									name="URL"
-									placeholder="Type or paste a link"
-									value={this.state.location}
-									onFocus={this._onHeroInputElementClick}
-									hasCta={!this.state.generatedShortlink || this.state.generatedShortlink == ''}
-								/>
-							</div>
-							<ShortlinkDisplay
-								placeholder={config.displayServiceUrl}
-								shortlink={this.state.generatedShortlink}
-								isLoading={this.state.loadingState.createLinkIsLoading}
-								hasCta={(!!this.state.generatedShortlink || this.state.generatedShortlink != '') && (!this.state.generatedDescriptiveShortlink)}
-							/>
-							{this.state.generatedShortlink && 
-								<ShortlinkSlugInput
-									text={this._generateTextPattern()}
-									onChange={this.handleDescriptorChange}
-									show={this.state.generatedShortlink ? true : false}
-									generatedLink={this.state.generatedDescriptiveShortlink}
-									isLoading={this.state.loadingState.createDescriptiveLinkIsLoading}
-									hasCta={!this.state.generatedDescriptiveShortlink || this.state.generatedDescriptiveShortlink != ''}
-								/>
-							}
-							<div className={`${globalClass}__snackbar-container`}>
-								{ this.state.errorState.lastError && 
-									<Snackbar 
-										message={this.state.errorState.lastError.message}
-										canDismiss={true}
-										timer={5000}
-										onDismiss={this._clearErrorState}
-										/>
-								}
-							</div>
-						</div>
-
-						<div className={`${globalClass}__footer-wrapper`}>
-							<HistoryWidget list={this.state.cachedShortlinks} />
-						</div>
-					</div>
-					<Footer />
-				</div>
-		)
-	}
+            <div className={`${globalClass}__footer-wrapper`}>
+              <HistoryWidget list={this.state.cachedShortlinks} />
+            </div>
+          </div>
+          <Footer />
+        </div>
+    )
+  }
 }

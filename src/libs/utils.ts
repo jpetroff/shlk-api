@@ -30,11 +30,13 @@ export function clearURLTracking (url: URL) : URL {
 
 export function prepareURL( _url: string ): string {
   let url = _url.trim()
-  const protocolRegex = new RegExp('^(https?|ftp)://')
+  const protocolRegex = new RegExp('^https?://')
 
   if(!protocolRegex.test(url)) url = 'https://'+url
 
-  let URLObj = new URL(url)
+  const URLObj = new URL(url)
+  let URLString : string = clearURLTracking(URLObj).toString()
+  if(URLString.indexOf('?') == -1) URLString = URLString.replace(/\/$/, '')
 
-  return clearURLTracking(URLObj).toString()
+  return URLString
 }
