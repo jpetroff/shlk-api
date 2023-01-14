@@ -86,7 +86,7 @@ export class Home extends React.Component<Props, State> {
   componentDidMount() {
     if(
         this.heroInputRef.current &&
-        !checkMobileMQ
+        (!checkMobileMQ || this.props.extension)
       ) this.heroInputRef.current.focus()
 
     if(validateURL(this.state.location)) {
@@ -123,9 +123,10 @@ export class Home extends React.Component<Props, State> {
     }
   }
 
+  private updateActiveTabUrl = _.once(() => this.setState({ location: this.props.extension?.activeTabUrl || ''}))
   componentDidUpdate() {
     if(this.props.extension && this.props.extension.activeTabUrl != this.state.location) {
-      this.setState({ location: this.props.extension.activeTabUrl})
+      this.updateActiveTabUrl()
     }
   }
 
@@ -172,7 +173,7 @@ export class Home extends React.Component<Props, State> {
   }
 
   private async retrieveLSCache() : Promise<boolean> {
-    const locationUrl = linkTools.fixProtocol(this.state.location.trim())
+    const locationUrl = linkTools.fixUrl(this.state.location.trim())
     const cachedURL = await LSC.checkShortlinkCache( {url: locationUrl} )
     console.log('cache try', locationUrl, window.localStorage[locationUrl])
 
@@ -221,7 +222,7 @@ export class Home extends React.Component<Props, State> {
     this._clearErrorState()
 
     try {
-      const locationUrl = linkTools.fixProtocol(this.state.location.trim())
+      const locationUrl = linkTools.fixUrl(this.state.location.trim())
       if (_.isEmpty(locationUrl)) return
       
       const cachedResult = await this.retrieveLSCache()
