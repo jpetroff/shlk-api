@@ -1,29 +1,39 @@
 import styles from './Header.less'
 import * as React from 'react'
 
-import { Logo, LogoC } from '../../components/icons'
-
-import constants from '../../js/constants'
+import Icon, { Logo, LogoC, Avatar, IconSize } from '../../components/icons'
 import { checkMobileMQ } from '../../js/utils'
+
+import Link from '../../components/link'
+
 
 type Props = {}
 
 type State = {}
 
-export default class Header extends React.Component<Props, State> {
-	private isMobile: boolean
+const Header : React.FC<Props> = (
 
-	constructor(props) {
-		super(props)
-		this.isMobile = checkMobileMQ()
-	}
+) => {
+	const isMobile: boolean = checkMobileMQ()
 
-	render() {
-		return (
-			<div className={`${styles.wrapperClass} app-header`}>
-				<Logo className={`app-header__logo app-header__logo_d`} />
-				<LogoC className={`app-header__logo app-header__logo_m`} />
-			</div>
-		)
-	}
+  const globalClass = `${styles.wrapperClass}_app-header`
+
+  return (
+    <div className={`${globalClass}`}>
+      <div className={`${globalClass}__logo-wrapper`}>
+        <Logo className={`${globalClass}__logo ${globalClass}__logo_d`} />
+        <LogoC className={`${globalClass}__logo ${globalClass}__logo_m`} />
+      </div>
+      <div className={`${globalClass}__middle`}></div>
+      <div className={`${globalClass}__user`}>
+        <Link className={`${globalClass}__account-link`} isDisabled={true}
+        >
+          <div className={`${globalClass}__account-link__avatar`}><Icon useIcon={Avatar} size={IconSize.LARGE} /></div>
+          <div className={`${globalClass}__account-link__text`}>Sign in</div>
+        </Link>
+      </div>
+    </div>
+  )
 }
+
+export default Header

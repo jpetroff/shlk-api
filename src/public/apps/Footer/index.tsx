@@ -14,12 +14,13 @@ const Footer : React.FC<{}> = () => {
           <span>Valmistettu Suomessa</span>
         </div>
         <div className={`${globalClass}__item`}>
-          Personal project made by <Link href="https://portfolio.designpr.one">designpr.one</Link>
+          Personal project by <Link href="https://portfolio.designpr.one">designpr.one</Link>
+          · PP Mori typeface <Heart className={`${globalClass}__with-love-icon`} />
         </div>
-        <div className={`${globalClass}__item`}>
+        {/* <div className={`${globalClass}__item`}>
           <span>Pangram Pangram•Foundry© × Mori typeface =</span>
-          <Heart className={`${globalClass}__with-love-icon`} />
-        </div>
+          
+        </div> */}
       </div>
     </div>
   )

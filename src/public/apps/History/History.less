@@ -18,7 +18,7 @@
     & {
       box-sizing: border-box;
       border-radius: 0.5rem;
-      box-shadow: inset 0 0 0 2px @black-90;
+      box-shadow: 0 0 0 2px @black-90;
       padding-top: 0.75rem;
       gap: 0;
     }
@@ -63,7 +63,7 @@
   @media @mq-mobile {
     &__link-list {
       flex-direction: column;
-      margin: 0 1rem;
+      margin: 0 0.75rem;
     }
   }
 
@@ -155,6 +155,11 @@
     .t-micricopy_13-16;
     color: @black-50;
     padding: 0 1rem;
+  }
+  @media @mq-mobile {
+    &__header {
+      padding: 0 0.75rem;
+    }
   }
 }
 

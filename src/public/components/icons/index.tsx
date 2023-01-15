@@ -19,28 +19,28 @@ export const Enter = EnterSvg
 export const Cross_16 = CrossSvg_16
 
 export enum IconSize {
-	SMALL = 'small',
-	LARGE = 'large'
+  SMALL = 'small',
+  LARGE = 'large'
 }
 
 export type ReactIcon = React.FunctionComponent<React.SVGAttributes<SVGElement>>
 
 type Props = {
-	useIcon: ReactIcon
-	size: IconSize
+  useIcon: ReactIcon
+  size: IconSize
 } & JSX.IntrinsicElements["div"]
 
 const Icon : React.FC<Props> = function( {
-	useIcon,
-	size
+  useIcon,
+  size
 } ) {
-	const globalClass = 'icon-svg'
-	const IconNode = useIcon
-	return (
-		<div className={`${styles.wrapperClass} ${globalClass} ${globalClass}_size-${size}`}>
-			<IconNode className={`${globalClass}__node`} />
-		</div>
-	)
+  const globalClass = 'icon-svg'
+  const IconNode = useIcon
+  return (
+    <div className={`${styles.wrapperClass} ${globalClass} ${globalClass}_size-${size}`}>
+      <IconNode className={`${globalClass}__node`} />
+    </div>
+  )
 }
 
 export default Icon

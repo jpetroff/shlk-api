@@ -42,7 +42,7 @@ export const ShortlinkDisplay : React.FC<Props> = function(
     [`${globalClass}_error`]: error
   })
 
-  const placeholderText = (<>{placeholder}/<span className={globalClass+'__text_placeholder-spacing'}>{'\u25ca\u25ca\u25ca\u25ca'}</span></>)
+  const placeholderText = (<>{placeholder}/<span className={globalClass+'__text_placeholder-spacing'}>{'••••'}</span></>)
 
   let linkLabel : string = 'Copy shortlink'
 

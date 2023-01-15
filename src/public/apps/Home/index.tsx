@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import styles from './Home.less'
-import { checkMobileMQ, modifyURLSlug, validateURL } from '../../js/utils'
+import { checkMobileMQ, modifyURLSlug, validateURL, setCookie, getCookie } from '../../js/utils'
 import { HTMLAnyInput, AnyObject } from '../../js/constants'
 import { WithRouterProps } from '../../js/router-hoc'
 
@@ -68,7 +68,7 @@ export class Home extends React.Component<Props, State> {
       generatedShortlink: undefined,
       generatedDescriptiveShortlink: undefined,
       generatedHash: undefined,
-      userTag: 'evgn',
+      userTag: this.defaultUserTag(),
       descriptionTag: '',
       errorState: {},
       loadingState: {
@@ -104,9 +104,6 @@ export class Home extends React.Component<Props, State> {
 
   componentWillUnmount(): void {
     this.handleGlobalEvents(false)
-    if(this.heroInputRef.current) {
-      this.heroInputRef.current.removeEventListener('click', this._onHeroInputElementClick)
-    }
   }
 
   private handleGlobalEvents(bind : boolean = true) {
@@ -137,7 +134,7 @@ export class Home extends React.Component<Props, State> {
       generatedShortlink: undefined,
       generatedDescriptiveShortlink: undefined,
       generatedHash: undefined,
-      userTag: 'evgn',
+      userTag: this.defaultUserTag(),
       descriptionTag: ''
     })
     if(isClearPress) this._setMobileConvenienceInput(false)
@@ -271,6 +268,9 @@ export class Home extends React.Component<Props, State> {
   private async _submitDescriptor() {
     this._clearErrorState()
     console.log('[Home] submitDescriptor\n', this.state.userTag, this.state.descriptionTag)
+
+    if(!_.isEmpty(this.state.userTag)) setCookie('userTag', this.state.userTag, 365)
+
     if(_.isEmpty(this.state.descriptionTag)) { 
       this.setState({
         generatedDescriptiveShortlink: undefined,
@@ -321,13 +321,17 @@ export class Home extends React.Component<Props, State> {
     this.setState({ errorState: {} })
   }
 
+  public defaultUserTag() : string {
+    return getCookie('userTag')
+  }
+
   private _setMobileConvenienceInput(mode: boolean) {
     if(checkMobileMQ() && this.state.mobileConvenienceInput != mode) {
       this.setState({ mobileConvenienceInput: mode })
     }
   }
 
-  private _onHeroInputElementClick(event: Event) : void {
+  private _onHeroInputElementFocus(event: Event) : void {
     this._setMobileConvenienceInput(true)
   }
 
@@ -347,7 +351,7 @@ export class Home extends React.Component<Props, State> {
                   name="URL"
                   placeholder="Type or paste a link"
                   value={this.state.location}
-                  onFocus={this._onHeroInputElementClick}
+                  onFocus={this._onHeroInputElementFocus}
                   hasCta={!this.state.generatedShortlink || this.state.generatedShortlink == ''}
                 />
               </div>
