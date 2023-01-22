@@ -14,7 +14,7 @@ exports.appRouter = appRouter;
 const publicDir = process.env.NODE_ENV == 'production' ?
     path_1.default.join(__dirname, '../public') :
     path_1.default.join(__dirname, '../../../shlk-app/dist');
-appRouter.get('/', (req, res) => {
+appRouter.get(['/', '/app/*'], (req, res) => {
     res.sendFile(path_1.default.join(publicDir, 'index.html'));
 });
 appRouter.get('/:redirectUrl', (req, res) => {

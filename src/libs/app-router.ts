@@ -9,7 +9,7 @@ const publicDir = process.env.NODE_ENV == 'production' ?
   path.join(__dirname, '../public') : 
   path.join(__dirname, '../../../shlk-app/dist')
 
-appRouter.get('/', (req, res) => {
+appRouter.get(['/', '/app/*'], (req, res) => {
 	res.sendFile(path.join(publicDir, 'index.html'));
 })
 
