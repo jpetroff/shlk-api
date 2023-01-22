@@ -15,7 +15,6 @@ const outputDir = 'dist/public';
 
 module.exports = (env, argv) => {
 	const isProduction = !!(process.env.NODE_ENV == 'production');
-	console.log(`\n\n\nisProduction:${isProduction}\n\n\n`)
 	const config = {
 		mode: process.env.NODE_ENV || 'production',
 		context: __dirname,
@@ -114,7 +113,6 @@ module.exports = (env, argv) => {
 						esModule: false,
 						name(resourcePath, resourceQuery) {		
 							const newPathBreakdown = path.dirname(resourcePath).split(path.sep)
-							// console.log('\n]n[!!!!!!!!]',newPathBreakdown,'\n\n', path.sep)
 							const prefixPath = _.rest(newPathBreakdown, _.indexOf(newPathBreakdown, path.basename(outputDir)) + 1).join(path.sep)
 							return `${prefixPath}/[name].[ext]`;
 						}
