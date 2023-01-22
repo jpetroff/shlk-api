@@ -15,16 +15,9 @@
   "main": "./dist/index.js",
   "scripts": {
     "prebuild": "rm -rf ./dist/*",
-    "prewatch": "rm -rf ./dist/*",
     "prestart": "rm -rf ./dist/*",
-    "prestart:dev": "rm -rf ./dist/*",
-    "build:server": "tsc --project ./tsconfig.json",
-    "build:frontend": "npx webpack",
-    "build": "NODE_ENV=production npm run build:server && npm run build:frontend",
-    "watch:server": "npx tsc-watch --noClear --onSuccess 'node ./dist/index.js'",
-    "watch:frontend": "npx webpack -w",
-    "start": "NODE_ENV=production npm run build && node ./dist/index.js",
-    "start:dev": "NODE_ENV=development ./node_modules/.bin/npm-run-all -p watch:server watch:frontend",
+    "build": "tsc --project ./tsconfig.json",
+    "start": "npx tsc-watch --noClear --onSuccess 'node ./dist/index.js'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -46,16 +39,9 @@
     "graphql-yoga": "^3.3.0",
     "@graphql-yoga/plugin-disable-introspection": "^0.2.0",
     "helmet": "^6.0.1",
-    "modernizr": "^3.12.0",
     "mongoose": "^6.8.0",
     "mongoose-beautiful-unique-validation": "^7.1.1",
     "random-hash": "^4.0.1",
-    "react": "^18.0.0",
-    "react-contenteditable": "^3.3.6",
-    "react-dom": "^18.0.0",
-    "react-router-dom": "^6.5.0",
-    "react-transition-group": "^4.4.5",
-    "styled-components": "^5.2.0",
     "underscore": "^1.13.6"
   },
   "devDependencies": {
