@@ -20,7 +20,7 @@ const userSchema = new Schema<UserDocument, UserModel>(
     },
 
     userTag: {
-      type: String
+      type: String,
     },
 
     id_token: {

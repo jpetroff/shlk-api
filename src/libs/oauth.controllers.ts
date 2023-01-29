@@ -1,20 +1,12 @@
 import express from 'express'
 import { OAuth2Client } from 'google-auth-library'
-import session from 'express-session'
-import MongoDBSessionConstructor from 'connect-mongodb-session'
-
-const keys = require('../../client_secret_652965437671-7sp6dqu6phcnj0dvtv3i5h5f9flicoed.apps.googleusercontent.com.json')
-
-const MongoDBSession = MongoDBSessionConstructor(session)
+import config from '../config'
 
 function getAuthClient () {
   return new OAuth2Client(
-    keys.web.client_id,
-    keys.web.client_secret,
-    keys.web.redirect_uris[1]
-    // process.env.GOOGLE_OAUTH_CLIENT_ID,
-    // process.env.GOOGLE_OAUTH_CLIENT_SECRET,
-    // process.env.GOOGLE_OAUTH_REDIRECT
+    config.web.client_id,
+    config.web.client_secret,
+    config.web.redirect_uris[0]
   )
 }
 

@@ -44,6 +44,7 @@ declare interface NewUser {
 */
 declare interface UserDocument extends NewUser {
   _id: string
+  userTag?: string
   createdAt?: string
   updatedAt?: string
 }
