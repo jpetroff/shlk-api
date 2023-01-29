@@ -3,6 +3,7 @@ import { appRouter, staticRoute } from './app.routes'
 import { oauthRouter } from './oauth.routes'
 import graphqlYogaServer from './qraphql-yoga'
 import Helmet, { HelmetOptions } from 'helmet'
+import { cliColors } from './utils'
 
 const helmetOpts : HelmetOptions = {
   contentSecurityPolicy: {
@@ -35,7 +36,7 @@ class App {
   }
 
 	public start(port: number) {
-		this.express.listen(port)
+		this.express.listen(port, () => console.log(`${cliColors.green}[✓]${cliColors.end} Server listening on port ${port}`))
 	}
 }
 

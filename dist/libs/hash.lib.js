@@ -8,4 +8,4 @@ const generateHash = new random_hash_1.RandomHash({
     rng: crypto_1.randomBytes
 });
 exports.default = generateHash;
-//# sourceMappingURL=shortlink-hash.js.map
+//# sourceMappingURL=hash.lib.js.map

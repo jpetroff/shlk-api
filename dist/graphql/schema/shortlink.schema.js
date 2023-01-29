@@ -41,4 +41,4 @@ exports.default = `
 		mutation: Mutation
 	}
 `;
-//# sourceMappingURL=public-schema.js.map
+//# sourceMappingURL=shortlink.schema.js.map

@@ -105,11 +105,11 @@
   //   "./node_modules/@types/node/index.d.ts"
   // ],
   "include": [
-    "src/**/*",
+    "src/**/*.ts",
+    "src/**/*.tsx",
     "assets/**/*"
   ],
   "exclude": [
-    "node_modules",
-    "src/public"
+    "node_modules"
   ]
 }

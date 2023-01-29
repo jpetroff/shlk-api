@@ -40,3 +40,10 @@ export function prepareURL( _url: string ): string {
 
   return URLString
 }
+
+export const cliColors = {
+  red:    `\x1b[1;31m`,
+  green:  `\x1b[1;32m`,
+  yellow: `\x1b[1;33m`,
+  end:    `\x1b[0m`,
+}

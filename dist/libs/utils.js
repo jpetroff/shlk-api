@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.prepareURL = exports.clearURLTracking = exports.sanitizeMongo = void 0;
+exports.cliColors = exports.prepareURL = exports.clearURLTracking = exports.sanitizeMongo = void 0;
 const underscore_1 = __importDefault(require("underscore"));
 function sanitizeMongo(dirtyData) {
     if (dirtyData instanceof Object) {
@@ -44,4 +44,10 @@ function prepareURL(_url) {
     return URLString;
 }
 exports.prepareURL = prepareURL;
+exports.cliColors = {
+    red: `\x1b[1;31m`,
+    green: `\x1b[1;32m`,
+    yellow: `\x1b[1;33m`,
+    end: `\x1b[0m`,
+};
 //# sourceMappingURL=utils.js.map

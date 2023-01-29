@@ -3,11 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const public_schema_1 = __importDefault(require("./schema/public-schema"));
-const public_resolvers_1 = __importDefault(require("./resolvers/public-resolvers"));
+const shortlink_schema_1 = __importDefault(require("./schema/shortlink.schema"));
+const public_resolvers_1 = __importDefault(require("./resolvers/public.resolvers"));
 const schema_1 = require("@graphql-tools/schema");
 const schema = (0, schema_1.makeExecutableSchema)({
-    typeDefs: public_schema_1.default,
+    typeDefs: shortlink_schema_1.default,
     resolvers: public_resolvers_1.default
 });
 exports.default = schema;

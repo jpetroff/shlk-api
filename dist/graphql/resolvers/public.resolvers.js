@@ -19,4 +19,4 @@ exports.default = {
         }
     }
 };
-//# sourceMappingURL=public-resolvers.js.map
+//# sourceMappingURL=public.resolvers.js.map

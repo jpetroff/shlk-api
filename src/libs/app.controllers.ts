@@ -1,5 +1,4 @@
 import { getShortlink, __wipeDB } from './public-queries.db'
-import { ShortlinkDocument } from '../models/shortlink'
 import _ from 'underscore'
 import express from 'express'
 

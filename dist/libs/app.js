@@ -4,10 +4,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const app_router_1 = require("./app-router");
-const oauth_router_1 = require("./oauth-router");
+const app_routes_1 = require("./app.routes");
+const oauth_routes_1 = require("./oauth.routes");
 const qraphql_yoga_1 = __importDefault(require("./qraphql-yoga"));
 const helmet_1 = __importDefault(require("helmet"));
+const utils_1 = require("./utils");
 const helmetOpts = {
     contentSecurityPolicy: {
         useDefaults: true,
@@ -27,13 +28,13 @@ class App {
         if (process.env.NODE_ENV != 'development') {
             this.express.use((0, helmet_1.default)(helmetOpts));
         }
-        this.express.use(app_router_1.staticRoute);
+        this.express.use(app_routes_1.staticRoute);
         this.express.use('/api', qraphql_yoga_1.default);
-        this.express.use('/', app_router_1.appRouter);
-        this.express.use('/', oauth_router_1.oauthRouter);
+        this.express.use('/', app_routes_1.appRouter);
+        this.express.use('/', oauth_routes_1.oauthRouter);
     }
     start(port) {
-        this.express.listen(port);
+        this.express.listen(port, () => console.log(`${utils_1.cliColors.green}[✓]${utils_1.cliColors.end} Server listening on port ${port}`));
     }
 }
 exports.default = new App();

@@ -15,14 +15,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.__wipeDB = exports.getShortlink = exports.createShortlinkDescriptor = exports.createShortlink = void 0;
 const shortlink_1 = __importDefault(require("../models/shortlink"));
 const utils_1 = require("./utils");
-const shortlink_hash_1 = __importDefault(require("./shortlink-hash"));
+const hash_lib_1 = __importDefault(require("./hash.lib"));
 const underscore_1 = __importDefault(require("underscore"));
 const graphql_1 = require("graphql");
 function createShortlink(location) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const shortlink = new shortlink_1.default({
-                hash: (0, shortlink_hash_1.default)(),
+                hash: (0, hash_lib_1.default)(),
                 location: (0, utils_1.prepareURL)(location)
             });
             const newShortlink = yield shortlink.save();
@@ -90,7 +90,7 @@ function createShortlinkDescriptor(args) {
             }
             else {
                 const shortlink = new shortlink_1.default({
-                    hash: (0, shortlink_hash_1.default)(),
+                    hash: (0, hash_lib_1.default)(),
                     location: args.location,
                     descriptor: {
                         userTag: args.userTag,

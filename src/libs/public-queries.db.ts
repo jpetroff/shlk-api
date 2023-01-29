@@ -1,17 +1,17 @@
 /* eslint-disable no-useless-catch */
-import Shortlink, { ShortlinkDocument } from '../models/shortlink'
-import { sanitizeMongo, prepareURL } from './utils'
+import Shortlink from '../models/shortlink'
+import { prepareURL } from './utils'
 import generateHash from './hash.lib'
 import _ from 'underscore'
 import { Query } from 'mongoose'
 import { GraphQLError } from 'graphql' 
 
 /**
- * Returns created shortlink or null: Promise<null | ShortlinkDocument>
+ * Returns created shortlink or null: Promise<ShortlinkDocument | null>
  *
  * @param {string} location Full URL
  */
-export async function createShortlink(location: string): Promise<null | ShortlinkDocument> {
+export async function createShortlink(location: string): Promise<ShortlinkDocument | null> {
   try {
     const shortlink = new Shortlink({
       hash: generateHash(),
