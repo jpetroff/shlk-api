@@ -1,5 +1,6 @@
 import express from 'express'
-import { appRouter, staticRoute } from './app-router'
+import { appRouter, staticRoute } from './app.routes'
+import { oauthRouter } from './oauth.routes'
 import graphqlYogaServer from './qraphql-yoga'
 import Helmet, { HelmetOptions } from 'helmet'
 
@@ -30,6 +31,7 @@ class App {
     this.express.use(staticRoute);
 		this.express.use('/api', graphqlYogaServer)
     this.express.use('/', appRouter)
+    this.express.use('/', oauthRouter)
   }
 
 	public start(port: number) {

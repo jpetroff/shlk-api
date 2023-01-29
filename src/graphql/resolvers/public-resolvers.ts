@@ -3,7 +3,7 @@ import {
 	createShortlink, 
 	createShortlinkDescriptor,
 	getShortlink
-} from '../../libs/mongo-public-queries'
+} from '../../libs/public-queries.db'
 
 export default {
 	Mutation: {

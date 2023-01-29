@@ -1,7 +1,7 @@
 /* eslint-disable no-useless-catch */
 import Shortlink, { ShortlinkDocument } from '../models/shortlink'
 import { sanitizeMongo, prepareURL } from './utils'
-import generateHash from './shortlink-hash'
+import generateHash from './hash.lib'
 import _ from 'underscore'
 import { Query } from 'mongoose'
 import { GraphQLError } from 'graphql' 

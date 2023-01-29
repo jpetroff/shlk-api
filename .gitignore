@@ -120,6 +120,7 @@ web_modules/
 
 # authentication files
 mongo_creds.json
+client_secret_*.json
 
 deploy
 stats.json

@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const app_router_1 = require("./app-router");
+const oauth_router_1 = require("./oauth-router");
 const qraphql_yoga_1 = __importDefault(require("./qraphql-yoga"));
 const helmet_1 = __importDefault(require("helmet"));
 const helmetOpts = {
@@ -29,6 +30,7 @@ class App {
         this.express.use(app_router_1.staticRoute);
         this.express.use('/api', qraphql_yoga_1.default);
         this.express.use('/', app_router_1.appRouter);
+        this.express.use('/', oauth_router_1.oauthRouter);
     }
     start(port) {
         this.express.listen(port);
