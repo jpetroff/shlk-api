@@ -12,29 +12,38 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.mongoConnect = void 0;
+exports.MongoDBStore = exports.mongoConnect = exports.appSessionSecret = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
-const mongo_creds_js_1 = __importDefault(require("../mongo_creds.js"));
+const config_js_1 = __importDefault(require("../config.js"));
 const utils_js_1 = require("./utils.js");
-const mongoClusterUri = mongo_creds_js_1.default.MONGO_FULL
-    .replace('{{MONGO_USER}}', mongo_creds_js_1.default.MONGO_USER)
-    .replace('{{MONGO_PASSWORD}}', mongo_creds_js_1.default.MONGO_PASSWORD)
-    .replace('{{MONGO_DB}}', mongo_creds_js_1.default.MONGO_DB);
+const express_session_1 = __importDefault(require("express-session"));
+const connect_mongodb_session_1 = __importDefault(require("connect-mongodb-session"));
+const mongoClusterUri = config_js_1.default.MONGO_FULL
+    .replace('{{MONGO_USER}}', config_js_1.default.MONGO_USER)
+    .replace('{{MONGO_PASSWORD}}', config_js_1.default.MONGO_PASSWORD)
+    .replace('{{MONGO_DB}}', config_js_1.default.MONGO_DB);
+exports.appSessionSecret = config_js_1.default.APP_SESSION_SECRET;
 mongoose_1.default.set('strictQuery', false);
 const options = {};
 function mongoConnect() {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log(`[…] Connecting to ${utils_js_1.cliColors.yellow}${mongo_creds_js_1.default.MONGO_DB}${utils_js_1.cliColors.end}: ${mongoClusterUri}`);
+        console.log(`[…] Connecting to ${utils_js_1.cliColors.yellow}${config_js_1.default.MONGO_DB}${utils_js_1.cliColors.end}: ${mongoClusterUri}`);
         return mongoose_1.default
             .connect(mongoClusterUri, options)
             .then((result) => {
-            console.log(`${utils_js_1.cliColors.green}[✓]${utils_js_1.cliColors.end} Connected to ${mongo_creds_js_1.default.MONGO_DB}`);
+            console.log(`${utils_js_1.cliColors.green}[✓]${utils_js_1.cliColors.end} Connected to ${config_js_1.default.MONGO_DB}`);
         })
             .catch((err) => {
-            console.error(`${utils_js_1.cliColors.red}[×]${utils_js_1.cliColors.end} Connection error\n`);
+            console.error(`${utils_js_1.cliColors.red}[x]${utils_js_1.cliColors.end} Connection error\n`);
             console.dir(err);
         });
     });
 }
 exports.mongoConnect = mongoConnect;
+const MongoDBCreateStore = (0, connect_mongodb_session_1.default)(express_session_1.default);
+exports.MongoDBStore = new MongoDBCreateStore({
+    uri: mongoClusterUri,
+    collection: 'sessions',
+    expires: 1000 * 60 * 60 * 24 * 30 * 6,
+});
 //# sourceMappingURL=connect.db.js.map

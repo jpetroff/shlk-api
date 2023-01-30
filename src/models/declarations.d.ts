@@ -34,9 +34,9 @@ declare interface QIUser {
 declare interface NewUser {
   email: string
   name: string
-  id_token?: string
-  access_token?: string
-  refresh_token?: string
+  id_token?: string | null
+  access_token?: string | null
+  refresh_token?: string | null
 }
 
 /* 

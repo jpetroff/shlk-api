@@ -25,10 +25,9 @@ class App {
 
   constructor () {
     this.express = express()
-    this.mountRoutes()
   }
 
-  private mountRoutes (): void {
+  public mountRoutes (): void {
     this.express.use(staticRoute);
     this.express.use('/api', graphqlYogaServer)
     this.express.use('/', appRouter)
@@ -40,15 +39,18 @@ class App {
   }
 
   public useSessionStorage (store: createSession.Store): void {
-    this.express.use(createSession({
+    const _store = createSession({
       secret: config.APP_SESSION_SECRET,
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 30 * 6, // 6 months in milliseconds
+        httpOnly: false,
+        secure: false
       },
       store: store,
       resave: true,
       saveUninitialized: true
-    }))
+    })
+    this.express.use(_store)
   }
 
   public start(port: number) {

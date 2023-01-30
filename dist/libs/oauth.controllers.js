@@ -8,12 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.oauthCallback = exports.oauthRedirect = void 0;
 const google_auth_library_1 = require("google-auth-library");
-const keys = require('../../client_secret_652965437671-7sp6dqu6phcnj0dvtv3i5h5f9flicoed.apps.googleusercontent.com.json');
+const config_1 = __importDefault(require("../config"));
+const auth_queries_db_1 = require("./auth-queries.db");
+const googleapis_1 = require("googleapis");
 function getAuthClient() {
-    return new google_auth_library_1.OAuth2Client(keys.web.client_id, keys.web.client_secret, keys.web.redirect_uris[1]);
+    return new google_auth_library_1.OAuth2Client(config_1.default.web.client_id, config_1.default.web.client_secret, config_1.default.web.redirect_uris[0]);
 }
 function oauthRedirect(req, res) {
     const oAuth2Client = getAuthClient();
@@ -33,12 +38,34 @@ function oauthCallback(req, res) {
         const code = qs.get('code');
         const oAuth2Client = getAuthClient();
         if (!code) {
-            res.sendStatus(404).json({ message: 'Authorization failed' });
+            res.sendStatus(400).json({ message: 'Authorization failed' });
         }
         else {
-            const r = yield oAuth2Client.getToken(code);
-            oAuth2Client.setCredentials(r.tokens);
-            console.info('Tokens acquired\n', r);
+            try {
+                const r = yield oAuth2Client.getToken(code);
+                oAuth2Client.setCredentials(r.tokens);
+                const gapi = googleapis_1.google.oauth2({
+                    auth: oAuth2Client,
+                    version: 'v2'
+                });
+                const { data } = yield gapi.userinfo.v2.me.get();
+                if (!data.email || !data.verified_email)
+                    throw new Error('Your email is not verified. Please verify before signing in');
+                const user = yield (0, auth_queries_db_1.createOrUpdateUser)({
+                    email: data.email,
+                    name: data.given_name || data.family_name || data.email,
+                    id_token: r.tokens.id_token,
+                    access_token: r.tokens.access_token,
+                    refresh_token: r.tokens.refresh_token
+                });
+                req.session.userId = user === null || user === void 0 ? void 0 : user._id;
+                req.session.tokens = r.tokens;
+                res.redirect('/');
+            }
+            catch (err) {
+                console.log(err);
+                res.status(400).send(err);
+            }
         }
     });
 }

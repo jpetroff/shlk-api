@@ -11,7 +11,9 @@ async function main () {
   
   if(process.env.NODE_ENV == 'production')
     app.useHelmet()
+
   app.useSessionStorage(MongoDBStore)
+  app.mountRoutes()
   app.start(port)
 }
 
