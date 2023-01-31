@@ -109,7 +109,7 @@
     "src/**/*.tsx",
     "src/**/*.js",
     "assets/**/*"
-  ],
+, "src/config.ts"  ],
   "exclude": [
     "node_modules"
   ]

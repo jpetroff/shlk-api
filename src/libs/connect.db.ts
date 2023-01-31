@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import config from '../config.js'
+import * as config from '../config'
 import { cliColors } from './utils.js'
 import session from 'express-session'
 import MongoDBSessionConstructor from 'connect-mongodb-session'
