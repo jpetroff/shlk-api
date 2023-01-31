@@ -119,8 +119,9 @@ web_modules/
 .pnp.*
 
 # authentication files
-mongo_creds.json
+config.js
 
 deploy
 stats.json
 *.tar.gz
+
