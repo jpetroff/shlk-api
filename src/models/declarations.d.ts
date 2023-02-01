@@ -33,7 +33,11 @@ declare interface QIUser {
  */
 declare interface NewUser {
   email: string
+
   name: string
+  avatar?: string | null
+  userTag?: string | null
+
   id_token?: string | null
   access_token?: string | null
   refresh_token?: string | null
@@ -44,7 +48,6 @@ declare interface NewUser {
 */
 declare interface UserDocument extends NewUser {
   _id: string
-  userTag?: string
   createdAt?: string
   updatedAt?: string
 }

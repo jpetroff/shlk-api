@@ -1,4 +1,4 @@
-import { getShortlink, __wipeDB } from './public-queries.db'
+import { getShortlink } from './public-queries.db'
 import _ from 'underscore'
 import express from 'express'
 
@@ -45,14 +45,4 @@ export function appRedirect (req: express.Request, res: express.Response) {
     })
 
   }
-}
-
-export function appDevDropDatabase(req: express.Request, res: express.Response) {
-  __wipeDB()
-    .then( (result) => {
-      res.json(result)
-    })
-    .catch( (err) => {
-      res.status(400).json(err)
-    })
 }

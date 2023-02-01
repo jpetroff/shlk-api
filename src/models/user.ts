@@ -19,8 +19,12 @@ const userSchema = new Schema<UserDocument, UserModel>(
       required: true,
     },
 
+    avatar: {
+      type: String
+    },
+
     userTag: {
-      type: String,
+      type: String
     },
 
     id_token: {

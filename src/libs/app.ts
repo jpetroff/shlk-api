@@ -25,22 +25,29 @@ class App {
 
   constructor () {
     this.express = express()
+
+    // static routes should be use before session middleware:
+    // site.manifest is downloaded without credentials (including session cookie)
+    // this creates session every page reload
+    this.express.use(staticRoute)
   }
 
-  public mountRoutes (): void {
-    this.express.use(staticRoute);
+  public mountRoutes (): this {
     this.express.use('/api', graphqlYogaServer)
-    this.express.use('/', appRouter)
     this.express.use('/', oauthRouter)
+    this.express.use('/', appRouter)
+    return this
   }
 
-  public useHelmet (): void {
+  public useHelmet (): this {
     this.express.use(Helmet(helmetOpts))
+    return this
   }
 
-  public useSessionStorage (store: createSession.Store): void {
+  public useSessionStorage (store: createSession.Store): this {
     const _store = createSession({
       secret: config.APP_SESSION_SECRET,
+      name: 'sid',
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 30 * 6, // 6 months in milliseconds
         httpOnly: false,
@@ -51,10 +58,12 @@ class App {
       saveUninitialized: true
     })
     this.express.use(_store)
+    return this
   }
 
-  public start(port: number) {
+  public start(port: number): this {
     this.express.listen(port, () => console.log(`${cliColors.green}[✓]${cliColors.end} Server listening on port ${port}`))
+    return this
   }
 }
 

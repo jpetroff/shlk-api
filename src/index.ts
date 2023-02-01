@@ -13,8 +13,8 @@ async function main () {
     app.useHelmet()
 
   app.useSessionStorage(MongoDBStore)
-  app.mountRoutes()
-  app.start(port)
+    .mountRoutes()
+    .start(port)
 }
 
 main().catch( (err) => console.error(err) )

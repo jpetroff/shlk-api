@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.oauthCallback = exports.oauthRedirect = void 0;
+exports.sessionLogout = exports.oauthCallback = exports.oauthRedirect = void 0;
 const google_auth_library_1 = require("google-auth-library");
 const config_1 = __importDefault(require("../config"));
 const auth_queries_db_1 = require("./auth-queries.db");
@@ -54,6 +54,7 @@ function oauthCallback(req, res) {
                 const user = yield (0, auth_queries_db_1.createOrUpdateUser)({
                     email: data.email,
                     name: data.given_name || data.family_name || data.email,
+                    avatar: data.picture,
                     id_token: r.tokens.id_token,
                     access_token: r.tokens.access_token,
                     refresh_token: r.tokens.refresh_token
@@ -70,4 +71,14 @@ function oauthCallback(req, res) {
     });
 }
 exports.oauthCallback = oauthCallback;
+function sessionLogout(req, res) {
+    req.session.destroy((err) => {
+        if (err) {
+            res.send(400).json(JSON.stringify(err));
+            return;
+        }
+        res.redirect('/');
+    });
+}
+exports.sessionLogout = sessionLogout;
 //# sourceMappingURL=oauth.controllers.js.map

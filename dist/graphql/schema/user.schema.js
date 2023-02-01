@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = `
   input QIUserUpdate {
     name: String
+    picture: String
     userTag: String
   }
 
@@ -12,6 +13,7 @@ exports.default = `
     email: String!
 
     name: String!
+    picture: String
     userTag: String
 
     createdAt: String

@@ -3,7 +3,7 @@ import { OAuth2Client } from 'google-auth-library'
 import config from '../config'
 import { createOrUpdateUser } from './auth-queries.db'
 import {google} from 'googleapis'
-import session from 'express-session'
+// import session from 'express-session'
 
 declare module 'express-session' {
   interface SessionData {
@@ -56,6 +56,7 @@ export async function oauthCallback (req: express.Request, res: express.Response
       const user = await createOrUpdateUser({
         email: data.email,
         name: data.given_name || data.family_name || data.email,
+        avatar: data.picture,
         id_token: r.tokens.id_token,
         access_token: r.tokens.access_token,
         refresh_token: r.tokens.refresh_token
@@ -72,13 +73,13 @@ export async function oauthCallback (req: express.Request, res: express.Response
   }
 }
 
-// data: {
-//   id: '113466010781844689435',
-//   email: 'work.petroff@gmail.com',
-//   verified_email: true,
-//   name: 'Evgenii Petrov (Eugene)',
-//   given_name: 'Evgenii',
-//   family_name: 'Petrov',
-//   picture: 'https://lh3.googleusercontent.com/a/AEdFTp4gokqQ9Ldi5EpW9zSpj4D2xgrSsXdFbmY6lBNztA=s96-c',
-//   locale: 'en'
-// },
+export function sessionLogout(req: express.Request, res: express.Response) {
+  req.session.destroy(
+    (err) => {
+      if(err) {
+        res.send(400).json(JSON.stringify(err)); return
+      }
+      res.redirect('/')
+    }
+  )
+}

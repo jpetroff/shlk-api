@@ -24,12 +24,12 @@ const helmetOpts = {
 class App {
     constructor() {
         this.express = (0, express_1.default)();
+        this.express.use(app_routes_1.staticRoute);
     }
     mountRoutes() {
-        this.express.use(app_routes_1.staticRoute);
         this.express.use('/api', qraphql_yoga_1.default);
-        this.express.use('/', app_routes_1.appRouter);
         this.express.use('/', oauth_routes_1.oauthRouter);
+        this.express.use('/', app_routes_1.appRouter);
     }
     useHelmet() {
         this.express.use((0, helmet_1.default)(helmetOpts));
@@ -37,6 +37,7 @@ class App {
     useSessionStorage(store) {
         const _store = (0, express_session_1.default)({
             secret: config_1.default.APP_SESSION_SECRET,
+            name: 'sid',
             cookie: {
                 maxAge: 1000 * 60 * 60 * 24 * 30 * 6,
                 httpOnly: false,

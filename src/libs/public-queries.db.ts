@@ -3,7 +3,6 @@ import Shortlink from '../models/shortlink'
 import { prepareURL } from './utils'
 import generateHash from './hash.lib'
 import _ from 'underscore'
-import { Query } from 'mongoose'
 import { GraphQLError } from 'graphql' 
 
 /**
@@ -152,17 +151,6 @@ export async function getShortlink(	args: {hash?: string, userTag?: string, desc
         extensions: { code: 'UNKNOWN_ERROR' }
       })
     }
-  }
-}
-
-export async function __wipeDB() : Promise<Query<any, ShortlinkDocument>|null> {
-  if(process.env.NODE_ENV == 'development') {
-    const res = await Shortlink.deleteMany()
-    return res
-  } else {
-    throw new GraphQLError('Forbidden', {
-      extensions: { code: 'RESTRICTED_API'}
-    })
   }
 }
 

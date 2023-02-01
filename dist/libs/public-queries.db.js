@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.__wipeDB = exports.getShortlink = exports.createShortlinkDescriptor = exports.createShortlink = void 0;
+exports.getShortlink = exports.createShortlinkDescriptor = exports.createShortlink = void 0;
 const shortlink_1 = __importDefault(require("../models/shortlink"));
 const utils_1 = require("./utils");
 const hash_lib_1 = __importDefault(require("./hash.lib"));
@@ -146,18 +146,4 @@ function getShortlink(args) {
     });
 }
 exports.getShortlink = getShortlink;
-function __wipeDB() {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (process.env.NODE_ENV == 'development') {
-            const res = yield shortlink_1.default.deleteMany();
-            return res;
-        }
-        else {
-            throw new graphql_1.GraphQLError('Forbidden', {
-                extensions: { code: 'RESTRICTED_API' }
-            });
-        }
-    });
-}
-exports.__wipeDB = __wipeDB;
 //# sourceMappingURL=public-queries.db.js.map

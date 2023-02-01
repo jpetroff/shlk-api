@@ -10,4 +10,5 @@ const oauthRouter = express_1.default.Router();
 exports.oauthRouter = oauthRouter;
 oauthRouter.get('/oauth/google', oauth_controllers_1.oauthRedirect);
 oauthRouter.get(`/oauth/google/callback`, oauth_controllers_1.oauthCallback);
+oauthRouter.get(`/logout`, oauth_controllers_1.sessionLogout);
 //# sourceMappingURL=oauth.routes.js.map

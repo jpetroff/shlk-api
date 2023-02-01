@@ -3,6 +3,7 @@
 export default `
   input QIUserUpdate {
     name: String
+    picture: String
     userTag: String
   }
 
@@ -12,6 +13,7 @@ export default `
     email: String!
 
     name: String!
+    picture: String
     userTag: String
 
     createdAt: String

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.appDevDropDatabase = exports.appRedirect = void 0;
+exports.appRedirect = void 0;
 const public_queries_db_1 = require("./public-queries.db");
 const underscore_1 = __importDefault(require("underscore"));
 function sendDescriptiveRedirect(res, result) {
@@ -48,14 +48,4 @@ function appRedirect(req, res) {
     }
 }
 exports.appRedirect = appRedirect;
-function appDevDropDatabase(req, res) {
-    (0, public_queries_db_1.__wipeDB)()
-        .then((result) => {
-        res.json(result);
-    })
-        .catch((err) => {
-        res.status(400).json(err);
-    });
-}
-exports.appDevDropDatabase = appDevDropDatabase;
 //# sourceMappingURL=app.controllers.js.map

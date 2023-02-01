@@ -16,8 +16,11 @@ const userSchema = new Schema({
         type: String,
         required: true,
     },
+    avatar: {
+        type: String
+    },
     userTag: {
-        type: String,
+        type: String
     },
     id_token: {
         type: String,
