@@ -1,19 +1,16 @@
-// import { buildSchema } from 'graphql'
-
 export default `
   input QIUserUpdate {
     name: String
-    picture: String
+    avatar: String
     userTag: String
   }
-
 
   type User {
     _id: ID!
     email: String!
 
     name: String!
-    picture: String
+    avatar: String
     userTag: String
 
     createdAt: String
@@ -21,11 +18,11 @@ export default `
   }
 
   type Query {
-    getUser(_id: String!): User
+    getLoggedInUser: User
   }
   
   type Mutation {
-    updateUser(args: QIUserUpdate): User
+    updateLoggedInUser(args: QIUserUpdate): User
   }
 
   schema {

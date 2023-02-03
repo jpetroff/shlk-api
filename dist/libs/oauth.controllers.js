@@ -53,19 +53,19 @@ function oauthCallback(req, res) {
                     throw new Error('Your email is not verified. Please verify before signing in');
                 const user = yield (0, auth_queries_db_1.createOrUpdateUser)({
                     email: data.email,
-                    name: data.given_name || data.family_name || data.email,
+                    name: data.given_name || data.family_name,
                     avatar: data.picture,
                     id_token: r.tokens.id_token,
                     access_token: r.tokens.access_token,
                     refresh_token: r.tokens.refresh_token
                 });
-                req.session.userId = user === null || user === void 0 ? void 0 : user._id;
+                req.session.userId = user === null || user === void 0 ? void 0 : user._id.toString();
                 req.session.tokens = r.tokens;
                 res.redirect('/');
             }
             catch (err) {
                 console.log(err);
-                res.status(400).send(err);
+                res.status(400).json(JSON.stringify(err));
             }
         }
     });

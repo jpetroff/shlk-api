@@ -18,6 +18,7 @@ exports.default = `
     createdAt: String
     updatedAt: String
     descriptor: ShortlinkDescriptor
+    owner: ID
   }
 
   input QIShortlink {

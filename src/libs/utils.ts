@@ -47,3 +47,13 @@ export const cliColors = {
   yellow: `\x1b[1;33m`,
   end:    `\x1b[0m`,
 }
+
+
+export function allEmpty(...args:any[]) : boolean {
+  if(arguments.length == 0) return false
+  if(arguments.length == 1) return !arguments[0]
+
+  return _.reduce(arguments, (prev, curr) => {
+    return (!prev) && (!curr)
+  })
+}

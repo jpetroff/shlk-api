@@ -22,9 +22,9 @@ function main() {
         const mongoose = yield (0, connect_db_1.mongoConnect)();
         if (process.env.NODE_ENV == 'production')
             app_1.default.useHelmet();
-        app_1.default.useSessionStorage(connect_db_1.MongoDBStore);
-        app_1.default.mountRoutes();
-        app_1.default.start(port);
+        app_1.default.useSessionStorage(connect_db_1.MongoDBStore)
+            .mountRoutes()
+            .start(port);
     });
 }
 main().catch((err) => console.error(err));

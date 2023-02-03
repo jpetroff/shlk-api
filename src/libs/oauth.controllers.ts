@@ -55,20 +55,20 @@ export async function oauthCallback (req: express.Request, res: express.Response
 
       const user = await createOrUpdateUser({
         email: data.email,
-        name: data.given_name || data.family_name || data.email,
+        name: data.given_name || data.family_name,
         avatar: data.picture,
         id_token: r.tokens.id_token,
         access_token: r.tokens.access_token,
         refresh_token: r.tokens.refresh_token
       })
 
-      req.session.userId = user?._id
+      req.session.userId = user?._id.toString()
       req.session.tokens = r.tokens
 
       res.redirect('/')
     } catch(err) {
       console.log(err)
-      res.status(400).send(err)
+      res.status(400).json(JSON.stringify(err))
     }
   }
 }

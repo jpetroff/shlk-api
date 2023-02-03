@@ -1,10 +1,8 @@
-import mongoose from 'mongoose'
+import mongoose, { Schema } from 'mongoose'
 import mongooseValidation from 'mongoose-beautiful-unique-validation'
 
 
 export type ShortlinkModel = typeof mongoose.Model<ShortlinkDocument>
-
-const Schema = mongoose.Schema
 
 const shortlinkSchema = new Schema<ShortlinkDocument, ShortlinkModel>(
   {
@@ -22,6 +20,12 @@ const shortlinkSchema = new Schema<ShortlinkDocument, ShortlinkModel>(
     descriptor: {
       userTag: { type: String },
       descriptionTag: { type: String }
+    },
+
+    owner: {
+      type: Schema.Types.ObjectId,
+      index: true,
+      required: false
     }
   },
   { timestamps: true }

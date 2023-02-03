@@ -19,6 +19,11 @@ const shortlinkSchema = new Schema({
     descriptor: {
         userTag: { type: String },
         descriptionTag: { type: String }
+    },
+    owner: {
+        type: Schema.Types.ObjectId,
+        unique: true,
+        required: false
     }
 }, { timestamps: true });
 shortlinkSchema.plugin(mongoose_beautiful_unique_validation_1.default);

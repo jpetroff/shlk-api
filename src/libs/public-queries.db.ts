@@ -1,27 +1,69 @@
 /* eslint-disable no-useless-catch */
-import Shortlink from '../models/shortlink'
-import { prepareURL } from './utils'
+import Shortlink, { ShortlinkModel } from '../models/shortlink'
+import { allEmpty, prepareURL } from './utils'
 import generateHash from './hash.lib'
 import _ from 'underscore'
 import { GraphQLError } from 'graphql' 
+import User from '../models/user'
 
 /**
- * Returns created shortlink or null: Promise<ShortlinkDocument | null>
+ * Returns new or existing Shortlink mongoose document
+ * to modify or save() later
  *
  * @param {string} location Full URL
+ * @param {string} hash (optional) Shortlink hash to check if it exists
+ * @param {string} userId (oprional) current logged user ID from session to attach owner to created shortlink
+ * 
+ * @return {Promise<ResultDocument<ShortlinkDocument>>}
  */
-export async function createShortlink(location: string): Promise<ShortlinkDocument | null> {
+async function createOrGetShortlink(location: string, userId?: Maybe<string>, _hash?: Maybe<string>) : Promise<ResultDoc<ShortlinkDocument>> {
+  // normalise location first
+  location = prepareURL(location)
+
+  let user : Maybe<UserDocument> = null
+  if(userId) {
+    user = await User.findById(userId)
+  }
+
+  let hash : string = _hash || generateHash()
+  const tryFindShortlink : Maybe<ResultDoc<ShortlinkDocument>> = await Shortlink.findOne({hash})
+
+  if(
+    tryFindShortlink && 
+    tryFindShortlink.location == location &&
+    (allEmpty(userId, user?._id.toString()) || userId == user?._id.toString())
+  ) {
+    return tryFindShortlink
+  }
+  
+  const shortlink : ResultDoc<ShortlinkDocument> = new Shortlink({
+    hash: generateHash(),
+    location: prepareURL(location),
+    owner: user?._id || undefined
+  })
+
+  return shortlink
+}
+
+
+/**
+ * Returns created shortlink or null
+ *
+ * @param {string} location Full URL
+ * @param {string} userId (oprional) current logged user ID from session to attach owner to created shortlink
+ * 
+ * @return {Promise<ShortlinkDocument | null>}
+ */
+export async function createShortlink(location: string, userId?: Maybe<string>): Promise<ShortlinkDocument | null> {
   try {
-    const shortlink = new Shortlink({
-      hash: generateHash(),
-      location: prepareURL(location)
-    })
-    const newShortlink = await shortlink.save()
-    return newShortlink
+    const resultShortlinkDocument = await createOrGetShortlink(location, userId)
+    const newShortlink = await resultShortlinkDocument.save()
+    return newShortlink.toObject()
+
   } catch (error) {
     if(error instanceof Error) {
       throw new GraphQLError(error.message, {
-        extensions: {  code: 'OTHER_MONGO_ERROR'  }
+        extensions: { code: 'OTHER_MONGO_ERROR' }
       })
     } else {
       throw new GraphQLError(String(error), {
@@ -34,18 +76,19 @@ export async function createShortlink(location: string): Promise<ShortlinkDocume
 /**
  * Creates or updates a shortlink with custom URL slug /{userTag}@{descriptionTag}
  * If shortlink already exists tries to update or throws error if duplicate is detected
- * Returns created shortlink or null: Promise<null | ShortlinkDocument> 
+ * Returns created shortlink or null 
  *
  * 	@param {object} arguments {
  * 	@param {string} location Full URL
  * 	@param {string} descriptionTag Custom URL slug instead of random hash
  * 	@param {string} userTag Full URL
  * 	@param {string} hash Random 4-letter slug }
+ * 
+ * @return {Promise<null | ShortlinkDocument>}
  */
 export async function createShortlinkDescriptor( 
   args : { location: string, descriptionTag: string, hash?: string, userTag?: string }
 ): Promise<null | ShortlinkDocument> {
-  args.location = prepareURL(args.location)
 
   const existingShortlinkDescription = await Shortlink.findOne( { descriptor: { userTag: args.userTag, descriptionTag: args.descriptionTag } } )
   try {

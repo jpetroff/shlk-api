@@ -1,3 +1,8 @@
+declare type ResultDoc<T> = import('mongoose').HydratedDocument<T>
+declare type QueryType<T> = import('mongoose').QueryWithHelpers<any, T>
+declare type ObjectId = import('mongoose').Types.ObjectId
+
+
 /*
   [Shortlink] GraphQL interface
 */
@@ -8,13 +13,14 @@ declare interface QIShortlink {
     userTag?: string
     descriptionTag: string 
   }
+  owner?: ObjectId
 }
 
 /* 
   [Shortlink] MongoDB object representation for query results
   */
 declare interface ShortlinkDocument extends QIShortlink {
-  _id?: string
+  _id?: ObjectId
   createdAt?: string
   updatedAt?: string
 }
@@ -23,31 +29,37 @@ declare interface ShortlinkDocument extends QIShortlink {
   [User] GraphQL interface for client User queries
  */
 declare interface QIUser {
-  name?: string
-  email: string
-  userTag?: string
+  name?: Maybe<string>
+  userTag?: Maybe<string>
+  avatar?: Maybe<string>
 }
 
 /* 
-
+  User profile for sending to frontend
  */
-declare interface NewUser {
+declare interface UserProfile {
   email: string
 
-  name: string
-  avatar?: string | null
-  userTag?: string | null
-
-  id_token?: string | null
-  access_token?: string | null
-  refresh_token?: string | null
+  name?: Maybe<string>
+  avatar?: Maybe<string>
+  userTag?: Maybe<string>
 }
+
+/* 
+  User params used internally
+ */
+declare interface UserObject extends UserProfile {
+  id_token?: Maybe<string>
+  access_token?: Maybe<string>
+  refresh_token?: Maybe<string>
+}
+
 
 /* 
   [User] MongoDB object representation for query results
 */
-declare interface UserDocument extends NewUser {
-  _id: string
+declare interface UserDocument extends UserObject {
+  _id: ObjectId
   createdAt?: string
   updatedAt?: string
 }

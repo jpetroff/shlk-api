@@ -18,12 +18,26 @@ const utils_1 = require("./utils");
 const hash_lib_1 = __importDefault(require("./hash.lib"));
 const underscore_1 = __importDefault(require("underscore"));
 const graphql_1 = require("graphql");
-function createShortlink(location) {
+const user_1 = __importDefault(require("../models/user"));
+function createShortlink(location, userId) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            let user;
+            if (userId) {
+                user = yield user_1.default.findById(userId);
+                if (user) {
+                    const tryFindLink = yield shortlink_1.default.findOne({
+                        owner: user._id,
+                        location
+                    });
+                    if (tryFindLink)
+                        return tryFindLink;
+                }
+            }
             const shortlink = new shortlink_1.default({
                 hash: (0, hash_lib_1.default)(),
-                location: (0, utils_1.prepareURL)(location)
+                location: (0, utils_1.prepareURL)(location),
+                owner: (user === null || user === void 0 ? void 0 : user._id) || undefined
             });
             const newShortlink = yield shortlink.save();
             return newShortlink;

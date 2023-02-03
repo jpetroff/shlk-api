@@ -30,9 +30,11 @@ class App {
         this.express.use('/api', qraphql_yoga_1.default);
         this.express.use('/', oauth_routes_1.oauthRouter);
         this.express.use('/', app_routes_1.appRouter);
+        return this;
     }
     useHelmet() {
         this.express.use((0, helmet_1.default)(helmetOpts));
+        return this;
     }
     useSessionStorage(store) {
         const _store = (0, express_session_1.default)({
@@ -48,9 +50,11 @@ class App {
             saveUninitialized: true
         });
         this.express.use(_store);
+        return this;
     }
     start(port) {
         this.express.listen(port, () => console.log(`${utils_1.cliColors.green}[✓]${utils_1.cliColors.end} Server listening on port ${port}`));
+        return this;
     }
 }
 exports.default = new App();
