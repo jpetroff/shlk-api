@@ -1,21 +1,21 @@
 import _ from 'underscore'
 
-export function sanitizeMongo( dirtyData: string | undefined): string;
-export function sanitizeMongo( dirtyData: { [key: string]: any } | undefined): { [key: string]: any };
-export function sanitizeMongo( dirtyData: string | { [key: string]: any } | undefined) {
-  if (dirtyData instanceof Object) {
-    for (const key in dirtyData) {
-      if (/^\$/.test(key)) {
-        delete dirtyData[key];
-      } else {
-        sanitizeMongo(dirtyData[key]);
-      }
-    }
-  } else if (_.isString(dirtyData)) {
-		dirtyData = dirtyData.replace(/[${}]/ig, '')
-	}
-  return dirtyData;
-}
+// export function sanitizeMongo( dirtyData: string | undefined): string;
+// export function sanitizeMongo( dirtyData: { [key: string]: any } | undefined): { [key: string]: any };
+// export function sanitizeMongo( dirtyData: string | { [key: string]: any } | undefined) {
+//   if (dirtyData instanceof Object) {
+//     for (const key in dirtyData) {
+//       if (/^\$/.test(key)) {
+//         delete dirtyData[key];
+//       } else {
+//         sanitizeMongo(dirtyData[key]);
+//       }
+//     }
+//   } else if (_.isString(dirtyData)) {
+// 		dirtyData = dirtyData.replace(/[${}]/ig, '')
+// 	}
+//   return dirtyData;
+// }
 
 export function clearURLTracking (url: URL) : URL {
   const trackingParams = [
@@ -28,7 +28,14 @@ export function clearURLTracking (url: URL) : URL {
   return url
 }
 
-export function prepareURL( _url: string ): string {
+/**
+ * Adds protocol https://, clears tracking tags, removes trailing slash
+ *
+ * @param {string} _url Full URL
+ * 
+ * @return {string}
+ */
+export function normalizeURL( _url: string ): string {
   let url = _url.trim()
   const protocolRegex = new RegExp('^https?://')
 
@@ -56,4 +63,10 @@ export function allEmpty(...args:any[]) : boolean {
   return _.reduce(arguments, (prev, curr) => {
     return (!prev) && (!curr)
   })
+}
+
+export function sameOrNoOwnerID(_id1: Maybe<string | ObjectId>, _id2: Maybe<string | ObjectId>) : boolean {
+  const id1 = _id1 ? _id1.toString() : _id1
+  const id2 = _id2 ? _id2.toString() : _id2
+  return allEmpty(id1, id2) || id1 == id2
 }

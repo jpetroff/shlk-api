@@ -16,31 +16,51 @@ exports.getShortlink = exports.createShortlinkDescriptor = exports.createShortli
 const shortlink_1 = __importDefault(require("../models/shortlink"));
 const utils_1 = require("./utils");
 const hash_lib_1 = __importDefault(require("./hash.lib"));
-const underscore_1 = __importDefault(require("underscore"));
 const graphql_1 = require("graphql");
 const user_1 = __importDefault(require("../models/user"));
+const url_metadata_1 = __importDefault(require("url-metadata"));
+function createOrGetShortlink(location, userId, _hash) {
+    return __awaiter(this, void 0, void 0, function* () {
+        location = (0, utils_1.normalizeURL)(location);
+        let user = null;
+        if (userId) {
+            user = yield user_1.default.findById(userId);
+        }
+        let tryFindShortlink = null;
+        let hash = _hash || (0, hash_lib_1.default)();
+        if (user) {
+            tryFindShortlink = yield shortlink_1.default.findOne({
+                owner: user._id,
+                location: location
+            });
+            if (tryFindShortlink)
+                return tryFindShortlink;
+        }
+        tryFindShortlink = yield shortlink_1.default.findOne({ hash });
+        if (tryFindShortlink &&
+            tryFindShortlink.location == location &&
+            (0, utils_1.sameOrNoOwnerID)(tryFindShortlink.owner, user === null || user === void 0 ? void 0 : user._id)) {
+            return tryFindShortlink;
+        }
+        let newShortlinkObject = {
+            hash: tryFindShortlink ? (0, hash_lib_1.default)() : hash,
+            location,
+        };
+        if (user === null || user === void 0 ? void 0 : user._id) {
+            const urlMetadata = yield (0, url_metadata_1.default)(location);
+            newShortlinkObject.owner = user._id;
+            newShortlinkObject.urlMetadata = urlMetadata;
+        }
+        const newShortlink = new shortlink_1.default(newShortlinkObject);
+        return newShortlink;
+    });
+}
 function createShortlink(location, userId) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            let user;
-            if (userId) {
-                user = yield user_1.default.findById(userId);
-                if (user) {
-                    const tryFindLink = yield shortlink_1.default.findOne({
-                        owner: user._id,
-                        location
-                    });
-                    if (tryFindLink)
-                        return tryFindLink;
-                }
-            }
-            const shortlink = new shortlink_1.default({
-                hash: (0, hash_lib_1.default)(),
-                location: (0, utils_1.prepareURL)(location),
-                owner: (user === null || user === void 0 ? void 0 : user._id) || undefined
-            });
-            const newShortlink = yield shortlink.save();
-            return newShortlink;
+            const resultShortlinkDocument = yield createOrGetShortlink(location, userId);
+            const newShortlink = yield resultShortlinkDocument.save();
+            return newShortlink.toObject();
         }
         catch (error) {
             if (error instanceof Error) {
@@ -59,61 +79,24 @@ function createShortlink(location, userId) {
 exports.createShortlink = createShortlink;
 function createShortlinkDescriptor(args) {
     return __awaiter(this, void 0, void 0, function* () {
-        args.location = (0, utils_1.prepareURL)(args.location);
-        const existingShortlinkDescription = yield shortlink_1.default.findOne({ descriptor: { userTag: args.userTag, descriptionTag: args.descriptionTag } });
         try {
-            if (existingShortlinkDescription != null && existingShortlinkDescription.location == args.location) {
-                return existingShortlinkDescription;
+            args.location = (0, utils_1.normalizeURL)(args.location);
+            const existingShortlinkDescription = yield shortlink_1.default.findOne({ descriptor: { userTag: args.userTag, descriptionTag: args.descriptionTag } });
+            if (existingShortlinkDescription != null &&
+                existingShortlinkDescription.location == args.location &&
+                (0, utils_1.sameOrNoOwnerID)(args.userId, existingShortlinkDescription.owner)) {
+                return existingShortlinkDescription.toObject();
             }
             else if (existingShortlinkDescription != null) {
-                throw new graphql_1.GraphQLError(`Shortlink '${args.userTag}@${args.descriptionTag}' already exists`, {
-                    extensions: { code: 'DUPLICATING_DESCRIPTOR' }
-                });
+                throw new graphql_1.GraphQLError(`Shortlink '/${args.userTag}@${args.descriptionTag}' already exists`, { extensions: { code: 'DUPLICATING_DESCRIPTOR' } });
             }
-            else if (args.hash && !underscore_1.default.isEmpty(args.hash)) {
-                const existingShortlinkHash = yield getShortlink({ hash: args.hash });
-                if (existingShortlinkHash != null && existingShortlinkHash.location != args.location) {
-                    throw new graphql_1.GraphQLError(`Cannot update: Hash /${args.hash} is taken by another location '${args.location}'`, {
-                        extensions: { code: 'DUPLICATING_HASH' }
-                    });
-                }
-                else if (existingShortlinkHash == null) {
-                    const shortlink = new shortlink_1.default({
-                        hash: args.hash,
-                        location: args.location,
-                        descriptor: {
-                            userTag: args.userTag,
-                            descriptionTag: args.descriptionTag
-                        }
-                    });
-                    const newShortlink = yield shortlink.save();
-                    return newShortlink;
-                }
-                else {
-                    const update = yield shortlink_1.default.findOneAndUpdate({
-                        hash: args.hash
-                    }, {
-                        descriptor: {
-                            userTag: args.userTag,
-                            descriptionTag: args.descriptionTag
-                        }
-                    });
-                    const updatedShortlink = yield shortlink_1.default.findById(update._id);
-                    return updatedShortlink;
-                }
-            }
-            else {
-                const shortlink = new shortlink_1.default({
-                    hash: (0, hash_lib_1.default)(),
-                    location: args.location,
-                    descriptor: {
-                        userTag: args.userTag,
-                        descriptionTag: args.descriptionTag
-                    }
-                });
-                const newShortlink = yield shortlink.save();
-                return newShortlink;
-            }
+            const shortlinkDocument = yield createOrGetShortlink(args.location, args.userId, args.hash);
+            shortlinkDocument.descriptor = {
+                userTag: args.userTag,
+                descriptionTag: args.descriptionTag
+            };
+            const resultShortlink = yield shortlinkDocument.save();
+            return resultShortlink.toObject();
         }
         catch (error) {
             if (error instanceof Error) {

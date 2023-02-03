@@ -14,6 +14,7 @@ declare interface QIShortlink {
     descriptionTag: string 
   }
   owner?: ObjectId
+  urlMetadata?: AnyObject
 }
 
 /* 

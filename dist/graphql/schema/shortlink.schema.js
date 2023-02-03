@@ -19,6 +19,7 @@ exports.default = `
     updatedAt: String
     descriptor: ShortlinkDescriptor
     owner: ID
+    urlMetadata: Mixed
   }
 
   input QIShortlink {

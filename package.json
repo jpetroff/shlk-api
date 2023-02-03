@@ -48,7 +48,8 @@
     "mongoose": "^6.8.0",
     "mongoose-beautiful-unique-validation": "^7.1.1",
     "random-hash": "^4.0.1",
-    "underscore": "^1.13.6"
+    "underscore": "^1.13.6",
+    "url-metadata": "^2.5.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.5",

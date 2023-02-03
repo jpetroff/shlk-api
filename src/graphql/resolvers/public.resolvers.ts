@@ -4,6 +4,7 @@ import {
   createShortlinkDescriptor,
   getShortlink
 } from '../../libs/public-queries.db'
+import * as _ from 'underscore'
 
 export default {
   Mutation: {
@@ -12,7 +13,12 @@ export default {
     },
   
     createDescriptiveShortlink: ( parent : any, args: {location: string, userTag?: string, descriptionTag: string, hash?: string }, context: any) => {
-      return createShortlinkDescriptor(args)
+      return createShortlinkDescriptor(
+        _.extendOwn(
+          {userId: context.req?.session?.userId},
+          args
+        )
+      )
     }
   },
 

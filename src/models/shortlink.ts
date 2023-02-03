@@ -9,7 +9,8 @@ const shortlinkSchema = new Schema<ShortlinkDocument, ShortlinkModel>(
     hash: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
+      immutable: true
     },
 
     location: {
@@ -25,7 +26,12 @@ const shortlinkSchema = new Schema<ShortlinkDocument, ShortlinkModel>(
     owner: {
       type: Schema.Types.ObjectId,
       index: true,
-      required: false
+      required: false,
+      immutable: true
+    },
+
+    urlMetadata: {
+      type: Schema.Types.Mixed
     }
   },
   { timestamps: true }

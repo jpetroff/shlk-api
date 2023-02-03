@@ -1,10 +1,11 @@
 /* eslint-disable no-useless-catch */
 import Shortlink, { ShortlinkModel } from '../models/shortlink'
-import { allEmpty, prepareURL } from './utils'
+import { normalizeURL, sameOrNoOwnerID } from './utils'
 import generateHash from './hash.lib'
 import _ from 'underscore'
 import { GraphQLError } from 'graphql' 
 import User from '../models/user'
+import fetchMetadata from 'url-metadata'
 
 /**
  * Returns new or existing Shortlink mongoose document
@@ -18,31 +19,58 @@ import User from '../models/user'
  */
 async function createOrGetShortlink(location: string, userId?: Maybe<string>, _hash?: Maybe<string>) : Promise<ResultDoc<ShortlinkDocument>> {
   // normalise location first
-  location = prepareURL(location)
+  location = normalizeURL(location)
 
   let user : Maybe<UserDocument> = null
   if(userId) {
     user = await User.findById(userId)
   }
 
+  let tryFindShortlink : Maybe<ResultDoc<ShortlinkDocument>> = null
   let hash : string = _hash || generateHash()
-  const tryFindShortlink : Maybe<ResultDoc<ShortlinkDocument>> = await Shortlink.findOne({hash})
 
+  // for existing user checking if URL already exists
+  if(user) {
+    tryFindShortlink = await Shortlink.findOne({
+      owner: user._id,
+      location: location
+    })
+
+    // if URL already exists, return it to avoid creating 
+    // duplicates in collection
+    if(tryFindShortlink) return tryFindShortlink
+  }
+
+  // next check if Shortlink object with 
+  // optionally provided hash exists already
+  // (or in rare case randomly generated one duplicated existing)
+  tryFindShortlink = await Shortlink.findOne({hash})
+
+  // if hash, location and owner match
+  // return existing to modify further
   if(
     tryFindShortlink && 
     tryFindShortlink.location == location &&
-    (allEmpty(userId, user?._id.toString()) || userId == user?._id.toString())
+    sameOrNoOwnerID(tryFindShortlink.owner, user?._id)
   ) {
     return tryFindShortlink
   }
-  
-  const shortlink : ResultDoc<ShortlinkDocument> = new Shortlink({
-    hash: generateHash(),
-    location: prepareURL(location),
-    owner: user?._id || undefined
-  })
 
-  return shortlink
+  // in any other case create a fresh Shortlink object
+  // to modify or store further 
+  let newShortlinkObject : ShortlinkDocument = {
+    hash: tryFindShortlink ? generateHash() : hash,
+    location,
+  }
+
+  if(user?._id) {
+    const urlMetadata = await fetchMetadata(location)
+    newShortlinkObject.owner = user._id
+    newShortlinkObject.urlMetadata = urlMetadata
+  }
+
+  const newShortlink : ResultDoc<ShortlinkDocument> = new Shortlink(newShortlinkObject)
+  return newShortlink
 }
 
 
@@ -78,75 +106,55 @@ export async function createShortlink(location: string, userId?: Maybe<string>):
  * If shortlink already exists tries to update or throws error if duplicate is detected
  * Returns created shortlink or null 
  *
- * 	@param {object} arguments {
- * 	@param {string} location Full URL
- * 	@param {string} descriptionTag Custom URL slug instead of random hash
- * 	@param {string} userTag Full URL
- * 	@param {string} hash Random 4-letter slug }
+ *  @param {object} arguments {
+ *  @param {string} location Full URL
+ *  @param {string} descriptionTag Custom URL slug instead of random hash
+ *  @param {string} userTag Full URL
+ *  @param {string} hash Random 4-letter slug
+ *  @param {string} userId owner user ID }
  * 
- * @return {Promise<null | ShortlinkDocument>}
+ *  @return {Promise<ShortlinkDocument | null>}
  */
 export async function createShortlinkDescriptor( 
-  args : { location: string, descriptionTag: string, hash?: string, userTag?: string }
-): Promise<null | ShortlinkDocument> {
-
-  const existingShortlinkDescription = await Shortlink.findOne( { descriptor: { userTag: args.userTag, descriptionTag: args.descriptionTag } } )
+  args : { location: string, descriptionTag: string, hash?: string, userTag?: string, userId?: string }
+): Promise<ShortlinkDocument | null> {
   try {
-    if (existingShortlinkDescription != null && existingShortlinkDescription.location == args.location ) {
-      return existingShortlinkDescription
+    args.location = normalizeURL(args.location)
+
+    // If shortlink with args.userTag and args.descriptionTag exists
+    // return it when location and owner id are the same 
+    // otherwise cannot create this shortlink
+    const existingShortlinkDescription : ResultDoc<ShortlinkDocument> | null = await Shortlink.findOne( 
+      { descriptor: { userTag: args.userTag, descriptionTag: args.descriptionTag } } 
+    )
+    if (
+      existingShortlinkDescription != null && 
+      existingShortlinkDescription.location == args.location &&
+      sameOrNoOwnerID(args.userId, existingShortlinkDescription.owner)
+    ) {
+      return existingShortlinkDescription.toObject()
 
     } else if (existingShortlinkDescription != null) {
-      throw new GraphQLError(`Shortlink '${args.userTag}@${args.descriptionTag}' already exists`, {
-        extensions: {  code: 'DUPLICATING_DESCRIPTOR'  }
-      })
-
-    } else if (args.hash && !_.isEmpty(args.hash)) {
-      const existingShortlinkHash = await getShortlink( { hash: args.hash } )
-      if(existingShortlinkHash != null && existingShortlinkHash.location != args.location) {
-        throw new GraphQLError(`Cannot update: Hash /${args.hash} is taken by another location '${args.location}'`, {
-          extensions: {  code: 'DUPLICATING_HASH'  }
-        })
-
-      } else if (existingShortlinkHash == null) {
-        const shortlink = new Shortlink({
-          hash: args.hash,
-          location: args.location,
-          descriptor: {
-            userTag: args.userTag,
-            descriptionTag: args.descriptionTag
-          }
-        })
-        const newShortlink = await shortlink.save() 
-        return newShortlink
-
-      } else {
-        const update = await Shortlink.findOneAndUpdate( 
-          {
-            hash: args.hash
-          },
-          {
-            descriptor: {
-              userTag: args.userTag,
-              descriptionTag: args.descriptionTag
-            }
-          }
-        )
-        const updatedShortlink = await Shortlink.findById(update._id)
-        return updatedShortlink
-      }
-
-    } else {
-      const shortlink = new Shortlink({
-        hash: generateHash(),
-        location: args.location,
-        descriptor: {
-          userTag: args.userTag,
-          descriptionTag: args.descriptionTag
-        }
-      })
-      const newShortlink = await shortlink.save() 
-      return newShortlink
+      throw new GraphQLError(
+        `Shortlink '/${args.userTag}@${args.descriptionTag}' already exists`, 
+        { extensions: { code: 'DUPLICATING_DESCRIPTOR' } }
+      )
     }
+
+    // Shortlink with args.userTag and args.descriptionTag DOES NOT exist:
+    // update existing one or create new and save()
+    const shortlinkDocument = await createOrGetShortlink(
+      args.location, args.userId, args.hash
+    )
+
+    shortlinkDocument.descriptor = {
+      userTag: args.userTag,
+      descriptionTag: args.descriptionTag
+    }
+
+    const resultShortlink = await shortlinkDocument.save()
+    return resultShortlink.toObject()
+
   } catch (error) {
     if(error instanceof Error) {
       throw new GraphQLError(error.message, {

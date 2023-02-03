@@ -3,25 +3,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cliColors = exports.prepareURL = exports.clearURLTracking = exports.sanitizeMongo = void 0;
+exports.sameOrNoOwnerID = exports.allEmpty = exports.cliColors = exports.normalizeURL = exports.clearURLTracking = void 0;
 const underscore_1 = __importDefault(require("underscore"));
-function sanitizeMongo(dirtyData) {
-    if (dirtyData instanceof Object) {
-        for (const key in dirtyData) {
-            if (/^\$/.test(key)) {
-                delete dirtyData[key];
-            }
-            else {
-                sanitizeMongo(dirtyData[key]);
-            }
-        }
-    }
-    else if (underscore_1.default.isString(dirtyData)) {
-        dirtyData = dirtyData.replace(/[${}]/ig, '');
-    }
-    return dirtyData;
-}
-exports.sanitizeMongo = sanitizeMongo;
 function clearURLTracking(url) {
     const trackingParams = [
         'fbclid',
@@ -32,7 +15,7 @@ function clearURLTracking(url) {
     return url;
 }
 exports.clearURLTracking = clearURLTracking;
-function prepareURL(_url) {
+function normalizeURL(_url) {
     let url = _url.trim();
     const protocolRegex = new RegExp('^https?://');
     if (!protocolRegex.test(url))
@@ -43,11 +26,27 @@ function prepareURL(_url) {
         URLString = URLString.replace(/\/$/, '');
     return URLString;
 }
-exports.prepareURL = prepareURL;
+exports.normalizeURL = normalizeURL;
 exports.cliColors = {
     red: `\x1b[1;31m`,
     green: `\x1b[1;32m`,
     yellow: `\x1b[1;33m`,
     end: `\x1b[0m`,
 };
+function allEmpty(...args) {
+    if (arguments.length == 0)
+        return false;
+    if (arguments.length == 1)
+        return !arguments[0];
+    return underscore_1.default.reduce(arguments, (prev, curr) => {
+        return (!prev) && (!curr);
+    });
+}
+exports.allEmpty = allEmpty;
+function sameOrNoOwnerID(_id1, _id2) {
+    const id1 = _id1 ? _id1.toString() : _id1;
+    const id2 = _id2 ? _id2.toString() : _id2;
+    return allEmpty(id1, id2) || id1 == id2;
+}
+exports.sameOrNoOwnerID = sameOrNoOwnerID;
 //# sourceMappingURL=utils.js.map
