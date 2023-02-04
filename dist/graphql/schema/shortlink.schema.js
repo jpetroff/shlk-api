@@ -6,6 +6,11 @@ exports.default = `
     descriptionTag: String
   }
 
+  type SnoozeObject {
+    awake: Int
+    description: String
+  }
+
   input QIShortlinkDescriptor {
     userTag: String
     descriptionTag: String
@@ -20,6 +25,9 @@ exports.default = `
     descriptor: ShortlinkDescriptor
     owner: ID
     urlMetadata: Mixed
+    siteTitle: String
+    siteDescription: String
+    snooze: SnoozeObject
   }
 
   input QIShortlink {

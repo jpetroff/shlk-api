@@ -32,7 +32,21 @@ const shortlinkSchema = new Schema<ShortlinkDocument, ShortlinkModel>(
 
     urlMetadata: {
       type: Schema.Types.Mixed
+    },
+
+    siteTitle: {
+      type: String
+    },
+
+    siteDescription: {
+      type: String
+    },
+
+    snooze: {
+      awake: Number,
+      description: String
     }
+
   },
   { timestamps: true }
 )

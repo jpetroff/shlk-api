@@ -1,9 +1,12 @@
-// import { buildSchema } from 'graphql'
-
 export default `
   type ShortlinkDescriptor {
     userTag: String
     descriptionTag: String
+  }
+
+  type SnoozeObject {
+    awake: Int
+    description: String
   }
 
   input QIShortlinkDescriptor {
@@ -20,6 +23,9 @@ export default `
     descriptor: ShortlinkDescriptor
     owner: ID
     urlMetadata: Mixed
+    siteTitle: String
+    siteDescription: String
+    snooze: SnoozeObject
   }
 
   input QIShortlink {

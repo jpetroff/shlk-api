@@ -32,19 +32,43 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const auth_queries_db_1 = require("../../libs/auth-queries.db");
+const user_queries_1 = require("../../libs/user.queries");
+const shortlink_queries_1 = require("../../libs/shortlink.queries");
+const auth_helpers_1 = require("../../libs/auth.helpers");
+const graphql_1 = require("graphql");
 const _ = __importStar(require("underscore"));
+const extends_1 = require("../extends");
 exports.default = {
     Query: {
         getLoggedInUser: (parent, args, context) => __awaiter(void 0, void 0, void 0, function* () {
-            var _a;
-            if (!((_a = context.req.session) === null || _a === void 0 ? void 0 : _a.userId))
-                return null;
-            const loggedUser = yield (0, auth_queries_db_1.getUser)(context.req.session.userId);
-            if (!loggedUser)
-                return null;
-            const loggedProfile = _.pick(loggedUser, auth_queries_db_1.UserProfileFields);
-            return loggedProfile;
+            var _a, _b;
+            try {
+                const userId = (_b = (_a = context === null || context === void 0 ? void 0 : context.req) === null || _a === void 0 ? void 0 : _a.session) === null || _b === void 0 ? void 0 : _b.userId;
+                const loggedUser = yield (0, user_queries_1.getUser)(userId);
+                if (!loggedUser)
+                    return null;
+                const loggedProfile = _.pick(loggedUser.toObject(), user_queries_1.UserProfileFields);
+                return loggedProfile;
+            }
+            catch (error) {
+                if (error instanceof graphql_1.GraphQLError) {
+                    throw error;
+                }
+                else {
+                    throw new graphql_1.GraphQLError(error.message || String(error), { extensions: error.meta || { code: 'UNKNOWN_ERROR' } });
+                }
+            }
+        }),
+        getUserShortlinks: (parent, argsObj, context) => __awaiter(void 0, void 0, void 0, function* () {
+            try {
+                const userId = (0, auth_helpers_1.authUserId)(context === null || context === void 0 ? void 0 : context.req);
+                const queryArgs = _.extendOwn({ userId: userId }, argsObj.args);
+                const shortlinkList = yield (0, shortlink_queries_1.queryShortlinks)(queryArgs);
+                return shortlinkList;
+            }
+            catch (error) {
+                throw (0, extends_1.resolveError)(error);
+            }
         })
     },
     Mutation: {

@@ -51,6 +51,16 @@ const shortlinkSchema = new mongoose_1.Schema({
     },
     urlMetadata: {
         type: mongoose_1.Schema.Types.Mixed
+    },
+    siteTitle: {
+        type: String
+    },
+    siteDescription: {
+        type: String
+    },
+    snooze: {
+        awake: Number,
+        description: String
     }
 }, { timestamps: true });
 shortlinkSchema.plugin(mongoose_beautiful_unique_validation_1.default);

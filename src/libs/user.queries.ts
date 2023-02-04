@@ -5,7 +5,7 @@ import _ from 'underscore'
 export const UserProfileFields : (keyof UserProfile)[] = [ 'email', 'name', 'avatar', 'userTag' ]
 export const UserObjectFields : (keyof UserObject)[] = Array().concat(UserProfileFields, [ 'id_token', 'access_token', 'refresh_token' ])
 
-export async function createOrUpdateUser( args: UserObject ) : Promise<UserDocument | null> {
+export async function createOrUpdateUser( args: UserObject ) : Promise<ResultDoc<UserDocument> | null> {
   if(_.isEmpty(args.refresh_token)) args = _.omit(args, 'refresh_token')
   if(_.isEmpty(args.name)) args.name = args.email
 
@@ -23,7 +23,7 @@ export async function createOrUpdateUser( args: UserObject ) : Promise<UserDocum
   return user
 }
 
-export async function getUser(id: string) : Promise<UserDocument | null> {
+export async function getUser(id: string) : Promise<ResultDoc<UserDocument> | null> {
   const loggedUser = await User.findById(id)
   return loggedUser
 }

@@ -1,4 +1,4 @@
-import { getShortlink } from './public-queries.db'
+import { getShortlink } from './shortlink.queries'
 import _ from 'underscore'
 import express from 'express'
 

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sameOrNoOwnerID = exports.allEmpty = exports.cliColors = exports.normalizeURL = exports.clearURLTracking = void 0;
+exports.ExtError = exports.sameOrNoOwnerID = exports.allEmpty = exports.cliColors = exports.normalizeURL = exports.clearURLTracking = void 0;
 const underscore_1 = __importDefault(require("underscore"));
 function clearURLTracking(url) {
     const trackingParams = [
@@ -49,4 +49,13 @@ function sameOrNoOwnerID(_id1, _id2) {
     return allEmpty(id1, id2) || id1 == id2;
 }
 exports.sameOrNoOwnerID = sameOrNoOwnerID;
+class ExtError extends Error {
+    constructor(message, meta) {
+        super(message);
+        this.name = 'Error';
+        Error.captureStackTrace(this, this.constructor);
+        this.meta = meta;
+    }
+}
+exports.ExtError = ExtError;
 //# sourceMappingURL=utils.js.map

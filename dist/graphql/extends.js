@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MixedResolver = exports.MixedTypeDef = exports.MixedType = void 0;
+exports.resolveError = exports.MixedResolver = exports.MixedTypeDef = exports.MixedType = void 0;
 const graphql_1 = require("graphql");
 exports.MixedType = new graphql_1.GraphQLScalarType({
     name: 'Mixed',
@@ -50,4 +50,13 @@ function parseAst(ast) {
             throw new Error(`Unexpected kind in parseLiteral: ${ast.kind}`);
     }
 }
+function resolveError(error) {
+    if (error instanceof graphql_1.GraphQLError) {
+        return error;
+    }
+    else {
+        return new graphql_1.GraphQLError(error.message || String(error), { extensions: error.meta || { code: 'UNKNOWN_ERROR' } });
+    }
+}
+exports.resolveError = resolveError;
 //# sourceMappingURL=extends.js.map

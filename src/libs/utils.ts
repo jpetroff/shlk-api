@@ -1,22 +1,5 @@
 import _ from 'underscore'
 
-// export function sanitizeMongo( dirtyData: string | undefined): string;
-// export function sanitizeMongo( dirtyData: { [key: string]: any } | undefined): { [key: string]: any };
-// export function sanitizeMongo( dirtyData: string | { [key: string]: any } | undefined) {
-//   if (dirtyData instanceof Object) {
-//     for (const key in dirtyData) {
-//       if (/^\$/.test(key)) {
-//         delete dirtyData[key];
-//       } else {
-//         sanitizeMongo(dirtyData[key]);
-//       }
-//     }
-//   } else if (_.isString(dirtyData)) {
-// 		dirtyData = dirtyData.replace(/[${}]/ig, '')
-// 	}
-//   return dirtyData;
-// }
-
 export function clearURLTracking (url: URL) : URL {
   const trackingParams = [
     'fbclid',
@@ -69,4 +52,21 @@ export function sameOrNoOwnerID(_id1: Maybe<string | ObjectId>, _id2: Maybe<stri
   const id1 = _id1 ? _id1.toString() : _id1
   const id2 = _id2 ? _id2.toString() : _id2
   return allEmpty(id1, id2) || id1 == id2
+}
+
+export class ExtError extends Error {
+  public meta?: AnyObject
+
+  constructor (message?: string, meta?: AnyObject) {
+    super(message)
+
+    // assign the error class name in your custom error (as a shortcut)
+    this.name = 'Error'
+
+    // capturing the stack trace keeps the reference to your error class
+    Error.captureStackTrace(this, this.constructor);
+
+    // you may also assign additional properties to your error
+    this.meta = meta
+  }
 }

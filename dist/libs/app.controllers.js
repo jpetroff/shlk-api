@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.appRedirect = void 0;
-const public_queries_db_1 = require("./public-queries.db");
+const shortlink_queries_1 = require("./shortlink.queries");
 const underscore_1 = __importDefault(require("underscore"));
 function sendDescriptiveRedirect(res, result) {
     const location = underscore_1.default.unescape(result.location);
@@ -23,7 +23,7 @@ function appRedirect(req, res) {
     const isDecriptiveUrl = /.*?@.*?/.test(req.params.redirectUrl);
     if (isDecriptiveUrl) {
         const [userTag, descriptionTag] = req.params.redirectUrl.split('@');
-        (0, public_queries_db_1.getShortlink)({
+        (0, shortlink_queries_1.getShortlink)({
             userTag,
             descriptionTag
         }).then((result) => {
@@ -36,7 +36,7 @@ function appRedirect(req, res) {
     }
     else {
         const hash = req.params.redirectUrl;
-        (0, public_queries_db_1.getShortlink)({
+        (0, shortlink_queries_1.getShortlink)({
             hash
         }).then((result) => {
             if (!result)

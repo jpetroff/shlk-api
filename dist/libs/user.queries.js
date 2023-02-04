@@ -39,4 +39,4 @@ function getUser(id) {
     });
 }
 exports.getUser = getUser;
-//# sourceMappingURL=auth-queries.db.js.map
+//# sourceMappingURL=user.queries.js.map

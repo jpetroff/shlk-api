@@ -1,7 +1,7 @@
 import express from 'express'
 import { OAuth2Client } from 'google-auth-library'
 import config from '../config'
-import { createOrUpdateUser } from './auth-queries.db'
+import { createOrUpdateUser } from './user.queries'
 import {google} from 'googleapis'
 // import session from 'express-session'
 

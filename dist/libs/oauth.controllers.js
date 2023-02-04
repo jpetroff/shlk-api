@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.sessionLogout = exports.oauthCallback = exports.oauthRedirect = void 0;
 const google_auth_library_1 = require("google-auth-library");
 const config_1 = __importDefault(require("../config"));
-const auth_queries_db_1 = require("./auth-queries.db");
+const user_queries_1 = require("./user.queries");
 const googleapis_1 = require("googleapis");
 function getAuthClient() {
     return new google_auth_library_1.OAuth2Client(config_1.default.web.client_id, config_1.default.web.client_secret, config_1.default.web.redirect_uris[0]);
@@ -51,7 +51,7 @@ function oauthCallback(req, res) {
                 const { data } = yield gapi.userinfo.v2.me.get();
                 if (!data.email || !data.verified_email)
                     throw new Error('Your email is not verified. Please verify before signing in');
-                const user = yield (0, auth_queries_db_1.createOrUpdateUser)({
+                const user = yield (0, user_queries_1.createOrUpdateUser)({
                     email: data.email,
                     name: data.given_name || data.family_name,
                     avatar: data.picture,

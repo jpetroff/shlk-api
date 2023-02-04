@@ -1,4 +1,4 @@
-import { GraphQLScalarType, Kind, ValueNode, ObjectValueNode } from 'graphql'
+import { GraphQLScalarType, Kind, ValueNode, ObjectValueNode, GraphQLError } from 'graphql'
 
 export const MixedType = new GraphQLScalarType({
   name: 'Mixed',
@@ -51,5 +51,15 @@ function parseAst(ast:ValueNode):unknown {
         return null
     default:
       throw new Error(`Unexpected kind in parseLiteral: ${ast.kind}`)
+  }
+}
+
+export function resolveError(error: any) : any {
+  if(error instanceof GraphQLError) { return error } 
+  else {
+    return new GraphQLError(
+      error.message || String(error), 
+      { extensions: error.meta || { code: 'UNKNOWN_ERROR' } }
+    )
   }
 }

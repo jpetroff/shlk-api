@@ -2,6 +2,16 @@ declare type ResultDoc<T> = import('mongoose').HydratedDocument<T>
 declare type QueryType<T> = import('mongoose').QueryWithHelpers<any, T>
 declare type ObjectId = import('mongoose').Types.ObjectId
 
+/* 
+  [Common] Common query arguments
+*/
+declare interface QICommon {
+  limit?: number
+  skip?: number
+  sort?: string
+  order?: string | number 
+  search?: string
+}
 
 /*
   [Shortlink] GraphQL interface
@@ -15,6 +25,12 @@ declare interface QIShortlink {
   }
   owner?: ObjectId
   urlMetadata?: AnyObject
+  siteTitle?: string
+  siteDescription?: string
+  snooze?: {
+    awake: Number
+    description?: String
+  }
 }
 
 /* 
