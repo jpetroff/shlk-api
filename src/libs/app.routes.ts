@@ -10,7 +10,7 @@ const publicDir = process.env.NODE_ENV == 'production' ?
 const indexPath = path.join(publicDir, 'index.html')
 
 /* frontend routes */
-appRouter.get(['/', '/app/*', '/login'], (req, res) => { res.sendFile(indexPath) })
+appRouter.get(['/', '/app', '/app/*', '/login'], (req, res) => { res.sendFile(indexPath) })
 appRouter.get('/:redirectUrl', appRedirect)
 
 /* utility */
