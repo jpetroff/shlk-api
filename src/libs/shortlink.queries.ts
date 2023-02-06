@@ -5,7 +5,7 @@ import { normalizeURL, sameOrNoOwnerID, ExtError } from './utils'
 import generateHash from './hash.lib'
 import _ from 'underscore'
 import User from '../models/user'
-import fetchMetadata from 'url-metadata'
+import fetchMetadata, { URLMeta } from './url-parser.lib'
 
 export const ShortlinkPublicFields : (keyof ShortlinkDocument)[] = [ 'hash', 'descriptor', 'location', 'urlMetadata' ]
 
@@ -67,12 +67,12 @@ async function createOrGetShortlink(location: string, userId?: Maybe<string>, _h
 
   if(user?._id) {
     newShortlinkObject.owner = user._id
-    let urlMetadata : Maybe<fetchMetadata.Result> = null
+    let urlMetadata : Maybe<URLMeta.Result> = null
     try { urlMetadata = await fetchMetadata(location) } catch {}
     if(urlMetadata) {
       newShortlinkObject.urlMetadata = urlMetadata
-      newShortlinkObject.siteTitle = urlMetadata['og:title'] || urlMetadata.title
-      newShortlinkObject.siteDescription = urlMetadata['og:description'] || urlMetadata.description
+      newShortlinkObject.siteTitle = urlMetadata.og?.title || urlMetadata.title
+      newShortlinkObject.siteDescription = urlMetadata.og?.description || urlMetadata.description
     }
   }
 
@@ -191,8 +191,6 @@ export async function queryShortlinks(
   args: { userId: string } & QICommon
 ): Promise<(LeanDocument<ShortlinkDocument>)[]> {
   let results : QueryWithHelpers<LeanDocument<ShortlinkDocument>[], LeanDocument<ShortlinkDocument> >
-
-  console.log(args)
 
   results = Shortlink.find<ShortlinkDocument>({
     owner: args.userId

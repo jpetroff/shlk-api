@@ -17,9 +17,10 @@ const shortlink_1 = __importDefault(require("../models/shortlink"));
 const utils_1 = require("./utils");
 const hash_lib_1 = __importDefault(require("./hash.lib"));
 const user_1 = __importDefault(require("../models/user"));
-const url_metadata_1 = __importDefault(require("url-metadata"));
+const url_parser_lib_1 = __importDefault(require("./url-parser.lib"));
 exports.ShortlinkPublicFields = ['hash', 'descriptor', 'location', 'urlMetadata'];
 function createOrGetShortlink(location, userId, _hash) {
+    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         location = (0, utils_1.normalizeURL)(location);
         let user = null;
@@ -50,13 +51,13 @@ function createOrGetShortlink(location, userId, _hash) {
             newShortlinkObject.owner = user._id;
             let urlMetadata = null;
             try {
-                urlMetadata = yield (0, url_metadata_1.default)(location);
+                urlMetadata = yield (0, url_parser_lib_1.default)(location);
             }
-            catch (_a) { }
+            catch (_c) { }
             if (urlMetadata) {
                 newShortlinkObject.urlMetadata = urlMetadata;
-                newShortlinkObject.siteTitle = urlMetadata['og:title'] || urlMetadata.title;
-                newShortlinkObject.siteDescription = urlMetadata['og:description'] || urlMetadata.description;
+                newShortlinkObject.siteTitle = ((_a = urlMetadata.og) === null || _a === void 0 ? void 0 : _a.title) || urlMetadata.title;
+                newShortlinkObject.siteDescription = ((_b = urlMetadata.og) === null || _b === void 0 ? void 0 : _b.description) || urlMetadata.description;
             }
         }
         const newShortlink = new shortlink_1.default(newShortlinkObject);
@@ -112,7 +113,6 @@ exports.getShortlink = getShortlink;
 function queryShortlinks(args) {
     return __awaiter(this, void 0, void 0, function* () {
         let results;
-        console.log(args);
         results = shortlink_1.default.find({
             owner: args.userId
         });
