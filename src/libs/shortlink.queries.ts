@@ -67,16 +67,20 @@ async function createOrGetShortlink(location: string, userId?: Maybe<string>, _h
 
   if(user?._id) {
     newShortlinkObject.owner = user._id
-    let urlMetadata : Maybe<URLMeta.Result> = null
-    try { urlMetadata = await fetchMetadata(location) } catch {}
-    if(urlMetadata) {
-      newShortlinkObject.urlMetadata = urlMetadata
-      newShortlinkObject.siteTitle = urlMetadata.og?.title || urlMetadata.title
-      newShortlinkObject.siteDescription = urlMetadata.og?.description || urlMetadata.description
-    }
   }
 
   const newShortlink : ResultDoc<ShortlinkDocument> = new Shortlink(newShortlinkObject)
+
+  if(user?._id) 
+    _.defer( async () => {
+      let urlMetadata : Maybe<URLMeta.Result> = undefined
+      let siteTitle : string, siteDescription : string
+      [ urlMetadata, siteTitle, siteDescription ] = await fetchMetadata(location)
+      newShortlink.urlMetadata = urlMetadata
+      newShortlink.siteTitle = siteTitle
+      newShortlink.siteDescription = siteDescription
+      newShortlink.save()
+    })
   return newShortlink
 }
 
@@ -197,13 +201,20 @@ export async function queryShortlinks(
   })
 
   if(args.search) {
-    results = results.find({
-      $text: {
-        $search: args.search,
-        $caseSensitive: false,
-        $diacriticSensitive: false
-      }
-    })
+    // results = results.find({
+    //   $text: {
+    //     $search: args.search,
+    //     $caseSensitive: false,
+    //     $diacriticSensitive: false
+    //   }
+    // })
+    const _s = args.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    results.or([
+      { siteTitle: { $regex: new RegExp(_s, 'i') } },
+      { siteDescription: { $regex: new RegExp(_s, 'i') } },
+      { location: { $regex: new RegExp(_s, 'i') } },
+      { 'descriptor.descriptionTag': { $regex: new RegExp(_s, 'i') } }
+    ])
   }
 
   if(args.sort && args.order) {

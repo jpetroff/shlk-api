@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -32,43 +23,41 @@ function oauthRedirect(req, res) {
     res.redirect(authorizeUrl);
 }
 exports.oauthRedirect = oauthRedirect;
-function oauthCallback(req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const qs = new URL(req.url, 'https://shlk.cc/').searchParams;
-        const code = qs.get('code');
-        const oAuth2Client = getAuthClient();
-        if (!code) {
-            res.sendStatus(400).json({ message: 'Authorization failed' });
+async function oauthCallback(req, res) {
+    const qs = new URL(req.url, 'https://shlk.cc/').searchParams;
+    const code = qs.get('code');
+    const oAuth2Client = getAuthClient();
+    if (!code) {
+        res.sendStatus(400).json({ message: 'Authorization failed' });
+    }
+    else {
+        try {
+            const r = await oAuth2Client.getToken(code);
+            oAuth2Client.setCredentials(r.tokens);
+            const gapi = googleapis_1.google.oauth2({
+                auth: oAuth2Client,
+                version: 'v2'
+            });
+            const { data } = await gapi.userinfo.v2.me.get();
+            if (!data.email || !data.verified_email)
+                throw new Error('Your email is not verified. Please verify before signing in');
+            const user = await (0, user_queries_1.createOrUpdateUser)({
+                email: data.email,
+                name: data.given_name || data.family_name,
+                avatar: data.picture,
+                id_token: r.tokens.id_token,
+                access_token: r.tokens.access_token,
+                refresh_token: r.tokens.refresh_token
+            });
+            req.session.userId = user?._id.toString();
+            req.session.tokens = r.tokens;
+            res.redirect('/');
         }
-        else {
-            try {
-                const r = yield oAuth2Client.getToken(code);
-                oAuth2Client.setCredentials(r.tokens);
-                const gapi = googleapis_1.google.oauth2({
-                    auth: oAuth2Client,
-                    version: 'v2'
-                });
-                const { data } = yield gapi.userinfo.v2.me.get();
-                if (!data.email || !data.verified_email)
-                    throw new Error('Your email is not verified. Please verify before signing in');
-                const user = yield (0, user_queries_1.createOrUpdateUser)({
-                    email: data.email,
-                    name: data.given_name || data.family_name,
-                    avatar: data.picture,
-                    id_token: r.tokens.id_token,
-                    access_token: r.tokens.access_token,
-                    refresh_token: r.tokens.refresh_token
-                });
-                req.session.userId = user === null || user === void 0 ? void 0 : user._id.toString();
-                req.session.tokens = r.tokens;
-                res.redirect('/');
-            }
-            catch (err) {
-                console.log(err);
-                res.status(400).json(JSON.stringify(err));
-            }
+        catch (err) {
+            console.log(err);
+            res.status(400).json(JSON.stringify(err));
         }
-    });
+    }
 }
 exports.oauthCallback = oauthCallback;
 function sessionLogout(req, res) {

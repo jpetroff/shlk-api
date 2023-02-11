@@ -26,6 +26,7 @@ export default `
     siteTitle: String
     siteDescription: String
     snooze: SnoozeObject
+    tags: [String]
   }
 
   input QIShortlink {

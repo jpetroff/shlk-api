@@ -1,8 +1,7 @@
 import axios, { AxiosRequestConfig } from "axios"
 import { parse as HTML, HTMLElement } from "node-html-parser"
-import http from 'node:http'
-import https from 'node:https'
-import { Buffer } from "node:buffer"
+import metadataTools from "./metadata.tools"
+import * as _ from 'underscore'
 
 interface Favicon {
   src: string,
@@ -37,77 +36,88 @@ const readMT = (el: HTMLElement, name: string) => {
     return prop == name ? el.getAttribute('content') : null;
 };
 
-const parse = async (url: string) : Promise<URLMeta.Result> => {
+const parse = async (url: string) : Promise<[URLMeta.Result, string, string]> => {
+  console.log(url)
+  const prefetch = axios.create({
+    url,
+    maxBodyLength: 1024*1024*2,
+    headers: {
+      'X-Custom-Header': 'foobar'
+    }
+  })
 
-    const prefetch = axios.create({
-      url,
-      timeout: 2000,
-      maxBodyLength: 1024*1024*2,
-      headers: {
-        'X-Custom-Header': 'foobar'
+  const fetchedHeaders = await prefetch.head(url)
+
+  let partialMeta : URLMeta.Result = {
+    type: fetchedHeaders.headers['content-type'] || 'unknown',
+    size: fetchedHeaders.headers['content-length'] ? parseInt(fetchedHeaders.headers['content-length']) : undefined,
+    encoding: fetchedHeaders.headers['content-encoding'] || 'utf-8'
+  }
+
+  let meta: URLMeta.SiteMeta = {}
+  let og: URLMeta.SiteMeta = {}
+
+  if(partialMeta.type.match(/html/ig) != null) {
+    try{
+      const { data } = await prefetch.get(url)
+
+      const $ = HTML(data);
+
+      const title = $.querySelector('title');
+      if (title)
+          meta.title = title.text;
+
+      const canonical = $.querySelector('link[rel=canonical]');
+      if (canonical) {
+          meta.url = canonical.getAttribute('href');
       }
-    })
 
-    const fetchedHeaders = await prefetch.head(url)
-
-    let partialMeta : URLMeta.Result = {
-      type: fetchedHeaders.headers['content-type'] || 'unknown',
-      size: fetchedHeaders.headers['content-length'] ? parseInt(fetchedHeaders.headers['content-length']) : undefined,
-      encoding: fetchedHeaders.headers['content-encoding'] || 'utf-8'
-    }
-
-    if(partialMeta.type.match(/html/ig) == null) {
-      return partialMeta
-    }
-
-    const { data } = await prefetch.get(url)
-
-    const $ = HTML(data);
-    let meta: URLMeta.SiteMeta = {}
-    let og: URLMeta.SiteMeta = {}
-
-    const title = $.querySelector('title');
-    if (title)
-        meta.title = title.text;
-
-    const canonical = $.querySelector('link[rel=canonical]');
-    if (canonical) {
-        meta.url = canonical.getAttribute('href');
-    }
-
-    const favicons = $.querySelectorAll('link[rel~=icon]');
-    let faviconList: Favicon[] = []
-    for(let i = 0; i < favicons.length; i++) {
-      const el = favicons[i]
-      const href = el.getAttribute('href')
-      if(href && /\.(jpe?g|png|gif)$/ig.test(href)) 
-        faviconList.push({
-          src: href,
-          sizes: el.getAttribute('sizes')
-        })
-    }
-    if(faviconList.length > 0)
+      const favicons = $.querySelectorAll('link[rel~=icon]');
+      let faviconList: Favicon[] = []
+      for(let i = 0; i < favicons.length; i++) {
+        const el = favicons[i]
+        const href = el.getAttribute('href')
+        if(href && /\.(jpe?g|png|gif|ico)$/ig.test(href)) {
+          let fullUrl : string = ''
+          try { 
+            fullUrl = (new URL(href, url)).toString() 
+            faviconList.push({
+              src: fullUrl,
+              sizes: el.getAttribute('sizes')
+            })
+          } catch {}
+        }
+      }
       meta.favicons = faviconList
 
-    const metas = $.querySelectorAll('meta');
+      const metas = $.querySelectorAll('meta');
 
-    for (let i = 0; i < metas.length; i++) {
-        const el = metas[i];
+      for (let i = 0; i < metas.length; i++) {
+          const el = metas[i];
 
-        ['title', 'description', 'image'].forEach( (s) => {
-            const val = readMT(el, s);
-            if (val) meta[s as (keyof Omit<URLMeta.SiteMeta, 'favicons'>)] = val;
-        });
+          ['title', 'description', 'image'].forEach( (s) => {
+              const val = readMT(el, s);
+              if (val) meta[s as (keyof Omit<URLMeta.SiteMeta, 'favicons'>)] = val;
+          });
 
-        ['og:title', 'og:description', 'og:image', 'og:url', 'og:site_name', 'og:type'].forEach(s => {
-            const val = readMT(el, s);
-            if (val) og[s.split(':')[1] as (keyof Omit<URLMeta.SiteMeta, 'favicons'>)] = val;
-        });
+          ['og:title', 'og:description', 'og:image', 'og:url', 'og:site_name', 'og:type'].forEach(s => {
+              const val = readMT(el, s);
+              if (val) og[s.split(':')[1] as (keyof Omit<URLMeta.SiteMeta, 'favicons'>)] = val;
+          });
+      }
+    } catch (err) {
+      console.log(err)
     }
+  }
 
-    // return _.extend({og: og}, partialMeta, meta)
-    return { ...partialMeta, ...meta, og }
+  let returnMeta : URLMeta.Result = _.extend({}, partialMeta, meta, {og: og}) as URLMeta.Result
+  const metaParams = {location: url, urlMetadata: returnMeta}
+  const siteTitle = metadataTools.getTitle(metaParams) || ''
+  const siteDescription = metadataTools.getDescription(metaParams) || ''
+  const defaultFavicon = metadataTools.getDefaultFavicon(returnMeta.favicons)
+  returnMeta.favicons?.splice(0, 0, defaultFavicon)
 
+  return [returnMeta, siteTitle, siteDescription]
 }
 
 

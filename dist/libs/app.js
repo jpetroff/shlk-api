@@ -22,6 +22,7 @@ const helmetOpts = {
     crossOriginResourcePolicy: { policy: "cross-origin" }
 };
 class App {
+    express;
     constructor() {
         this.express = (0, express_1.default)();
         this.express.use(app_routes_1.staticRoute);

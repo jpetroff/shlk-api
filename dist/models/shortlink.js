@@ -61,6 +61,9 @@ const shortlinkSchema = new mongoose_1.Schema({
     snooze: {
         awake: Number,
         description: String
+    },
+    tags: {
+        type: [String]
     }
 }, { timestamps: true });
 shortlinkSchema.plugin(mongoose_beautiful_unique_validation_1.default);

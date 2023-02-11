@@ -30,7 +30,8 @@ declare interface QIShortlink {
   snooze?: {
     awake: Number
     description?: String
-  }
+  },
+  tags?: String[]
 }
 
 /* 

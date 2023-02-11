@@ -45,6 +45,10 @@ const shortlinkSchema = new Schema<ShortlinkDocument, ShortlinkModel>(
     snooze: {
       awake: Number,
       description: String
+    },
+
+    tags: {
+      type: [String]
     }
 
   },

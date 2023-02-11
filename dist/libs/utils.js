@@ -50,6 +50,7 @@ function sameOrNoOwnerID(_id1, _id2) {
 }
 exports.sameOrNoOwnerID = sameOrNoOwnerID;
 class ExtError extends Error {
+    meta;
     constructor(message, meta) {
         super(message);
         this.name = 'Error';

@@ -24,7 +24,7 @@ function toObject(value) {
 }
 function parseObject(_ast) {
     const ast = _ast;
-    if (!(ast === null || ast === void 0 ? void 0 : ast.fields))
+    if (!ast?.fields)
         return undefined;
     const value = Object.create(null);
     ast.fields.forEach((field) => {

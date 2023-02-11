@@ -1,0 +1,21 @@
+
+> shlk-main@1.0.0 prestart
+> rm -rf ./dist/*
+
+
+> shlk-main@1.0.0 start
+> npx tsc-watch --noClear --onSuccess 'node ./dist/index.js'
+
+
+
+----------------------
+11:54:45 PM - Starting compilation in watch mode...
+
+
+11:55:09 PM -[32m Found 0 errors. Watching for file changes.[39m
+
+
+[…] shlk.cc app starting in [1;33mdevelopment[0m mode
+[…] Connecting to [1;33mtest[0m: mongodb+srv://jpetrov:9rRd6cpHBndVNenc@shlk-db.vyq1kxk.mongodb.net/test?retryWrites=true&w=majority
+[1;32m[✓][0m Connected to test
+[1;32m[✓][0m Server listening on port 8002
