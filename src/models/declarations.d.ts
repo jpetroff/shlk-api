@@ -28,10 +28,23 @@ declare interface QIShortlink {
   siteTitle?: string
   siteDescription?: string
   snooze?: {
-    awake: Number
-    description?: String
+    awake: number
+    description?: string
   },
-  tags?: String[]
+  tags?: string[]
+  _searchIndex?: string
+}
+
+/* 
+  [Shortlink] Snooze timer params
+ */
+declare interface QISnoozeTimer {
+  location?: string
+  hash?: string
+  id?: string
+  standardTimer?: import('../libs/snooze.tools').StandardTimers
+  customDay?: import('../libs/snooze.tools').SnoozeDay
+  customTime?: import('../libs/snooze.tools').SnoozeTime
 }
 
 /* 

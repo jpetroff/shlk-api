@@ -17,7 +17,7 @@
     "prebuild": "rm -rf ./dist/*",
     "prestart": "rm -rf ./dist/*",
     "build": "tsc --project ./tsconfig.json",
-    "start": "npx tsc-watch --noClear --onSuccess 'node ./dist/index.js'",
+    "start": "npx tsc-watch --noClear --onSuccess 'node --experimental-modules ./dist/index.js'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ExtError = exports.sameOrNoOwnerID = exports.allEmpty = exports.cliColors = exports.normalizeURL = exports.clearURLTracking = void 0;
+exports.readableBytes = exports.ExtError = exports.sameOrNoOwnerID = exports.allEmpty = exports.cliColors = exports.normalizeURL = exports.clearURLTracking = void 0;
 const underscore_1 = __importDefault(require("underscore"));
 function clearURLTracking(url) {
     const trackingParams = [
@@ -59,4 +59,47 @@ class ExtError extends Error {
     }
 }
 exports.ExtError = ExtError;
+var BASE;
+(function (BASE) {
+    BASE[BASE["TWO"] = 2] = "TWO";
+    BASE[BASE["TEN"] = 10] = "TEN";
+})(BASE || (BASE = {}));
+const UNITS = {
+    [BASE.TEN]: ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"],
+    [BASE.TWO]: ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
+};
+function toFixed(value, n) {
+    const m = Math.pow(10, n);
+    return Math.round(value * m) / m;
+}
+function parseBytes(value, base = BASE.TEN) {
+    const bytes = Number(value);
+    const absValue = Math.abs(bytes);
+    const step = base === BASE.TWO
+        ? 1024
+        : 1000;
+    if (!Number.isFinite(absValue)) {
+        throw new TypeError("value can not be used as a finite number");
+    }
+    let i;
+    if (absValue === 0)
+        i = 0;
+    else {
+        i =
+            base === BASE.TWO
+                ? Math.floor(Math.log2(absValue) / 10)
+                : Math.floor(Math.log10(absValue) / 3);
+    }
+    const j = Math.min(i, UNITS[base].length - 1);
+    const v = toFixed(absValue / Math.pow(step, j), 2);
+    return {
+        value: absValue === 0 ? 0 : v * (value / absValue),
+        unit: UNITS[base][j],
+    };
+}
+function readableBytes(bytes, base = BASE.TWO) {
+    const { value, unit } = parseBytes(bytes, base);
+    return `${value} ${unit}`;
+}
+exports.readableBytes = readableBytes;
 //# sourceMappingURL=utils.js.map

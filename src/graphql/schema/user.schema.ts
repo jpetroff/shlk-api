@@ -13,6 +13,15 @@ export default `
     search: String
   }
 
+  input QISnoozeArgs {
+    location: String
+    hash: String
+    id: String
+    standardTimer: String
+    customDay: Mixed
+    customTime: Mixed
+  }
+
   type User {
     _id: ID!
     email: String!
@@ -32,6 +41,7 @@ export default `
   
   type Mutation {
     updateLoggedInUser(args: QIUserUpdate): User
+    createOrUpdateShortlinkTimer(args: QISnoozeArgs) : Shortlink
   }
 
   schema {

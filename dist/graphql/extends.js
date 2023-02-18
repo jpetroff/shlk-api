@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resolveError = exports.MixedResolver = exports.MixedTypeDef = exports.MixedType = void 0;
+exports.LongResolver = exports.LongTypeDef = exports.LongType = exports.resolveError = exports.MixedResolver = exports.MixedTypeDef = exports.MixedType = void 0;
 const graphql_1 = require("graphql");
 exports.MixedType = new graphql_1.GraphQLScalarType({
     name: 'Mixed',
@@ -59,4 +59,34 @@ function resolveError(error) {
     }
 }
 exports.resolveError = resolveError;
+exports.LongType = new graphql_1.GraphQLScalarType({
+    name: 'Long',
+    description: 'The `Long` scalar type represents 52-bit integers',
+    serialize: coerceLong,
+    parseValue: coerceLong,
+    parseLiteral: parseLiteral,
+});
+exports.LongTypeDef = `scalar Long`;
+exports.LongResolver = {
+    Long: exports.LongType
+};
+const MAX_LONG = Number.MAX_SAFE_INTEGER;
+const MIN_LONG = Number.MIN_SAFE_INTEGER;
+function coerceLong(value) {
+    if (!value)
+        throw new TypeError('Long cannot represent non 52-bit signed integer value');
+    const num = Number(value);
+    if (num == num && num <= MAX_LONG && num >= MIN_LONG)
+        return num < 0 ? Math.ceil(num) : Math.floor(num);
+    throw new TypeError(`Long cannot represent non 52-bit signed integer value: ${value}`);
+}
+function parseLiteral(ast) {
+    if (ast.kind == graphql_1.Kind.INT) {
+        const num = parseInt(ast.value, 10);
+        if (num <= MAX_LONG && num >= MIN_LONG)
+            return num;
+        return null;
+    }
+    return null;
+}
 //# sourceMappingURL=extends.js.map

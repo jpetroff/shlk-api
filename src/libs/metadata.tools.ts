@@ -1,6 +1,7 @@
+import axios from 'axios'
 import * as _ from 'underscore'
 import linkTools from './link.tools'
-import prettyBytes from 'pretty-bytes'
+import { readableBytes } from './utils'
 
 type LinkData = {
   location: string
@@ -10,9 +11,31 @@ type LinkData = {
 class MetadataTools {
   constructor() {}
 
-  getDefaultFavicon( list?: {src: string, sizes?: string}[] ) : {src: string, sizes?: string} {
-    if(!list) return { src: '/assets/default-favicon.png', sizes: 'default' }
-    return { src: '/assets/default-favicon.png', sizes: 'default' }
+  getDefaultFavicon( list?: {src: string, sizes?: string}[] ) : Maybe<{src: string, sizes?: string}> {
+    if(!list || list.length < 1) {
+      return null
+    }
+    return list[0]
+  }
+
+  sortFaviconList(list?: {src: string, sizes?: string}[] ) : Maybe<{src: string, sizes?: string}[]> {
+    if(!list || list.length < 1) {
+      return null
+    }
+
+    let faviconList = _.map(list, (item) => {
+      if(!item.sizes || item.sizes == 'any') {
+        item.sizes = '-1'
+        return item
+      }
+      const sizeArray = item.sizes?.split('x')
+      item.sizes = sizeArray[0] || '-1'
+      return item
+    })
+
+    faviconList = _.sortBy(faviconList, (item) => { return parseInt(item.sizes || '-1') } )
+
+    return faviconList
   }
 
   getTitle( shortlink: LinkData ) : string {
@@ -30,27 +53,20 @@ class MetadataTools {
 
     const type = shortlink.urlMetadata.type.replace(/;.*$/ig, '').trim()
     if(/html/ig.test(type)) {
-      const v1 = (shortlink.urlMetadata.description ||
+      const v = ( shortlink.urlMetadata.description ||
                   shortlink.urlMetadata.og?.description || 
                   '')
-      const v2 =  [
-                    shortlink.urlMetadata.og?.type || '',
-                    shortlink.urlMetadata.og?.site_name || ''
-                  ].join(' · ')
-      return v1.trim() || v2.trim() || ''
+      return v.trim() || ''
     }
     if(/image/ig.test(type)) {
-      return [
-        'Image',
-        // ( shortlink.urlMetadata.size? prettyBytes(parseInt(shortlink.urlMetadata.size)) : '' )
-        shortlink.urlMetadata.size || ''
-      ].join(' · ')
+      let strings = [ 'Image' ]
+      if(shortlink.urlMetadata.size) strings.push(readableBytes(parseInt(shortlink.urlMetadata.size)))
+      return strings.join(' · ')
     }
     if(/video/ig.test(type)) {
-      return [
-        'Video',
-        shortlink.urlMetadata.size || ''
-      ].join(' · ')
+      let strings = [ 'Video' ]
+      if(shortlink.urlMetadata.size) strings.push(readableBytes(parseInt(shortlink.urlMetadata.size)))
+      return strings.join(' · ')
     }
     return ''
   }

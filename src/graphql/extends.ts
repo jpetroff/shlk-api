@@ -1,4 +1,4 @@
-import { GraphQLScalarType, Kind, ValueNode, ObjectValueNode, GraphQLError } from 'graphql'
+import { GraphQLScalarType, Kind, ValueNode, ObjectValueNode, GraphQLError, IntValueNode } from 'graphql'
 
 export const MixedType = new GraphQLScalarType({
   name: 'Mixed',
@@ -62,4 +62,44 @@ export function resolveError(error: any) : any {
       { extensions: error.meta || { code: 'UNKNOWN_ERROR' } }
     )
   }
+}
+
+/* 
+  Big Integer for Date.valueOf()
+*/
+
+export const LongType = new GraphQLScalarType({
+  name: 'Long',
+  description: 'The `Long` scalar type represents 52-bit integers',
+  serialize: coerceLong,
+  parseValue: coerceLong,
+  parseLiteral: parseLiteral,
+})
+
+export const LongTypeDef = `scalar Long`
+
+export const LongResolver = {
+  Long: LongType
+}
+
+const MAX_LONG = Number.MAX_SAFE_INTEGER
+const MIN_LONG = Number.MIN_SAFE_INTEGER
+
+function coerceLong(value: unknown) : Maybe<number> {
+  if(!value)
+      throw new TypeError('Long cannot represent non 52-bit signed integer value')
+  const num = Number(value)
+  if(num == num && num <= MAX_LONG && num >= MIN_LONG)
+      return num < 0 ? Math.ceil(num) : Math.floor(num)
+  throw new TypeError(`Long cannot represent non 52-bit signed integer value: ${value}`)
+}
+
+function parseLiteral(ast: ValueNode) : unknown {
+  if(ast.kind == Kind.INT) {
+    const num = parseInt(ast.value, 10)
+    if(num <= MAX_LONG && num >= MIN_LONG)
+        return num
+    return null
+  }
+  return null
 }

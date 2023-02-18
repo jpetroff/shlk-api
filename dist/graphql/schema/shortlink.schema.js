@@ -7,7 +7,7 @@ exports.default = `
   }
 
   type SnoozeObject {
-    awake: Int
+    awake: Long
     description: String
   }
 
@@ -29,6 +29,7 @@ exports.default = `
     siteDescription: String
     snooze: SnoozeObject
     tags: [String]
+    _searchIndex: String
   }
 
   input QIShortlink {

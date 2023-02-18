@@ -3,13 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.queryShortlinks = exports.getShortlink = exports.createShortlinkDescriptor = exports.createShortlink = exports.ShortlinkPublicFields = void 0;
-const shortlink_1 = __importDefault(require("../models/shortlink"));
-const utils_1 = require("./utils");
-const hash_lib_1 = __importDefault(require("./hash.lib"));
+exports.setAwakeTimer = exports.queryShortlinks = exports.getShortlink = exports.createShortlinkDescriptor = exports.createShortlink = exports.ShortlinkPublicFields = void 0;
 const underscore_1 = __importDefault(require("underscore"));
+const shortlink_1 = __importDefault(require("../models/shortlink"));
 const user_1 = __importDefault(require("../models/user"));
+const hash_lib_1 = __importDefault(require("./hash.lib"));
 const url_parser_lib_1 = __importDefault(require("./url-parser.lib"));
+const utils_1 = require("./utils");
+const snooze_tools_1 = __importDefault(require("../libs/snooze.tools"));
 exports.ShortlinkPublicFields = ['hash', 'descriptor', 'location', 'urlMetadata'];
 async function createOrGetShortlink(location, userId, _hash) {
     location = (0, utils_1.normalizeURL)(location);
@@ -42,15 +43,16 @@ async function createOrGetShortlink(location, userId, _hash) {
     }
     const newShortlink = new shortlink_1.default(newShortlinkObject);
     if (user?._id)
-        underscore_1.default.defer(async () => {
+        underscore_1.default.delay(async () => {
             let urlMetadata = undefined;
             let siteTitle, siteDescription;
             [urlMetadata, siteTitle, siteDescription] = await (0, url_parser_lib_1.default)(location);
             newShortlink.urlMetadata = urlMetadata;
             newShortlink.siteTitle = siteTitle;
             newShortlink.siteDescription = siteDescription;
+            newShortlink._searchIndex = `${newShortlink.location}|${newShortlink.descriptor?.descriptionTag || ''}|${newShortlink.siteTitle}|${newShortlink.siteDescription}`;
             newShortlink.save();
-        });
+        }, 100);
     return newShortlink;
 }
 async function createShortlink(location, userId) {
@@ -75,6 +77,7 @@ async function createShortlinkDescriptor(args) {
         userTag: args.userTag,
         descriptionTag: args.descriptionTag
     };
+    shortlinkDocument._searchIndex = `${shortlinkDocument.location}|${shortlinkDocument.descriptor?.descriptionTag || ''}|${shortlinkDocument.siteTitle}|${shortlinkDocument.siteDescription}`;
     const resultShortlink = await shortlinkDocument.save();
     return resultShortlink.toObject();
 }
@@ -100,12 +103,7 @@ async function queryShortlinks(args) {
     });
     if (args.search) {
         const _s = args.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        results.or([
-            { siteTitle: { $regex: new RegExp(_s, 'i') } },
-            { siteDescription: { $regex: new RegExp(_s, 'i') } },
-            { location: { $regex: new RegExp(_s, 'i') } },
-            { 'descriptor.descriptionTag': { $regex: new RegExp(_s, 'i') } }
-        ]);
+        results.find({ _searchIndex: { $regex: new RegExp(_s, 'i') } });
     }
     if (args.sort && args.order) {
         results.sort([[args.sort, args.order]]);
@@ -121,4 +119,39 @@ async function queryShortlinks(args) {
     return resultArray;
 }
 exports.queryShortlinks = queryShortlinks;
+async function setAwakeTimer(args) {
+    if (!args.userId)
+        return null;
+    let shortlinkDoc = null;
+    if (args.id) {
+        try {
+            shortlinkDoc = await shortlink_1.default.findById(args.id);
+            if (shortlinkDoc?.owner?.toString() != args.userId)
+                throw new Error('Shortlink belongs to another user and cannot be modified');
+        }
+        catch (err) {
+            throw new utils_1.ExtError(err.message, { code: 'SNOOZE_MODIFY_ERROR' });
+        }
+    }
+    else if (args.location) {
+        shortlinkDoc = await createOrGetShortlink(args.location, args.userId, args.hash);
+    }
+    if (!shortlinkDoc)
+        return null;
+    if (args.standardTimer) {
+        shortlinkDoc.snooze = {
+            awake: snooze_tools_1.default.getStandardSnooze(args.standardTimer).valueOf(),
+            description: snooze_tools_1.default.getStandardDescription(args.standardTimer)
+        };
+    }
+    else if (args.customDay && args.customTime) {
+        shortlinkDoc.snooze = {
+            awake: snooze_tools_1.default.getCustomSnooze(args.customDay, args.customTime).valueOf(),
+            description: ''
+        };
+    }
+    await shortlinkDoc.save();
+    return shortlinkDoc;
+}
+exports.setAwakeTimer = setAwakeTimer;
 //# sourceMappingURL=shortlink.queries.js.map

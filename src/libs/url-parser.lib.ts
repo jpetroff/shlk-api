@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig } from "axios"
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios"
 import { parse as HTML, HTMLElement } from "node-html-parser"
 import metadataTools from "./metadata.tools"
 import * as _ from 'underscore'
@@ -42,11 +42,17 @@ const parse = async (url: string) : Promise<[URLMeta.Result, string, string]> =>
     url,
     maxBodyLength: 1024*1024*2,
     headers: {
-      'X-Custom-Header': 'foobar'
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10) AppleWebKit (KHTML, like Gecko) Chrome Safari',
+      'Referer': 'https://shlk.cc',
+      'Viewport-Width': '960',
+      'Cache-Control': 'no-cache',
+      'Accept-Language': 'en-US,en;q=0.9'
     }
   })
 
-  const fetchedHeaders = await prefetch.head(url)
+  let fetchedHeaders : AxiosResponse<any, any> 
+  try { fetchedHeaders = await prefetch.head(url) } 
+  catch { return [{type: 'invalid url'}, 'Site not accessible', ''] }
 
   let partialMeta : URLMeta.Result = {
     type: fetchedHeaders.headers['content-type'] || 'unknown',
@@ -59,9 +65,10 @@ const parse = async (url: string) : Promise<[URLMeta.Result, string, string]> =>
 
   if(partialMeta.type.match(/html/ig) != null) {
     try{
-      const { data } = await prefetch.get(url)
+      const urlObject = new URL(url)
+      const { data } = await prefetch.get(urlObject.toString())
 
-      const $ = HTML(data);
+      const $ = HTML(data)
 
       const title = $.querySelector('title');
       if (title)
@@ -72,15 +79,15 @@ const parse = async (url: string) : Promise<[URLMeta.Result, string, string]> =>
           meta.url = canonical.getAttribute('href');
       }
 
-      const favicons = $.querySelectorAll('link[rel~=icon]');
+      const favicons = $.querySelectorAll('link[rel~=icon]')
       let faviconList: Favicon[] = []
       for(let i = 0; i < favicons.length; i++) {
         const el = favicons[i]
         const href = el.getAttribute('href')
-        if(href && /\.(jpe?g|png|gif|ico)$/ig.test(href)) {
+        if(href && /\.(jpe?g|png|gif|ico)(\?.*$)?/ig.test(href)) {
           let fullUrl : string = ''
           try { 
-            fullUrl = (new URL(href, url)).toString() 
+            fullUrl = (new URL(href, urlObject.origin)).toString() 
             faviconList.push({
               src: fullUrl,
               sizes: el.getAttribute('sizes')
@@ -88,7 +95,15 @@ const parse = async (url: string) : Promise<[URLMeta.Result, string, string]> =>
           } catch {}
         }
       }
-      meta.favicons = faviconList
+      if(faviconList.length == 0) {
+        try {
+          const defaultFaviconUrl = new URL('/favicon.ico', urlObject.origin)
+          const hasDefault = await prefetch.head(defaultFaviconUrl.toString())
+          if(hasDefault.headers && hasDefault.headers['content-type'] && /image/ig.test(hasDefault.headers['content-type']) )
+            faviconList.push({ src: defaultFaviconUrl.toString() })
+        } catch {}
+      }
+      meta.favicons = metadataTools.sortFaviconList(faviconList) || []
 
       const metas = $.querySelectorAll('meta');
 
@@ -115,7 +130,7 @@ const parse = async (url: string) : Promise<[URLMeta.Result, string, string]> =>
   const siteTitle = metadataTools.getTitle(metaParams) || ''
   const siteDescription = metadataTools.getDescription(metaParams) || ''
   const defaultFavicon = metadataTools.getDefaultFavicon(returnMeta.favicons)
-  returnMeta.favicons?.splice(0, 0, defaultFavicon)
+  if(defaultFavicon) returnMeta.favicons?.splice(0, 0, defaultFavicon)
 
   return [returnMeta, siteTitle, siteDescription]
 }

@@ -10,10 +10,10 @@ import resolversUser from './resolvers/auth.resolvers'
 import { makeExecutableSchema } from '@graphql-tools/schema'
 import { mergeTypeDefs, mergeResolvers } from '@graphql-tools/merge'
 
-import { MixedResolver, MixedTypeDef } from './extends'
+import { MixedResolver, MixedTypeDef, LongTypeDef, LongResolver } from './extends'
 
-const mergedTypeDefs = mergeTypeDefs([typeDefsPublic, typeDefsUser, MixedTypeDef])
-const mergedResolvers = mergeResolvers([resolversPublic, resolversUser, MixedResolver])
+const mergedTypeDefs = mergeTypeDefs([typeDefsPublic, typeDefsUser, MixedTypeDef, LongTypeDef])
+const mergedResolvers = mergeResolvers([resolversPublic, resolversUser, MixedResolver, LongResolver])
 
 const schema = makeExecutableSchema({
 	typeDefs: mergedTypeDefs,

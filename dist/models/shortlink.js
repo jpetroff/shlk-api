@@ -64,6 +64,9 @@ const shortlinkSchema = new mongoose_1.Schema({
     },
     tags: {
         type: [String]
+    },
+    _searchIndex: {
+        type: String
     }
 }, { timestamps: true });
 shortlinkSchema.plugin(mongoose_beautiful_unique_validation_1.default);

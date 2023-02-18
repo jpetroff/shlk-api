@@ -49,6 +49,10 @@ const shortlinkSchema = new Schema<ShortlinkDocument, ShortlinkModel>(
 
     tags: {
       type: [String]
+    },
+
+    _searchIndex: {
+      type: String
     }
 
   },

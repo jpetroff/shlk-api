@@ -5,7 +5,7 @@ export default `
   }
 
   type SnoozeObject {
-    awake: Int
+    awake: Long
     description: String
   }
 
@@ -27,6 +27,7 @@ export default `
     siteDescription: String
     snooze: SnoozeObject
     tags: [String]
+    _searchIndex: String
   }
 
   input QIShortlink {

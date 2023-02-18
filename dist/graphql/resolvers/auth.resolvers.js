@@ -64,6 +64,16 @@ exports.default = {
     Mutation: {
         updateLoggedInUser: async (parent, args, context) => {
             return null;
+        },
+        createOrUpdateShortlinkTimer: async (parent, { args }, context) => {
+            const userId = context?.req?.session?.userId;
+            const shortlink = await (0, shortlink_queries_1.setAwakeTimer)({
+                userId: userId,
+                ...args
+            });
+            if (!shortlink)
+                return null;
+            return shortlink.toObject();
         }
     }
 };

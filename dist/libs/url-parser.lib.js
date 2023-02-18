@@ -41,10 +41,20 @@ const parse = async (url) => {
         url,
         maxBodyLength: 1024 * 1024 * 2,
         headers: {
-            'X-Custom-Header': 'foobar'
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10) AppleWebKit (KHTML, like Gecko) Chrome Safari',
+            'Referer': 'https://shlk.cc',
+            'Viewport-Width': '960',
+            'Cache-Control': 'no-cache',
+            'Accept-Language': 'en-US,en;q=0.9'
         }
     });
-    const fetchedHeaders = await prefetch.head(url);
+    let fetchedHeaders;
+    try {
+        fetchedHeaders = await prefetch.head(url);
+    }
+    catch {
+        return [{ type: 'invalid url' }, 'Site not accessible', ''];
+    }
     let partialMeta = {
         type: fetchedHeaders.headers['content-type'] || 'unknown',
         size: fetchedHeaders.headers['content-length'] ? parseInt(fetchedHeaders.headers['content-length']) : undefined,
@@ -54,7 +64,8 @@ const parse = async (url) => {
     let og = {};
     if (partialMeta.type.match(/html/ig) != null) {
         try {
-            const { data } = await prefetch.get(url);
+            const urlObject = new URL(url);
+            const { data } = await prefetch.get(urlObject.toString());
             const $ = (0, node_html_parser_1.parse)(data);
             const title = $.querySelector('title');
             if (title)
@@ -68,10 +79,10 @@ const parse = async (url) => {
             for (let i = 0; i < favicons.length; i++) {
                 const el = favicons[i];
                 const href = el.getAttribute('href');
-                if (href && /\.(jpe?g|png|gif|ico)$/ig.test(href)) {
+                if (href && /\.(jpe?g|png|gif|ico)(\?.*$)?/ig.test(href)) {
                     let fullUrl = '';
                     try {
-                        fullUrl = (new URL(href, url)).toString();
+                        fullUrl = (new URL(href, urlObject.origin)).toString();
                         faviconList.push({
                             src: fullUrl,
                             sizes: el.getAttribute('sizes')
@@ -80,7 +91,16 @@ const parse = async (url) => {
                     catch { }
                 }
             }
-            meta.favicons = faviconList;
+            if (faviconList.length == 0) {
+                try {
+                    const defaultFaviconUrl = new URL('/favicon.ico', urlObject.origin);
+                    const hasDefault = await prefetch.head(defaultFaviconUrl.toString());
+                    if (hasDefault.headers && hasDefault.headers['content-type'] && /image/ig.test(hasDefault.headers['content-type']))
+                        faviconList.push({ src: defaultFaviconUrl.toString() });
+                }
+                catch { }
+            }
+            meta.favicons = metadata_tools_1.default.sortFaviconList(faviconList) || [];
             const metas = $.querySelectorAll('meta');
             for (let i = 0; i < metas.length; i++) {
                 const el = metas[i];
@@ -105,7 +125,8 @@ const parse = async (url) => {
     const siteTitle = metadata_tools_1.default.getTitle(metaParams) || '';
     const siteDescription = metadata_tools_1.default.getDescription(metaParams) || '';
     const defaultFavicon = metadata_tools_1.default.getDefaultFavicon(returnMeta.favicons);
-    returnMeta.favicons?.splice(0, 0, defaultFavicon);
+    if (defaultFavicon)
+        returnMeta.favicons?.splice(0, 0, defaultFavicon);
     return [returnMeta, siteTitle, siteDescription];
 };
 exports.parse = parse;
