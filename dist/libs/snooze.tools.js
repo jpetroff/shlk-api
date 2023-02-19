@@ -24,6 +24,7 @@ var StandardTimers;
     StandardTimers["inMonth"] = "inmonth_morning";
     StandardTimers["later"] = "today_later";
     StandardTimers["inHour"] = "today_hour";
+    StandardTimers["someday"] = "random_afternoon";
 })(StandardTimers = exports.StandardTimers || (exports.StandardTimers = {}));
 class SnoozeTools {
     Days = {

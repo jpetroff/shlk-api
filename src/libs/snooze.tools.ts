@@ -37,7 +37,8 @@ export enum StandardTimers {
   nextMonth = 'nextmonth_morning',
   inMonth = 'inmonth_morning',
   later = 'today_later',
-  inHour = 'today_hour'
+  inHour = 'today_hour',
+  someday = 'random_afternoon'
 }
 
 class SnoozeTools {
