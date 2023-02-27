@@ -211,6 +211,15 @@ export async function queryShortlinks(
     )
   }
 
+  if(args.isSnooze) {
+    results.find(
+      { 
+        snooze: { $exists: true },
+        'snooze.awake': { $gte: (new Date()).valueOf() }
+      }
+    )
+  }
+
   if (args.sort && args.order) {
     results.sort([[args.sort, args.order as SortOrder]])
   } else {
@@ -236,6 +245,7 @@ export async function setAwakeTimer(
     standardTimer?: StandardTimers
     customDay?: SnoozeDay
     customTime?: SnoozeTime
+    baseDateISOString?: string
   }
 ) : Promise<ResultDoc<ShortlinkDocument> | null> {
   if(!args.userId) return null
@@ -257,18 +267,33 @@ export async function setAwakeTimer(
 
   if(!shortlinkDoc) return null
 
+  const baseDate = args.baseDateISOString ? new Date(args.baseDateISOString) : new Date()
+
   if(args.standardTimer) {
     shortlinkDoc.snooze = {
-      awake: SnoozeTools.getStandardSnooze( args.standardTimer ).valueOf(),
+      awake: SnoozeTools.getStandardSnooze( args.standardTimer, baseDate ).valueOf(),
       description: SnoozeTools.getStandardDescription( args.standardTimer )
     } 
   } else if(args.customDay && args.customTime) {
     shortlinkDoc.snooze = {
-      awake: SnoozeTools.getCustomSnooze(args.customDay, args.customTime).valueOf(),
+      awake: SnoozeTools.getCustomSnooze(args.customDay, args.customTime, baseDate).valueOf(),
       description: ''
     }
   }
 
   await shortlinkDoc.save()
   return shortlinkDoc
+}
+
+export async function queryPredefinedTimers(userId?: string) : Promise<{label: string, value: string}[]> {
+  if(!userId) return []
+
+  let result : {label: string, value: string}[] = []
+  _.each(StandardTimers, (value) => {
+    result.push({
+      value, 
+      label: SnoozeTools.getStandardDescription(value)
+    })
+  })
+  return result
 }

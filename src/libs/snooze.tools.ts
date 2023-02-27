@@ -64,17 +64,17 @@ class SnoozeTools {
 
   }
 
-  getStandardSnooze(snooze: StandardTimers) : Date {
+  getStandardSnooze(snooze: StandardTimers, baseDate: Date = new Date()) : Date {
     const [dateParamName, timeParamName] = snooze.split('_')
     const dateParam = this.Days[dateParamName]
     const timeParam = this.Times[timeParamName]
     return this.getCustomSnooze(dateParam, timeParam)
   }
 
-  getCustomSnooze(date: SnoozeDay, time: SnoozeTime) : Date {
+  getCustomSnooze(date: SnoozeDay, time: SnoozeTime, baseDate: Date = new Date()) : Date {
     return this.setTime(
       this.setDay(
-        new Date(),
+        baseDate,
         date
       ),
     time)
@@ -93,6 +93,7 @@ class SnoozeTools {
       case StandardTimers.inMonth: return 'In a month'
       case StandardTimers.later: return 'Later today'
       case StandardTimers.inHour: return 'In an hour'
+      case StandardTimers.someday: return 'Someday'
       default: return ''
     }
   }

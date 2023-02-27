@@ -22,7 +22,7 @@ async function createOrUpdateUser(args) {
 }
 exports.createOrUpdateUser = createOrUpdateUser;
 async function getUser(id) {
-    const loggedUser = await user_1.default.findById(id);
+    let loggedUser = await user_1.default.findById(id);
     return loggedUser;
 }
 exports.getUser = getUser;

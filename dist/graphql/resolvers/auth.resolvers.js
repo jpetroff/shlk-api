@@ -37,7 +37,8 @@ exports.default = {
                 const loggedUser = await (0, user_queries_1.getUser)(userId);
                 if (!loggedUser)
                     return null;
-                const loggedProfile = _.pick(loggedUser.toObject(), user_queries_1.UserProfileFields);
+                let loggedProfile = _.pick(loggedUser.toObject(), user_queries_1.UserProfileFields);
+                loggedProfile.predefinedTimers = await (0, shortlink_queries_1.queryPredefinedTimers)(userId);
                 return loggedProfile;
             }
             catch (error) {
@@ -49,20 +50,24 @@ exports.default = {
                 }
             }
         },
-        getUserShortlinks: async (parent, argsObj, context) => {
+        getUserShortlinks: async (parent, { args }, context) => {
             try {
                 const userId = (0, auth_helpers_1.authUserId)(context?.req);
-                const queryArgs = _.extendOwn({ userId: userId }, argsObj.args);
+                const queryArgs = _.extendOwn({ userId: userId }, args);
                 const shortlinkList = await (0, shortlink_queries_1.queryShortlinks)(queryArgs);
                 return shortlinkList;
             }
             catch (error) {
                 throw (0, extends_1.resolveError)(error);
             }
+        },
+        getPredefinedTimers: async (_, __, context) => {
+            const userId = context?.req?.session?.userId;
+            return (0, shortlink_queries_1.queryPredefinedTimers)(userId);
         }
     },
     Mutation: {
-        updateLoggedInUser: async (parent, args, context) => {
+        updateLoggedInUser: async (parent, { args }, context) => {
             return null;
         },
         createOrUpdateShortlinkTimer: async (parent, { args }, context) => {

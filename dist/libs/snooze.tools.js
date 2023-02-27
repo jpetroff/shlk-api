@@ -44,14 +44,14 @@ class SnoozeTools {
     };
     constructor() {
     }
-    getStandardSnooze(snooze) {
+    getStandardSnooze(snooze, baseDate = new Date()) {
         const [dateParamName, timeParamName] = snooze.split('_');
         const dateParam = this.Days[dateParamName];
         const timeParam = this.Times[timeParamName];
         return this.getCustomSnooze(dateParam, timeParam);
     }
-    getCustomSnooze(date, time) {
-        return this.setTime(this.setDay(new Date(), date), time);
+    getCustomSnooze(date, time, baseDate = new Date()) {
+        return this.setTime(this.setDay(baseDate, date), time);
     }
     getStandardDescription(snooze) {
         switch (snooze) {
@@ -66,6 +66,7 @@ class SnoozeTools {
             case StandardTimers.inMonth: return 'In a month';
             case StandardTimers.later: return 'Later today';
             case StandardTimers.inHour: return 'In an hour';
+            case StandardTimers.someday: return 'Someday';
             default: return '';
         }
     }

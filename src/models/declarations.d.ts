@@ -11,6 +11,7 @@ declare interface QICommon {
   sort?: string
   order?: string | number 
   search?: string
+  isSnooze?: boolean
 }
 
 /*
@@ -45,6 +46,7 @@ declare interface QISnoozeTimer {
   standardTimer?: import('../libs/snooze.tools').StandardTimers
   customDay?: import('../libs/snooze.tools').SnoozeDay
   customTime?: import('../libs/snooze.tools').SnoozeTime
+  baseDateISOString?: string
 }
 
 /* 
@@ -74,6 +76,7 @@ declare interface UserProfile {
   name?: Maybe<string>
   avatar?: Maybe<string>
   userTag?: Maybe<string>
+  predefinedTimers?: Maybe<AnyObject[]>
 }
 
 /* 

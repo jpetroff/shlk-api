@@ -24,6 +24,6 @@ export async function createOrUpdateUser( args: UserObject ) : Promise<ResultDoc
 }
 
 export async function getUser(id: string) : Promise<ResultDoc<UserDocument> | null> {
-  const loggedUser = await User.findById(id)
+  let loggedUser = await User.findById(id)
   return loggedUser
 }

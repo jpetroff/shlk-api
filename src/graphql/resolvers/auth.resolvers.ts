@@ -1,11 +1,12 @@
 import { getUser, createOrUpdateUser, UserProfileFields } from '../../libs/user.queries'
-import { queryShortlinks, setAwakeTimer } from '../../libs/shortlink.queries'
+import { queryShortlinks, setAwakeTimer, queryPredefinedTimers } from '../../libs/shortlink.queries'
 import { authUserId } from '../../libs/auth.helpers'
 import { GraphQLError } from 'graphql'
 import * as _ from 'underscore'
 import { resolve } from 'path'
 import { resolveError } from '../extends'
 import { LeanDocument } from 'mongoose'
+import snoozeTools from '../../libs/snooze.tools'
 
 export default {
   Query: {
@@ -16,7 +17,8 @@ export default {
         const loggedUser : Maybe<ResultDoc<UserDocument>> = await getUser(userId)
         if(!loggedUser) return null
 
-        const loggedProfile : UserProfile = _.pick(loggedUser.toObject(), UserProfileFields)
+        let loggedProfile : UserProfile = _.pick(loggedUser.toObject(), UserProfileFields)
+        loggedProfile.predefinedTimers = await queryPredefinedTimers(userId)
         return loggedProfile
       } catch(error : any) {
         if(error instanceof GraphQLError) { throw error } 
@@ -29,24 +31,29 @@ export default {
       }
     },
 
-    getUserShortlinks: async ( parent: any, argsObj: { args: QICommon }, context: any) : Promise<ShortlinkDocument[]> => {
+    getUserShortlinks: async ( parent: any, { args }: Args<QICommon>, context: any) : Promise<ShortlinkDocument[]> => {
       try {
         const userId = authUserId(context?.req)
-        const queryArgs = _.extendOwn({ userId: userId }, argsObj.args)
+        const queryArgs = _.extendOwn({ userId: userId }, args)
         const shortlinkList = await queryShortlinks(queryArgs)
         return shortlinkList
       } catch(error : any) {
         throw resolveError(error)
       }
+    },
+
+    getPredefinedTimers: async (_: any, __: any, context: any) : Promise<{label: string, value: string}[]> => {
+      const userId = context?.req?.session?.userId
+      return queryPredefinedTimers(userId)
     }
   },
 
   Mutation: {
-    updateLoggedInUser: async (parent: any, args: QIUser, context: any) : Promise<UserProfile | null> => {
+    updateLoggedInUser: async (parent: any, { args }: Args<QIUser>, context: any) : Promise<UserProfile | null> => {
       return null
     },
 
-    createOrUpdateShortlinkTimer: async (parent: any, { args }: {args: QISnoozeTimer}, context: any) : Promise<ShortlinkDocument | null> => {
+    createOrUpdateShortlinkTimer: async (parent: any, { args }: Args<QISnoozeTimer>, context: any) : Promise<ShortlinkDocument | null> => {
       const userId = context?.req?.session?.userId
       const shortlink = await setAwakeTimer( {
         userId: userId,

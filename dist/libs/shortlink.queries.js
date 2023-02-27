@@ -1,16 +1,39 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setAwakeTimer = exports.queryShortlinks = exports.getShortlink = exports.createShortlinkDescriptor = exports.createShortlink = exports.ShortlinkPublicFields = void 0;
+exports.queryPredefinedTimers = exports.setAwakeTimer = exports.queryShortlinks = exports.getShortlink = exports.createShortlinkDescriptor = exports.createShortlink = exports.ShortlinkPublicFields = void 0;
 const underscore_1 = __importDefault(require("underscore"));
 const shortlink_1 = __importDefault(require("../models/shortlink"));
 const user_1 = __importDefault(require("../models/user"));
 const hash_lib_1 = __importDefault(require("./hash.lib"));
 const url_parser_lib_1 = __importDefault(require("./url-parser.lib"));
 const utils_1 = require("./utils");
-const snooze_tools_1 = __importDefault(require("../libs/snooze.tools"));
+const snooze_tools_1 = __importStar(require("../libs/snooze.tools"));
 exports.ShortlinkPublicFields = ['hash', 'descriptor', 'location', 'urlMetadata'];
 async function createOrGetShortlink(location, userId, _hash) {
     location = (0, utils_1.normalizeURL)(location);
@@ -105,6 +128,12 @@ async function queryShortlinks(args) {
         const _s = args.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         results.find({ _searchIndex: { $regex: new RegExp(_s, 'i') } });
     }
+    if (args.isSnooze) {
+        results.find({
+            snooze: { $exists: true },
+            'snooze.awake': { $gte: (new Date()).valueOf() }
+        });
+    }
     if (args.sort && args.order) {
         results.sort([[args.sort, args.order]]);
     }
@@ -138,15 +167,16 @@ async function setAwakeTimer(args) {
     }
     if (!shortlinkDoc)
         return null;
+    const baseDate = args.baseDateISOString ? new Date(args.baseDateISOString) : new Date();
     if (args.standardTimer) {
         shortlinkDoc.snooze = {
-            awake: snooze_tools_1.default.getStandardSnooze(args.standardTimer).valueOf(),
+            awake: snooze_tools_1.default.getStandardSnooze(args.standardTimer, baseDate).valueOf(),
             description: snooze_tools_1.default.getStandardDescription(args.standardTimer)
         };
     }
     else if (args.customDay && args.customTime) {
         shortlinkDoc.snooze = {
-            awake: snooze_tools_1.default.getCustomSnooze(args.customDay, args.customTime).valueOf(),
+            awake: snooze_tools_1.default.getCustomSnooze(args.customDay, args.customTime, baseDate).valueOf(),
             description: ''
         };
     }
@@ -154,4 +184,17 @@ async function setAwakeTimer(args) {
     return shortlinkDoc;
 }
 exports.setAwakeTimer = setAwakeTimer;
+async function queryPredefinedTimers(userId) {
+    if (!userId)
+        return [];
+    let result = [];
+    underscore_1.default.each(snooze_tools_1.StandardTimers, (value) => {
+        result.push({
+            value,
+            label: snooze_tools_1.default.getStandardDescription(value)
+        });
+    });
+    return result;
+}
+exports.queryPredefinedTimers = queryPredefinedTimers;
 //# sourceMappingURL=shortlink.queries.js.map

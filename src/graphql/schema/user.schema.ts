@@ -11,6 +11,7 @@ export default `
     sort: String
     order: String
     search: String
+    isSnooze: Boolean
   }
 
   input QISnoozeArgs {
@@ -20,6 +21,7 @@ export default `
     standardTimer: String
     customDay: Mixed
     customTime: Mixed
+    baseDateISOString: String
   }
 
   type User {
@@ -32,11 +34,14 @@ export default `
 
     createdAt: String
     updatedAt: String
+
+    predefinedTimers: [Mixed]
   }
 
   type Query {
     getLoggedInUser: User
     getUserShortlinks(args: QIUserShortlinks): [Shortlink]
+    getPredefinedTimers: [Mixed]
   }
   
   type Mutation {
