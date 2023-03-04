@@ -33,7 +33,8 @@ class SnoozeTools {
         'monday': { weekday: Weekdays.Mon },
         'saturday': { weekday: Weekdays.Sat },
         'inmonth': { monthInc: 1 },
-        'nextmonth': { monthInc: 1, day: 1 }
+        'nextmonth': { monthInc: 1, day: 1 },
+        'random': {}
     };
     Times = {
         'morning': { daytime: [9, 0] },
@@ -46,7 +47,8 @@ class SnoozeTools {
     }
     getStandardSnooze(snooze, baseDate = new Date()) {
         const [dateParamName, timeParamName] = snooze.split('_');
-        const dateParam = this.Days[dateParamName];
+        const dateParam = dateParamName == 'random' ?
+            { monthInc: 3, dayInc: Math.floor(Math.random() * 30) } : this.Days[dateParamName];
         const timeParam = this.Times[timeParamName];
         return this.getCustomSnooze(dateParam, timeParam);
     }
