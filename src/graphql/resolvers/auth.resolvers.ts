@@ -1,4 +1,4 @@
-import { getUser, createOrUpdateUser, UserProfileFields } from '../../libs/user.queries'
+import { getUser, createOrUpdateUser, UserProfileFields, updateUserById } from '../../libs/user.queries'
 import { queryShortlinks, setAwakeTimer, queryPredefinedTimers } from '../../libs/shortlink.queries'
 import { authUserId } from '../../libs/auth.helpers'
 import { GraphQLError } from 'graphql'
@@ -50,7 +50,13 @@ export default {
 
   Mutation: {
     updateLoggedInUser: async (parent: any, { args }: Args<QIUser>, context: any) : Promise<UserProfile | null> => {
-      return null
+      try {
+        const userId = authUserId(context?.req)
+        const result = await updateUserById(userId, args)
+        return result?.toObject() || null
+      } catch(error: any) {
+        throw resolveError(error)
+      }
     },
 
     createOrUpdateShortlinkTimer: async (parent: any, { args }: Args<QISnoozeTimer>, context: any) : Promise<ShortlinkDocument | null> => {

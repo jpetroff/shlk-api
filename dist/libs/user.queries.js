@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUser = exports.createOrUpdateUser = exports.UserObjectFields = exports.UserProfileFields = void 0;
+exports.getUser = exports.updateUserById = exports.createOrUpdateUser = exports.UserObjectFields = exports.UserProfileFields = void 0;
 const user_1 = __importDefault(require("../models/user"));
 const underscore_1 = __importDefault(require("underscore"));
 exports.UserProfileFields = ['email', 'name', 'avatar', 'userTag'];
@@ -18,9 +18,20 @@ async function createOrUpdateUser(args) {
             !underscore_1.default.isEmpty(value);
     });
     const user = await user_1.default.findOneAndUpdate({ email: args.email }, newParams, { upsert: true, new: true });
+    if (!user.userTag)
+        user.userTag = String(user.name).toLowerCase();
     return user;
 }
 exports.createOrUpdateUser = createOrUpdateUser;
+async function updateUserById(id, params) {
+    const newParams = underscore_1.default.pick(params, (value, key) => {
+        return exports.UserProfileFields.indexOf(key) != -1 &&
+            !underscore_1.default.isEmpty(value);
+    });
+    const result = await user_1.default.findByIdAndUpdate(id, newParams, { new: true });
+    return result;
+}
+exports.updateUserById = updateUserById;
 async function getUser(id) {
     let loggedUser = await user_1.default.findById(id);
     return loggedUser;

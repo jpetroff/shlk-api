@@ -68,7 +68,14 @@ exports.default = {
     },
     Mutation: {
         updateLoggedInUser: async (parent, { args }, context) => {
-            return null;
+            try {
+                const userId = (0, auth_helpers_1.authUserId)(context?.req);
+                const result = await (0, user_queries_1.updateUserById)(userId, args);
+                return result?.toObject() || null;
+            }
+            catch (error) {
+                throw (0, extends_1.resolveError)(error);
+            }
         },
         createOrUpdateShortlinkTimer: async (parent, { args }, context) => {
             const userId = context?.req?.session?.userId;

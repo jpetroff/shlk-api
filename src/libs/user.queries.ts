@@ -20,7 +20,19 @@ export async function createOrUpdateUser( args: UserObject ) : Promise<ResultDoc
     {upsert: true, new: true}
   )
 
+  /* Handle defaults on creation to only modify missing default fields */
+  if(!user.userTag) user.userTag = String(user.name).toLowerCase()
+
   return user
+}
+
+export async function updateUserById(id: string, params: QIUser) : Promise<ResultDoc<UserDocument> | null> {
+  const newParams = _.pick(params, (value, key) => {
+    return  UserProfileFields.indexOf(key as (keyof UserProfile)) != -1 &&
+            !_.isEmpty(value)
+  })
+  const result = await User.findByIdAndUpdate(id, newParams, {new: true})
+  return result
 }
 
 export async function getUser(id: string) : Promise<ResultDoc<UserDocument> | null> {
