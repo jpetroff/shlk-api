@@ -47,6 +47,8 @@ export default `
   type Mutation {
     updateLoggedInUser(args: QIUserUpdate): User
     createOrUpdateShortlinkTimer(args: QISnoozeArgs) : Shortlink
+    deleteShortlinkSnoozeTimer(id: String, location: String, awake: Long) : Shortlink
+    deleteShortlink(id: String!) : Shortlink
   }
 
   schema {

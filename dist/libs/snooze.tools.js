@@ -25,6 +25,7 @@ var StandardTimers;
     StandardTimers["later"] = "today_later";
     StandardTimers["inHour"] = "today_hour";
     StandardTimers["someday"] = "random_afternoon";
+    StandardTimers["test"] = "today_immediately";
 })(StandardTimers = exports.StandardTimers || (exports.StandardTimers = {}));
 class SnoozeTools {
     Days = {
@@ -42,6 +43,7 @@ class SnoozeTools {
         'evening': { daytime: [20, 0] },
         'later': { timeInc: [3, 0] },
         'hour': { timeInc: [1, 0] },
+        'immediately': { timeInc: [0, 0, 10, 0] }
     };
     constructor() {
     }
@@ -69,6 +71,7 @@ class SnoozeTools {
             case StandardTimers.later: return 'Later today';
             case StandardTimers.inHour: return 'In an hour';
             case StandardTimers.someday: return 'Someday';
+            case StandardTimers.test: return 'Test immediately';
             default: return '';
         }
     }
@@ -88,11 +91,11 @@ class SnoozeTools {
     setTime(base, params) {
         const now = new Date();
         if (params.timeInc) {
-            base.setHours(now.getHours() + params.timeInc[0], now.getMinutes() + params.timeInc[1]);
+            base.setHours(now.getHours() + params.timeInc[0], now.getMinutes() + params.timeInc[1], now.getSeconds() + (params.timeInc[2] || 0), now.getMilliseconds() + (params.timeInc[3] || 0));
             return base;
         }
         else if (params.daytime) {
-            base.setHours(params.daytime[0], params.daytime[1]);
+            base.setHours(params.daytime[0], params.daytime[1], params.daytime[2] || 0, params.daytime[3] || 0);
             return base;
         }
         else {

@@ -12,8 +12,8 @@ export type SnoozeDay = {
 }
 
 export type SnoozeTime = {
-  timeInc?: [number, number]
-  daytime?: [number, number]
+  timeInc?: [number, number, number?, number?]
+  daytime?: [number, number, number?, number?]
 }
 
 export enum Weekdays {
@@ -38,7 +38,8 @@ export enum StandardTimers {
   inMonth = 'inmonth_morning',
   later = 'today_later',
   inHour = 'today_hour',
-  someday = 'random_afternoon'
+  someday = 'random_afternoon',
+  test = 'today_immediately'
 }
 
 class SnoozeTools {
@@ -59,6 +60,7 @@ class SnoozeTools {
     'evening': { daytime: [20, 0] },
     'later': { timeInc: [3, 0] },
     'hour': { timeInc: [1, 0] },
+    'immediately': { timeInc: [0,0,10,0]}
   }
 
   constructor() {
@@ -96,6 +98,7 @@ class SnoozeTools {
       case StandardTimers.later: return 'Later today'
       case StandardTimers.inHour: return 'In an hour'
       case StandardTimers.someday: return 'Someday'
+      case StandardTimers.test: return 'Test immediately'
       default: return ''
     }
   }
@@ -117,10 +120,15 @@ class SnoozeTools {
   setTime(base: Date, params: SnoozeTime) : Date {
     const now = new Date()
     if(params.timeInc) {
-      base.setHours(now.getHours() + params.timeInc[0], now.getMinutes() + params.timeInc[1])
+      base.setHours(
+        now.getHours() + params.timeInc[0], 
+        now.getMinutes() + params.timeInc[1],
+        now.getSeconds() + (params.timeInc[2] || 0),
+        now.getMilliseconds() + (params.timeInc[3] || 0)
+      )
       return base
     } else if (params.daytime) {
-      base.setHours(params.daytime[0], params.daytime[1])
+      base.setHours(params.daytime[0], params.daytime[1], params.daytime[2] || 0, params.daytime[3] || 0)
       return base
     } else {
       return base

@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.queryPredefinedTimers = exports.setAwakeTimer = exports.queryShortlinks = exports.getShortlink = exports.createShortlinkDescriptor = exports.createShortlink = exports.ShortlinkPublicFields = void 0;
+exports.deleteShortlink = exports.queryAndDeleteShortlinkSnoozeTimer = exports.queryPredefinedTimers = exports.setAwakeTimer = exports.queryShortlinks = exports.getShortlink = exports.createShortlinkDescriptor = exports.createShortlink = exports.ShortlinkPublicFields = void 0;
 const underscore_1 = __importDefault(require("underscore"));
 const shortlink_1 = __importDefault(require("../models/shortlink"));
 const user_1 = __importDefault(require("../models/user"));
@@ -86,6 +86,8 @@ async function createShortlink(location, userId) {
 exports.createShortlink = createShortlink;
 async function createShortlinkDescriptor(args) {
     args.location = (0, utils_1.normalizeURL)(args.location);
+    const user = await user_1.default.findById(args.userId);
+    args.userTag = user?.userTag || 'you';
     const existingShortlinkDescription = await shortlink_1.default.findOne({ descriptor: { userTag: args.userTag, descriptionTag: args.descriptionTag } });
     if (existingShortlinkDescription != null &&
         existingShortlinkDescription.location == args.location &&
@@ -197,4 +199,23 @@ async function queryPredefinedTimers(userId) {
     return result;
 }
 exports.queryPredefinedTimers = queryPredefinedTimers;
+async function queryAndDeleteShortlinkSnoozeTimer(id, location, awake) {
+    let shortlinkQuery = {};
+    if (id)
+        shortlinkQuery._id = id;
+    if (location)
+        shortlinkQuery.location = location;
+    if (awake)
+        shortlinkQuery['snooze.awake'] = awake;
+    if (underscore_1.default.isEmpty(shortlinkQuery))
+        return null;
+    const result = await shortlink_1.default.findOneAndUpdate(shortlinkQuery, { snooze: {} });
+    return result;
+}
+exports.queryAndDeleteShortlinkSnoozeTimer = queryAndDeleteShortlinkSnoozeTimer;
+async function deleteShortlink(id) {
+    const result = await shortlink_1.default.findByIdAndDelete(id);
+    return result;
+}
+exports.deleteShortlink = deleteShortlink;
 //# sourceMappingURL=shortlink.queries.js.map

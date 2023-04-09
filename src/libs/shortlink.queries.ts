@@ -120,6 +120,9 @@ export async function createShortlinkDescriptor(
 ): Promise<ResultDoc<ShortlinkDocument> | null> {
   args.location = normalizeURL(args.location)
 
+  const user = await User.findById(args.userId)
+  args.userTag = user?.userTag || 'you'
+
   // If shortlink with args.userTag and args.descriptionTag exists
   // return it when location and owner id are the same 
   // otherwise cannot create this shortlink
@@ -295,5 +298,21 @@ export async function queryPredefinedTimers(userId?: string) : Promise<{label: s
       label: SnoozeTools.getStandardDescription(value)
     })
   })
+  return result
+}
+
+export async function queryAndDeleteShortlinkSnoozeTimer(id?: string, location?: string, awake?: number): Promise<ResultDoc<ShortlinkDocument> | null> {
+  let shortlinkQuery : AnyObject = {}
+  if(id) shortlinkQuery._id = id
+  if(location) shortlinkQuery.location = location
+  if(awake) shortlinkQuery['snooze.awake'] = awake
+  if(_.isEmpty(shortlinkQuery)) return null
+
+  const result = await Shortlink.findOneAndUpdate(shortlinkQuery, { snooze: {} })
+  return result
+}
+
+export async function deleteShortlink(id: string): Promise<ResultDoc<ShortlinkDocument> | null> {
+  const result = await Shortlink.findByIdAndDelete(id)
   return result
 }

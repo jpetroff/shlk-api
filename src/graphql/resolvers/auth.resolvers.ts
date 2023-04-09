@@ -1,5 +1,5 @@
 import { getUser, createOrUpdateUser, UserProfileFields, updateUserById } from '../../libs/user.queries'
-import { queryShortlinks, setAwakeTimer, queryPredefinedTimers } from '../../libs/shortlink.queries'
+import { queryShortlinks, setAwakeTimer, queryPredefinedTimers, queryAndDeleteShortlinkSnoozeTimer, deleteShortlink } from '../../libs/shortlink.queries'
 import { authUserId } from '../../libs/auth.helpers'
 import { GraphQLError } from 'graphql'
 import * as _ from 'underscore'
@@ -67,6 +67,28 @@ export default {
       })
       if(!shortlink) return null
       return shortlink.toObject()
+    },
+
+    deleteShortlinkSnoozeTimer: async (parent: any, { id, location, awake } : { id?: string, location?: string, awake?: number}, context: any) : Promise<ShortlinkDocument | null> => {
+      try {
+        const userId = authUserId(context?.req)
+        const shortlink = await queryAndDeleteShortlinkSnoozeTimer(id, location, awake)
+        if(!shortlink) return null
+        return shortlink.toObject()
+      } catch(error: any) {
+        throw resolveError(error)
+      }
+    },
+
+    deleteShortlink: async (parent: any, { id } : {id: string}, context: any) : Promise<ShortlinkDocument | null> => {
+      try {
+        const userId = authUserId(context?.req)
+        const shortlink = await deleteShortlink(id)
+        if(!shortlink) return null
+        return shortlink.toObject()
+      } catch(error) {
+        throw resolveError(error)
+      }
     }
   }
 }
