@@ -132,8 +132,7 @@ async function queryShortlinks(args) {
     }
     if (args.isSnooze) {
         results.find({
-            snooze: { $exists: true },
-            'snooze.awake': { $gte: (new Date()).valueOf() }
+            snooze: { $exists: true }
         });
     }
     if (args.sort && args.order) {
@@ -190,26 +189,23 @@ async function queryPredefinedTimers(userId) {
     if (!userId)
         return [];
     let result = [];
-    underscore_1.default.each(snooze_tools_1.StandardTimers, (value) => {
-        result.push({
-            value,
-            label: snooze_tools_1.default.getStandardDescription(value)
+    const baseDate = new Date();
+    underscore_1.default.each(snooze_tools_1.StandardTimerGroups, (value) => {
+        underscore_1.default.each(value.content, (standardSnooze) => {
+            result.push({
+                groupLabel: value.label,
+                groupDate: underscore_1.default.map(value.date, (dateItem) => (snooze_tools_1.default.getCustomSnooze(dateItem, {}, baseDate)).valueOf()),
+                label: snooze_tools_1.default.getStandardDescription(standardSnooze),
+                value: standardSnooze,
+                dateValue: (snooze_tools_1.default.getStandardSnooze(standardSnooze, baseDate)).valueOf()
+            });
         });
     });
     return result;
 }
 exports.queryPredefinedTimers = queryPredefinedTimers;
-async function queryAndDeleteShortlinkSnoozeTimer(id, location, awake) {
-    let shortlinkQuery = {};
-    if (id)
-        shortlinkQuery._id = id;
-    if (location)
-        shortlinkQuery.location = location;
-    if (awake)
-        shortlinkQuery['snooze.awake'] = awake;
-    if (underscore_1.default.isEmpty(shortlinkQuery))
-        return null;
-    const result = await shortlink_1.default.findOneAndUpdate(shortlinkQuery, { snooze: {} });
+async function queryAndDeleteShortlinkSnoozeTimer(id) {
+    const result = await shortlink_1.default.findByIdAndUpdate(id, { $unset: { snooze: true } }, { new: true });
     return result;
 }
 exports.queryAndDeleteShortlinkSnoozeTimer = queryAndDeleteShortlinkSnoozeTimer;

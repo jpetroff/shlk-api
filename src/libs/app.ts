@@ -12,11 +12,13 @@ const helmetOpts : HelmetOptions = {
   contentSecurityPolicy: {
     useDefaults: true,
     directives: {
-      "script-src": ["'self'", "http://localhost:35729"],
-      "style-src": null,
+      "script-src": [`'self'`],
+      "style-src": [`'self'`, `*`],
+      "img-src": [`'self'`, `*`],
     }
   },
-  crossOriginResourcePolicy: { policy: "cross-origin" }
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginEmbedderPolicy: false,
 }
 
 

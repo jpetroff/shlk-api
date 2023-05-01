@@ -37,7 +37,6 @@ const readMT = (el: HTMLElement, name: string) => {
 };
 
 const parse = async (url: string) : Promise<[URLMeta.Result, string, string]> => {
-  console.log(url)
   const prefetch = axios.create({
     url,
     maxBodyLength: 1024*1024*2,

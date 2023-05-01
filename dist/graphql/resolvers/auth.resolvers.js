@@ -87,13 +87,16 @@ exports.default = {
                 return null;
             return shortlink.toObject();
         },
-        deleteShortlinkSnoozeTimer: async (parent, { id, location, awake }, context) => {
+        deleteShortlinkSnoozeTimer: async (parent, { ids }, context) => {
             try {
                 const userId = (0, auth_helpers_1.authUserId)(context?.req);
-                const shortlink = await (0, shortlink_queries_1.queryAndDeleteShortlinkSnoozeTimer)(id, location, awake);
-                if (!shortlink)
-                    return null;
-                return shortlink.toObject();
+                let result = [];
+                for (let i = 0; i < ids.length; i++) {
+                    const shortlink = await (0, shortlink_queries_1.queryAndDeleteShortlinkSnoozeTimer)(ids[i]);
+                    if (shortlink)
+                        result.push(shortlink.toObject());
+                }
+                return result;
             }
             catch (error) {
                 throw (0, extends_1.resolveError)(error);

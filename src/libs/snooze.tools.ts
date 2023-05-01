@@ -27,20 +27,49 @@ export enum Weekdays {
 }
 
 export enum StandardTimers {
+  inHour = 'today_hour',
+  later = 'today_later',
+  evening = 'today_evening',
+  afternoon = 'today_afternoon',
+
+  tomorrow_now = 'tomorrow_now',
   tomorrow_morning = 'tomorrow_morning',
   tomorrow_evening = 'tomorrow_evening',
   tomorrow_afternoon = 'tomorrow_afternoon',
-  evening = 'today_evening',
-  afternoon = 'today_afternoon',
-  nextMonday = 'monday_morning',
+
   nextWeekend = 'saturday_afternoon',
+  nextMonday = 'monday_morning',
+  inWeek = 'inweek_morning',
+
   nextMonth = 'nextmonth_morning',
   inMonth = 'inmonth_morning',
-  later = 'today_later',
-  inHour = 'today_hour',
   someday = 'random_afternoon',
-  test = 'today_immediately'
+
+  test = 'today_now'
 }
+
+export const StandardTimerGroups = [
+  { 
+    label: 'Today',
+    date: [{dayInc: 0} as SnoozeDay],
+    content: [StandardTimers.inHour, StandardTimers.later, StandardTimers.afternoon, StandardTimers.evening]
+  },
+  {
+    label: 'Tomorrow',
+    date: [{dayInc: 1} as SnoozeDay],
+    content: [StandardTimers.tomorrow_now, StandardTimers.tomorrow_morning, StandardTimers.tomorrow_afternoon, StandardTimers.tomorrow_evening]
+  },
+  {
+    label: 'Week',
+    date: [{dayInc: 0} as SnoozeDay, {dayInc:6} as SnoozeDay],
+    content: [StandardTimers.nextWeekend, StandardTimers.nextMonday, StandardTimers.inWeek]
+  },
+  {
+    label: 'Longer time',
+    date: [ ],
+    content: [StandardTimers.nextMonth, StandardTimers.inMonth, StandardTimers.someday]
+  }
+]
 
 class SnoozeTools {
   
@@ -49,6 +78,7 @@ class SnoozeTools {
     'tomorrow': { dayInc: 1},
     'monday': { weekday: Weekdays.Mon},
     'saturday': { weekday: Weekdays.Sat},
+    'inweek': { dayInc: 7 },
     'inmonth': { monthInc: 1 },
     'nextmonth': { monthInc: 1, day: 1 },
     'random': {}
@@ -60,7 +90,7 @@ class SnoozeTools {
     'evening': { daytime: [20, 0] },
     'later': { timeInc: [3, 0] },
     'hour': { timeInc: [1, 0] },
-    'immediately': { timeInc: [0,0,10,0]}
+    'now': { timeInc: [0,0,10,0] },
   }
 
   constructor() {
@@ -86,13 +116,15 @@ class SnoozeTools {
 
   getStandardDescription(snooze: StandardTimers) : string {
     switch(snooze) {
-      case StandardTimers.tomorrow_morning: return 'Tomorrow morning'
-      case StandardTimers.tomorrow_evening: return 'Tomorrow evening'
-      case StandardTimers.tomorrow_afternoon: return 'Tomorrow afternoon'
-      case StandardTimers.evening: return 'This evening'
-      case StandardTimers.afternoon: return 'This afternoon'
-      case StandardTimers.nextMonday: return 'Next monday'
+      case StandardTimers.tomorrow_morning: return 'Morning'
+      case StandardTimers.tomorrow_now: return 'Same time'
+      case StandardTimers.tomorrow_evening: return 'Evening'
+      case StandardTimers.tomorrow_afternoon: return 'Afternoon'
+      case StandardTimers.evening: return 'Evening'
+      case StandardTimers.afternoon: return 'Afternoon'
+      case StandardTimers.nextMonday: return 'Next Monday'
       case StandardTimers.nextWeekend: return 'Next weekend'
+      case StandardTimers.inWeek: return 'In a week'
       case StandardTimers.nextMonth: return 'Next month'
       case StandardTimers.inMonth: return 'In a month'
       case StandardTimers.later: return 'Later today'

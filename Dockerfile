@@ -19,5 +19,6 @@ RUN npm ci --only=production
 COPY --chown=node:node ./dist ./
 
 EXPOSE "8002"
+ENV NODE_ENV=production
 
 CMD ["pm2-runtime", "./index.js"]

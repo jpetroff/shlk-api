@@ -6,7 +6,7 @@ import User from '../models/user'
 import generateHash from './hash.lib'
 import fetchMetadata, { URLMeta } from './url-parser.lib'
 import { ExtError, normalizeURL, sameOrNoOwnerID } from './utils'
-import SnoozeTools, { StandardTimers, SnoozeDay, SnoozeTime } from '../libs/snooze.tools'
+import SnoozeTools, { StandardTimers, SnoozeDay, SnoozeTime, StandardTimerGroups } from '../libs/snooze.tools'
 
 export const ShortlinkPublicFields: (keyof ShortlinkDocument)[] = ['hash', 'descriptor', 'location', 'urlMetadata']
 
@@ -217,8 +217,7 @@ export async function queryShortlinks(
   if(args.isSnooze) {
     results.find(
       { 
-        snooze: { $exists: true },
-        'snooze.awake': { $gte: (new Date()).valueOf() }
+        snooze: { $exists: true }
       }
     )
   }
@@ -288,27 +287,30 @@ export async function setAwakeTimer(
   return shortlinkDoc
 }
 
-export async function queryPredefinedTimers(userId?: string) : Promise<{label: string, value: string}[]> {
+export async function queryPredefinedTimers(userId?: string) : Promise<{groupLabel: string, label: string, value: StandardTimers, dateValue: number}[]> {
   if(!userId) return []
 
-  let result : {label: string, value: string}[] = []
-  _.each(StandardTimers, (value) => {
-    result.push({
-      value, 
-      label: SnoozeTools.getStandardDescription(value)
+  let result : {groupLabel: string, groupDate: number[], label: string, value: StandardTimers, dateValue: number}[] = []
+
+  const baseDate = new Date()
+
+  _.each(StandardTimerGroups, (value) => {
+    _.each(value.content, (standardSnooze) => { 
+      result.push({
+        groupLabel: value.label,
+        groupDate: _.map(value.date, (dateItem) => (SnoozeTools.getCustomSnooze(dateItem, {}, baseDate)).valueOf() ),
+        label: SnoozeTools.getStandardDescription(standardSnooze),
+        value: standardSnooze,
+        dateValue: (SnoozeTools.getStandardSnooze(standardSnooze, baseDate)).valueOf()
+      })
     })
   })
+
   return result
 }
 
-export async function queryAndDeleteShortlinkSnoozeTimer(id?: string, location?: string, awake?: number): Promise<ResultDoc<ShortlinkDocument> | null> {
-  let shortlinkQuery : AnyObject = {}
-  if(id) shortlinkQuery._id = id
-  if(location) shortlinkQuery.location = location
-  if(awake) shortlinkQuery['snooze.awake'] = awake
-  if(_.isEmpty(shortlinkQuery)) return null
-
-  const result = await Shortlink.findOneAndUpdate(shortlinkQuery, { snooze: {} })
+export async function queryAndDeleteShortlinkSnoozeTimer(id: string): Promise<ResultDoc<ShortlinkDocument> | null> {
+  const result = await Shortlink.findByIdAndUpdate(id, { $unset: {snooze: true } }, { new: true })
   return result
 }
 

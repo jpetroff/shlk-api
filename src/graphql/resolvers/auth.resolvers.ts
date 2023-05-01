@@ -20,6 +20,7 @@ export default {
         let loggedProfile : UserProfile = _.pick(loggedUser.toObject(), UserProfileFields)
         loggedProfile.predefinedTimers = await queryPredefinedTimers(userId)
         return loggedProfile
+
       } catch(error : any) {
         if(error instanceof GraphQLError) { throw error } 
         else {
@@ -69,12 +70,15 @@ export default {
       return shortlink.toObject()
     },
 
-    deleteShortlinkSnoozeTimer: async (parent: any, { id, location, awake } : { id?: string, location?: string, awake?: number}, context: any) : Promise<ShortlinkDocument | null> => {
+    deleteShortlinkSnoozeTimer: async (parent: any, { ids } : { ids: string[] }, context: any) : Promise<ShortlinkDocument[]> => {
       try {
         const userId = authUserId(context?.req)
-        const shortlink = await queryAndDeleteShortlinkSnoozeTimer(id, location, awake)
-        if(!shortlink) return null
-        return shortlink.toObject()
+        let result : ShortlinkDocument[] = []
+        for(let i = 0; i < ids.length; i++) {
+          const shortlink = await queryAndDeleteShortlinkSnoozeTimer(ids[i])
+          if(shortlink) result.push(shortlink.toObject())
+        }
+        return result
       } catch(error: any) {
         throw resolveError(error)
       }

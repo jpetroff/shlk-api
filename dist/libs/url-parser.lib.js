@@ -36,7 +36,6 @@ const readMT = (el, name) => {
     return prop == name ? el.getAttribute('content') : null;
 };
 const parse = async (url) => {
-    console.log(url);
     const prefetch = axios_1.default.create({
         url,
         maxBodyLength: 1024 * 1024 * 2,
