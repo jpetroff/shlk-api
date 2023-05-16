@@ -41,8 +41,8 @@ exports.StandardTimerGroups = [
         content: [StandardTimers.tomorrow_now, StandardTimers.tomorrow_morning, StandardTimers.tomorrow_afternoon, StandardTimers.tomorrow_evening]
     },
     {
-        label: 'Week',
-        date: [{ dayInc: 0 }, { dayInc: 6 }],
+        label: 'Within week',
+        date: [{ dayInc: 7 }],
         content: [StandardTimers.nextWeekend, StandardTimers.nextMonday, StandardTimers.inWeek]
     },
     {
@@ -135,9 +135,9 @@ class SnoozeTools {
             return params.day || (now.getDate() + (params.dayInc || 0));
         }
         else if (params.weekday != undefined) {
-            const dayDiff = params.weekday - now.getDate();
-            const dayInc = dayDiff <= 0 ? dayDiff + 6 : dayDiff;
-            return dayInc;
+            const dayDiff = params.weekday - now.getDay();
+            const dayInc = dayDiff <= 0 ? dayDiff + 7 : dayDiff;
+            return now.getDate() + dayInc;
         }
         else {
             return now.getDate();

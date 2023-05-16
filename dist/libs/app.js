@@ -50,7 +50,7 @@ class App {
             },
             store: store,
             resave: true,
-            saveUninitialized: true
+            saveUninitialized: false
         });
         this.express.use(_store);
         return this;
