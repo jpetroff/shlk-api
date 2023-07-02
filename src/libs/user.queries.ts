@@ -21,7 +21,12 @@ export async function createOrUpdateUser( args: UserObject ) : Promise<ResultDoc
   )
 
   /* Handle defaults on creation to only modify missing default fields */
-  if(!user.userTag) user.userTag = String(user.name).toLowerCase()
+  console.log(user.userTag)
+  if(!user.userTag) {
+    user.userTag = String(user.name).toLowerCase()
+    await user.save()
+  }
+  console.log(user.toObject())
 
   return user
 }
