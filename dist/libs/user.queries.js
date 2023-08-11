@@ -18,12 +18,10 @@ async function createOrUpdateUser(args) {
             !underscore_1.default.isEmpty(value);
     });
     const user = await user_1.default.findOneAndUpdate({ email: args.email }, newParams, { upsert: true, new: true });
-    console.log(user.userTag);
     if (!user.userTag) {
         user.userTag = String(user.name).toLowerCase();
         await user.save();
     }
-    console.log(user.toObject());
     return user;
 }
 exports.createOrUpdateUser = createOrUpdateUser;
