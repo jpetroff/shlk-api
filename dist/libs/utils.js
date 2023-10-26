@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.readableBytes = exports.ExtError = exports.sameOrNoOwnerID = exports.allEmpty = exports.cliColors = exports.normalizeURL = exports.clearURLTracking = void 0;
+exports.readableBytes = exports.ExtError = exports.sameOrNoOwnerID = exports.allEmpty = exports.cliColors = exports.normalizeURL = exports.modifyURLSlug = exports.clearURLTracking = void 0;
 const underscore_1 = __importDefault(require("underscore"));
 function clearURLTracking(url) {
     const trackingParams = [
@@ -15,6 +15,12 @@ function clearURLTracking(url) {
     return url;
 }
 exports.clearURLTracking = clearURLTracking;
+function modifyURLSlug(str) {
+    str = str.replace(/[^a-z0-9\s-]/ig, '');
+    str = str.replace(/\s/ig, '-');
+    return str;
+}
+exports.modifyURLSlug = modifyURLSlug;
 function normalizeURL(_url) {
     let url = _url.trim();
     const protocolRegex = new RegExp('^https?://');

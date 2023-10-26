@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteShortlink = exports.queryAndDeleteShortlinkSnoozeTimer = exports.queryPredefinedTimers = exports.setAwakeTimer = exports.queryShortlinks = exports.getShortlink = exports.createShortlinkDescriptor = exports.createShortlink = exports.ShortlinkPublicFields = void 0;
+exports.deleteShortlink = exports.queryAndDeleteShortlinkSnoozeTimer = exports.queryPredefinedTimers = exports.setAwakeTimer = exports.queryShortlinks = exports.getShortlink = exports.updateShortlink = exports.createShortlinkDescriptor = exports.createShortlink = exports.ShortlinkPublicFields = void 0;
 const underscore_1 = __importDefault(require("underscore"));
 const shortlink_1 = __importDefault(require("../models/shortlink"));
 const user_1 = __importDefault(require("../models/user"));
@@ -86,6 +86,7 @@ async function createShortlink(location, userId) {
 exports.createShortlink = createShortlink;
 async function createShortlinkDescriptor(args) {
     args.location = (0, utils_1.normalizeURL)(args.location);
+    args.descriptionTag = (0, utils_1.modifyURLSlug)(args.descriptionTag);
     const user = await user_1.default.findById(args.userId);
     args.userTag = user?.userTag || 'you';
     const existingShortlinkDescription = await shortlink_1.default.findOne({ descriptor: { userTag: args.userTag, descriptionTag: args.descriptionTag } });
@@ -107,6 +108,35 @@ async function createShortlinkDescriptor(args) {
     return resultShortlink.toObject();
 }
 exports.createShortlinkDescriptor = createShortlinkDescriptor;
+async function updateShortlink(userId, args) {
+    const user = await user_1.default.findById(userId);
+    let newShortlink = underscore_1.default.defaults({}, args.shortlink);
+    const userTag = args.shortlink.descriptor?.userTag || user.userTag;
+    if (args.shortlink.descriptor && args.shortlink.descriptor.descriptionTag != '') {
+        args.shortlink.descriptor.descriptionTag = (0, utils_1.modifyURLSlug)(args.shortlink.descriptor.descriptionTag);
+        const existingShortlinkDescription = await shortlink_1.default.findOne({ descriptor: { userTag, descriptionTag: args.shortlink.descriptor.descriptionTag } });
+        if (existingShortlinkDescription && existingShortlinkDescription._id.toString() != args.id) {
+            throw new utils_1.ExtError(`Shortlink '/${userTag}@${args.shortlink.descriptor.descriptionTag}' already exists`, { code: 'DUPLICATING_DESCRIPTOR' });
+        }
+    }
+    let unsetRules = {};
+    if (!args.shortlink.descriptor || args.shortlink.descriptor?.descriptionTag == '') {
+        newShortlink.descriptor = undefined;
+        unsetRules.descriptor = true;
+    }
+    if (args.shortlink.location)
+        newShortlink.location = (0, utils_1.normalizeURL)(args.shortlink.location);
+    if (!args.shortlink.snooze || !args.shortlink.snooze.awake) {
+        newShortlink.snooze = undefined;
+        unsetRules.snooze = true;
+    }
+    const result = await shortlink_1.default.findByIdAndUpdate(args.id, {
+        $set: newShortlink,
+        $unset: unsetRules
+    }, { new: true });
+    return result;
+}
+exports.updateShortlink = updateShortlink;
 async function getShortlink(args) {
     if (args.hash) {
         const shortlink = await shortlink_1.default.findOne({ hash: args.hash });
@@ -139,7 +169,7 @@ async function queryShortlinks(args) {
         results.sort([[args.sort, args.order]]);
     }
     else {
-        results.sort([['updatedAt', 'desc']]);
+        results.sort([['createdAt', 'desc']]);
     }
     if (args.skip)
         results.skip(args.skip);

@@ -11,6 +11,13 @@ export function clearURLTracking (url: URL) : URL {
   return url
 }
 
+export function modifyURLSlug (str: string) : string {
+  str = str.replace(/[^a-z0-9\s-]/ig, '')
+  // str = str.replace(/\s+/ig, ' ').trim()
+  str = str.replace(/\s/ig, '-')
+  return str
+}
+
 /**
  * Adds protocol https://, clears tracking tags, removes trailing slash
  *

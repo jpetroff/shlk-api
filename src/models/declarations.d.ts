@@ -59,6 +59,29 @@ declare interface ShortlinkDocument extends QIShortlink {
 }
 
 /* 
+
+ */
+declare interface QIEditableShortlinkProps {
+  location?: string
+  descriptor?: {
+    userTag?: string
+    descriptionTag: string 
+  }
+  owner?: ObjectId
+  urlMetadata?: AnyObject
+  siteTitle?: string
+  siteDescription?: string
+  snooze?: {
+    awake: number
+    description?: string
+  },
+  tags?: string[]
+  _searchIndex?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+/* 
   [User] GraphQL interface for client User queries
  */
 declare interface QIUser {

@@ -113,6 +113,18 @@ exports.default = {
             catch (error) {
                 throw (0, extends_1.resolveError)(error);
             }
+        },
+        updateShortlink: async (parent, { id, shortlink }, context) => {
+            try {
+                const userId = (0, auth_helpers_1.authUserId)(context?.req);
+                const newShortlink = await (0, shortlink_queries_1.updateShortlink)(userId, { id, shortlink });
+                if (!newShortlink)
+                    return null;
+                return newShortlink.toObject();
+            }
+            catch (error) {
+                throw (0, extends_1.resolveError)(error);
+            }
         }
     }
 };

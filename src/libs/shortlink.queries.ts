@@ -5,8 +5,9 @@ import Shortlink from '../models/shortlink'
 import User from '../models/user'
 import generateHash from './hash.lib'
 import fetchMetadata, { URLMeta } from './url-parser.lib'
-import { ExtError, normalizeURL, sameOrNoOwnerID } from './utils'
+import { ExtError, modifyURLSlug, normalizeURL, sameOrNoOwnerID } from './utils'
 import SnoozeTools, { StandardTimers, SnoozeDay, SnoozeTime, StandardTimerGroups } from '../libs/snooze.tools'
+
 
 export const ShortlinkPublicFields: (keyof ShortlinkDocument)[] = ['hash', 'descriptor', 'location', 'urlMetadata']
 
@@ -119,6 +120,7 @@ export async function createShortlinkDescriptor(
   args: { location: string, descriptionTag: string, hash?: string, userTag?: string, userId?: string }
 ): Promise<ResultDoc<ShortlinkDocument> | null> {
   args.location = normalizeURL(args.location)
+  args.descriptionTag = modifyURLSlug(args.descriptionTag)
 
   const user = await User.findById(args.userId)
   args.userTag = user?.userTag || 'you'
@@ -158,6 +160,53 @@ export async function createShortlinkDescriptor(
 
   const resultShortlink = await shortlinkDocument.save()
   return resultShortlink.toObject()
+}
+
+export async function updateShortlink(userId: string, args: {id: string, shortlink: QIEditableShortlinkProps}): Promise<ResultDoc<ShortlinkDocument> | null> {
+  const user = await User.findById(userId)
+
+  let newShortlink = _.defaults({}, args.shortlink)
+
+  const userTag = args.shortlink.descriptor?.userTag || user.userTag
+
+  if(args.shortlink.descriptor && args.shortlink.descriptor.descriptionTag != '') {
+    args.shortlink.descriptor.descriptionTag = modifyURLSlug(args.shortlink.descriptor.descriptionTag)
+    const existingShortlinkDescription: ResultDoc<ShortlinkDocument> | null = await Shortlink.findOne(
+      { descriptor: { userTag, descriptionTag: args.shortlink.descriptor.descriptionTag } }
+    )
+    if(existingShortlinkDescription && existingShortlinkDescription._id.toString() != args.id) {
+      throw new ExtError(
+        `Shortlink '/${userTag}@${args.shortlink.descriptor.descriptionTag}' already exists`,
+        { code: 'DUPLICATING_DESCRIPTOR' }
+      )
+    }
+  }
+
+  let unsetRules : any = {}
+
+  if(!args.shortlink.descriptor || args.shortlink.descriptor?.descriptionTag == '') {
+    newShortlink.descriptor = undefined
+    unsetRules.descriptor = true
+  }
+
+  if(args.shortlink.location) 
+    newShortlink.location = normalizeURL(args.shortlink.location)
+
+  if(!args.shortlink.snooze || !args.shortlink.snooze.awake) {
+    newShortlink.snooze = undefined
+    unsetRules.snooze = true
+  }
+
+  const result = await Shortlink.findByIdAndUpdate(
+    args.id,
+    {
+      $set: newShortlink,
+      $unset: unsetRules
+    },
+    {new: true}
+  )
+
+  return result
 }
 
 /**
@@ -225,7 +274,7 @@ export async function queryShortlinks(
   if (args.sort && args.order) {
     results.sort([[args.sort, args.order as SortOrder]])
   } else {
-    results.sort([['updatedAt', 'desc']])
+    results.sort([['createdAt', 'desc']])
   }
   if (args.skip) results.skip(args.skip)
   if (args.limit) results.limit(args.limit)
