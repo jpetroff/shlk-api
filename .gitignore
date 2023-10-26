@@ -119,7 +119,8 @@ web_modules/
 .pnp.*
 
 # authentication files
-config.js
+src/credentials.*.json
+dist/credentials.*.json
 
 deploy
 stats.json

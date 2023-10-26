@@ -1,0 +1,114 @@
+/*!
+{
+  "name": "CSS Animations",
+  "property": "cssanimations",
+  "caniuse": "css-animation",
+  "polyfills": ["transformie", "csssandpaper"],
+  "tags": ["css"],
+  "warnings": ["Android < 4 will pass this test, but can only animate a single property at a time"],
+  "notes": [{
+    "name" : "Article: 'Dispelling the Android CSS animation myths'",
+    "href": "https://goo.gl/OGw5Gm"
+  }]
+}
+!*/
+
+/*!
+{
+  "name": "CSS Grid (old & new)",
+  "property": ["cssgrid", "cssgridlegacy"],
+  "authors": ["Faruk Ates"],
+  "tags": ["css"],
+  "notes": [{
+    "name": "The new, standardized CSS Grid",
+    "href": "https://www.w3.org/TR/css3-grid-layout/"
+  }, {
+    "name": "The _old_ CSS Grid (legacy)",
+    "href": "https://www.w3.org/TR/2011/WD-css3-grid-layout-20110407/"
+  }]
+}
+!*/
+
+/*!
+{
+  "name": "Hover Media Query",
+  "property": "hovermq",
+  "notes": [{
+    "name": "//Name of reference document",
+    "href": "//URL of reference document"
+  }]
+}
+!*/
+
+/*!
+{
+  "name": "Local Storage",
+  "property": "localstorage",
+  "caniuse": "namevalue-storage",
+  "tags": ["storage"],
+  "knownBugs": [],
+  "notes": [],
+  "warnings": [],
+  "polyfills": [
+    "joshuabell-polyfill",
+    "cupcake",
+    "storagepolyfill",
+    "amplifyjs",
+    "yui-cacheoffline"
+  ]
+}
+!*/
+
+/*!
+{
+  "name": "Touch Events",
+  "property": "touchevents",
+  "caniuse" : "touch",
+  "tags": ["media", "attribute"],
+  "notes": [{
+    "name": "Touch Events spec",
+    "href": "https://www.w3.org/TR/2013/WD-touch-events-20130124/"
+  }],
+  "warnings": [
+    "Indicates if the browser supports the Touch Events spec, and does not necessarily reflect a touchscreen device"
+  ],
+  "knownBugs": [
+    "False-positive on some configurations of Nokia N900",
+    "False-positive on some BlackBerry 6.0 builds – https://github.com/Modernizr/Modernizr/issues/372#issuecomment-3112695"
+  ]
+}
+!*/
+
+/*!
+{
+  "name": "matchMedia",
+  "property": "matchmedia",
+  "caniuse" : "matchmedia",
+  "tags": ["matchmedia"],
+  "authors": ["Alberto Elias"],
+  "notes": [{
+    "name": "W3C CSSOM View Module",
+    "href": "https://drafts.csswg.org/cssom-view/#the-mediaquerylist-interface"
+  }, {
+    "name": "MDN documentation",
+    "href": "https://developer.mozilla.org/en-US/docs/Web/API/Window.matchMedia"
+  }],
+  "polyfills": ["matchmediajs"]
+}
+!*/
+
+/*!
+{
+  "name": "requestAnimationFrame",
+  "property": "requestanimationframe",
+  "aliases": ["raf"],
+  "caniuse": "requestanimationframe",
+  "tags": ["animation"],
+  "authors": ["Addy Osmani"],
+  "notes": [{
+    "name": "W3C spec",
+    "href": "https://www.w3.org/TR/animation-timing/"
+  }],
+  "polyfills": ["raf"]
+}
+!*/

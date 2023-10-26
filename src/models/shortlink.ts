@@ -1,37 +1,16 @@
-import mongoose from 'mongoose'
+import mongoose, { Schema } from 'mongoose'
 import mongooseValidation from 'mongoose-beautiful-unique-validation'
 
-/*
-GraphQL interface for arguments and request
-*/
-export interface QIShortlink {
-	hash: string;
-	location: string;
-	descriptor?: {
-		userTag?: string;
-		descriptionTag: string; 
-	}
-}
-
-/* 
-	MongoDB object representation for query results
-	*/
-export interface ShortlinkDocument extends QIShortlink {
-	_id?: string;
-	createdAt?: string;
-	updatedAt?: string;
-}
 
 export type ShortlinkModel = typeof mongoose.Model<ShortlinkDocument>
-
-const Schema = mongoose.Schema
 
 const shortlinkSchema = new Schema<ShortlinkDocument, ShortlinkModel>(
   {
     hash: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
+      immutable: true
     },
 
     location: {
@@ -42,7 +21,40 @@ const shortlinkSchema = new Schema<ShortlinkDocument, ShortlinkModel>(
     descriptor: {
       userTag: { type: String },
       descriptionTag: { type: String }
+    },
+
+    owner: {
+      type: Schema.Types.ObjectId,
+      index: true,
+      required: false,
+      immutable: true
+    },
+
+    urlMetadata: {
+      type: Schema.Types.Mixed
+    },
+
+    siteTitle: {
+      type: String
+    },
+
+    siteDescription: {
+      type: String
+    },
+
+    snooze: {
+      awake: Number,
+      description: String
+    },
+
+    tags: {
+      type: [String]
+    },
+
+    _searchIndex: {
+      type: String
     }
+
   },
   { timestamps: true }
 )
