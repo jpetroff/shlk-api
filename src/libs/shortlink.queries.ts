@@ -1,7 +1,7 @@
 /* eslint-disable no-useless-catch */
 import { LeanDocument, QueryWithHelpers, SortOrder } from 'mongoose'
 import _ from 'underscore'
-import Shortlink from '../models/shortlink'
+import Shortlink, { ShortlinkModel } from '../models/shortlink'
 import User from '../models/user'
 import generateHash from './hash.lib'
 import fetchMetadata, { URLMeta } from './url-parser.lib'
@@ -197,7 +197,25 @@ export async function updateShortlink(userId: string, args: {id: string, shortli
     unsetRules.snooze = true
   }
 
-  const result = await Shortlink.findByIdAndUpdate(
+  // const currentShortlink : ResultDoc<ShortlinkDocument> | null = await Shortlink.findById(args.id)
+
+  const [urlMetadata, __, ___] = await fetchMetadata(newShortlink.location)
+  newShortlink.urlMetadata = urlMetadata
+  newShortlink._searchIndex = `${newShortlink.location}|${newShortlink.descriptor?.descriptionTag || ''}|${newShortlink.siteTitle}|${newShortlink.siteDescription}`
+
+  // if(!currentShortlink) {
+  //   throw new ExtError('Shortlink doesn’t exist')
+  // }
+
+  // const result = await currentShortlink.update(
+  //   {
+  //     $set: newShortlink,
+  //     $unset: unsetRules
+  //   },
+  //   {new: true}
+  // )
+
+  const result = Shortlink.findByIdAndUpdate(
     args.id,
     {
       $set: newShortlink,

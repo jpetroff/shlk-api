@@ -130,7 +130,10 @@ async function updateShortlink(userId, args) {
         newShortlink.snooze = undefined;
         unsetRules.snooze = true;
     }
-    const result = await shortlink_1.default.findByIdAndUpdate(args.id, {
+    const [urlMetadata, __, ___] = await (0, url_parser_lib_1.default)(newShortlink.location);
+    newShortlink.urlMetadata = urlMetadata;
+    newShortlink._searchIndex = `${newShortlink.location}|${newShortlink.descriptor?.descriptionTag || ''}|${newShortlink.siteTitle}|${newShortlink.siteDescription}`;
+    const result = shortlink_1.default.findByIdAndUpdate(args.id, {
         $set: newShortlink,
         $unset: unsetRules
     }, { new: true });

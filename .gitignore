@@ -125,4 +125,5 @@ dist/credentials.*.json
 deploy
 stats.json
 *.tar.gz
+.DS_Store
 
