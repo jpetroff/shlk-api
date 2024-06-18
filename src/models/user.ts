@@ -41,6 +41,10 @@ const userSchema = new Schema<UserDocument, UserModel>(
       type: String,
       unique: true
     },
+
+    ip: {
+      type: String
+    },
   },
   { timestamps: true }
 )

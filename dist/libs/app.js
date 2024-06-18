@@ -11,6 +11,7 @@ const helmet_1 = __importDefault(require("helmet"));
 const utils_1 = require("./utils");
 const express_session_1 = __importDefault(require("express-session"));
 const config_1 = __importDefault(require("../config"));
+const ban_queries_1 = require("./ban.queries");
 const helmetOpts = {
     contentSecurityPolicy: {
         useDefaults: true,
@@ -28,6 +29,7 @@ class App {
     constructor() {
         this.express = (0, express_1.default)();
         this.express.use(app_routes_1.staticRoute);
+        this.express.set('trust proxy', true);
     }
     mountRoutes() {
         this.express.use('/api', qraphql_yoga_1.default);
@@ -37,6 +39,18 @@ class App {
     }
     useHelmet() {
         this.express.use((0, helmet_1.default)(helmetOpts));
+        return this;
+    }
+    useIPCheck() {
+        this.express.use(async (req, res, next) => {
+            try {
+                await (0, ban_queries_1.checkBanlist)(req.ip, 'IP');
+                next();
+            }
+            catch (err) {
+                res.status(500).send(err);
+            }
+        });
         return this;
     }
     useSessionStorage(store) {
@@ -56,7 +70,7 @@ class App {
         return this;
     }
     start(port) {
-        this.express.listen(port, () => console.log(`${utils_1.cliColors.green}[✓]${utils_1.cliColors.end} Server listening on port ${port}`));
+        this.express.listen(port, '0.0.0.0', () => console.log(`${utils_1.cliColors.green}[✓]${utils_1.cliColors.end} Server listening on port ${port}`));
         return this;
     }
 }

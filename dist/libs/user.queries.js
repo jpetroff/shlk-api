@@ -6,13 +6,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUser = exports.updateUserById = exports.createOrUpdateUser = exports.UserObjectFields = exports.UserProfileFields = void 0;
 const user_1 = __importDefault(require("../models/user"));
 const underscore_1 = __importDefault(require("underscore"));
+const ban_queries_1 = require("./ban.queries");
 exports.UserProfileFields = ['email', 'name', 'avatar', 'userTag'];
-exports.UserObjectFields = Array().concat(exports.UserProfileFields, ['id_token', 'access_token', 'refresh_token']);
+exports.UserObjectFields = Array().concat(exports.UserProfileFields, ['id_token', 'access_token', 'refresh_token', 'ip']);
 async function createOrUpdateUser(args) {
     if (underscore_1.default.isEmpty(args.refresh_token))
         args = underscore_1.default.omit(args, 'refresh_token');
     if (underscore_1.default.isEmpty(args.name))
         args.name = args.email;
+    await (0, ban_queries_1.checkBanlist)(args.email, 'user');
     const newParams = underscore_1.default.pick(args, (value, key) => {
         return exports.UserObjectFields.indexOf(key) != -1 &&
             !underscore_1.default.isEmpty(value);

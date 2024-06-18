@@ -7,7 +7,7 @@ function authUserId(req) {
         return req.session.userId;
     }
     else {
-        throw new utils_1.ExtError(`You need to log in to use this`, { code: 'FORBIDDEN' });
+        throw new utils_1.ExtError(`Please, log in with Google account to use the app`, { code: 'FORBIDDEN' });
     }
 }
 exports.authUserId = authUserId;

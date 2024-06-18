@@ -1,4 +1,4 @@
-FROM node:19
+FROM --platform=linux/amd64 node:19
 
 # install pm2.io 
 

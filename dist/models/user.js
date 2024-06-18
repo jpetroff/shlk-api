@@ -34,6 +34,9 @@ const userSchema = new Schema({
         type: String,
         unique: true
     },
+    ip: {
+        type: String
+    },
 }, { timestamps: true });
 userSchema.plugin(mongoose_beautiful_unique_validation_1.default);
 exports.default = mongoose_1.default.model("User", userSchema);

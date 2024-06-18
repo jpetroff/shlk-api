@@ -1,13 +1,16 @@
 /* eslint-disable no-useless-catch */
 import User from '../models/user'
 import _ from 'underscore'
+import { checkBanlist } from './ban.queries'
 
 export const UserProfileFields : (keyof UserProfile)[] = [ 'email', 'name', 'avatar', 'userTag' ]
-export const UserObjectFields : (keyof UserObject)[] = Array().concat(UserProfileFields, [ 'id_token', 'access_token', 'refresh_token' ])
+export const UserObjectFields : (keyof UserObject)[] = Array().concat(UserProfileFields, [ 'id_token', 'access_token', 'refresh_token', 'ip' ])
 
 export async function createOrUpdateUser( args: UserObject ) : Promise<ResultDoc<UserDocument> | null> {
   if(_.isEmpty(args.refresh_token)) args = _.omit(args, 'refresh_token')
   if(_.isEmpty(args.name)) args.name = args.email
+
+  await checkBanlist(args.email, 'user')
 
   const newParams = _.pick(args, (value, key) => {
     return  UserObjectFields.indexOf(key as (keyof UserObject)) != -1 &&

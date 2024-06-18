@@ -5,7 +5,7 @@ export function authUserId(req: Maybe<Express.Request>) : string {
     return req.session.userId
   } else {
     throw new ExtError(
-      `You need to log in to use this`,
+      `Please, log in with Google account to use the app`,
       { code: 'FORBIDDEN' }
     )
   }

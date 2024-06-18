@@ -12,6 +12,7 @@ async function main() {
     const mongoose = await (0, connect_db_1.mongoConnect)();
     if (process.env.NODE_ENV == 'production')
         app_1.default.useHelmet();
+    app_1.default.useIPCheck();
     app_1.default.useSessionStorage(connect_db_1.MongoDBStore)
         .mountRoutes()
         .start(port);

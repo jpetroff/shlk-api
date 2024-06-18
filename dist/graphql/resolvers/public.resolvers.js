@@ -27,10 +27,12 @@ const shortlink_queries_1 = require("../../libs/shortlink.queries");
 const graphql_1 = require("graphql");
 const _ = __importStar(require("underscore"));
 const extends_1 = require("../extends");
+const auth_helpers_1 = require("../../libs/auth.helpers");
 exports.default = {
     Mutation: {
         createShortlink: (parent, args, context) => {
             try {
+                const userId = (0, auth_helpers_1.authUserId)(context?.req);
                 return (0, shortlink_queries_1.createShortlink)(args.location, context.req?.session?.userId);
             }
             catch (error) {
@@ -44,6 +46,7 @@ exports.default = {
         },
         createDescriptiveShortlink: (parent, args, context) => {
             try {
+                const userId = (0, auth_helpers_1.authUserId)(context?.req);
                 return (0, shortlink_queries_1.createShortlinkDescriptor)(_.extendOwn({ userId: context.req?.session?.userId }, args));
             }
             catch (error) {

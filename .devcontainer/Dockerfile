@@ -1,0 +1,3 @@
+FROM node:19
+
+EXPOSE "8002" "35729"

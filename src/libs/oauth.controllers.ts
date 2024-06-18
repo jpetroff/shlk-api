@@ -59,16 +59,20 @@ export async function oauthCallback (req: express.Request, res: express.Response
         avatar: data.picture,
         id_token: r.tokens.id_token,
         access_token: r.tokens.access_token,
-        refresh_token: r.tokens.refresh_token
+        refresh_token: r.tokens.refresh_token,
+        ip: req.ip
       })
 
       req.session.userId = user?._id.toString()
       req.session.tokens = r.tokens
 
       res.redirect('/')
-    } catch(err) {
-      console.log(err)
-      res.status(400).json(JSON.stringify(err))
+    } catch(err: any) {
+      if(err?.meta?.code == 'BANNED') {
+        res.status(500).json(err.message)
+      } else {
+        res.status(400).json(err)
+      }
     }
   }
 }

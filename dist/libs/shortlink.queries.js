@@ -34,9 +34,11 @@ const hash_lib_1 = __importDefault(require("./hash.lib"));
 const url_parser_lib_1 = __importDefault(require("./url-parser.lib"));
 const utils_1 = require("./utils");
 const snooze_tools_1 = __importStar(require("../libs/snooze.tools"));
+const ban_queries_1 = require("./ban.queries");
 exports.ShortlinkPublicFields = ['hash', 'descriptor', 'location', 'urlMetadata'];
 async function createOrGetShortlink(location, userId, _hash) {
     location = (0, utils_1.normalizeURL)(location);
+    await (0, ban_queries_1.checkBanlist)(location, 'location');
     let user = null;
     if (userId) {
         user = await user_1.default.findById(userId);
@@ -87,6 +89,7 @@ exports.createShortlink = createShortlink;
 async function createShortlinkDescriptor(args) {
     args.location = (0, utils_1.normalizeURL)(args.location);
     args.descriptionTag = (0, utils_1.modifyURLSlug)(args.descriptionTag);
+    await (0, ban_queries_1.checkBanlist)(args.location, 'location');
     const user = await user_1.default.findById(args.userId);
     args.userTag = user?.userTag || 'you';
     const existingShortlinkDescription = await shortlink_1.default.findOne({ descriptor: { userTag: args.userTag, descriptionTag: args.descriptionTag } });
@@ -110,6 +113,8 @@ async function createShortlinkDescriptor(args) {
 exports.createShortlinkDescriptor = createShortlinkDescriptor;
 async function updateShortlink(userId, args) {
     const user = await user_1.default.findById(userId);
+    if (args.shortlink.location)
+        await (0, ban_queries_1.checkBanlist)(args.shortlink.location, 'location');
     let newShortlink = underscore_1.default.defaults({}, args.shortlink);
     const userTag = args.shortlink.descriptor?.userTag || user.userTag;
     if (args.shortlink.descriptor && args.shortlink.descriptor.descriptionTag != '') {

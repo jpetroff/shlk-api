@@ -8,11 +8,13 @@ import {
 import { GraphQLError } from 'graphql'
 import * as _ from 'underscore'
 import { resolveError } from '../extends'
+import { authUserId } from '../../libs/auth.helpers'
 
 export default {
   Mutation: {
     createShortlink: ( parent : any, args : { location: string }, context: any) => {
       try {
+        const userId = authUserId(context?.req)
         return createShortlink(args.location, context.req?.session?.userId)
       } catch(error : any) {
         if(error instanceof GraphQLError) { throw error } 
@@ -27,6 +29,7 @@ export default {
   
     createDescriptiveShortlink: ( parent : any, args: {location: string, userTag?: string, descriptionTag: string, hash?: string }, context: any) => {
       try {
+        const userId = authUserId(context?.req)
         return createShortlinkDescriptor(
           _.extendOwn(
             {userId: context.req?.session?.userId},

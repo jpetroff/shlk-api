@@ -109,6 +109,7 @@ declare interface UserObject extends UserProfile {
   id_token?: Maybe<string>
   access_token?: Maybe<string>
   refresh_token?: Maybe<string>
+  ip?: string
 }
 
 

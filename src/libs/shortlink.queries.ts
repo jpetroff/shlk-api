@@ -7,6 +7,7 @@ import generateHash from './hash.lib'
 import fetchMetadata, { URLMeta } from './url-parser.lib'
 import { ExtError, modifyURLSlug, normalizeURL, sameOrNoOwnerID } from './utils'
 import SnoozeTools, { StandardTimers, SnoozeDay, SnoozeTime, StandardTimerGroups } from '../libs/snooze.tools'
+import { checkBanlist } from './ban.queries'
 
 
 export const ShortlinkPublicFields: (keyof ShortlinkDocument)[] = ['hash', 'descriptor', 'location', 'urlMetadata']
@@ -24,6 +25,8 @@ export const ShortlinkPublicFields: (keyof ShortlinkDocument)[] = ['hash', 'desc
 async function createOrGetShortlink(location: string, userId?: Maybe<string>, _hash?: Maybe<string>): Promise<ResultDoc<ShortlinkDocument>> {
   // normalise location first
   location = normalizeURL(location)
+
+  await checkBanlist(location, 'location')
 
   let user: Maybe<UserDocument> = null
   if (userId) {
@@ -122,6 +125,8 @@ export async function createShortlinkDescriptor(
   args.location = normalizeURL(args.location)
   args.descriptionTag = modifyURLSlug(args.descriptionTag)
 
+  await checkBanlist(args.location, 'location')
+
   const user = await User.findById(args.userId)
   args.userTag = user?.userTag || 'you'
 
@@ -164,6 +169,9 @@ export async function createShortlinkDescriptor(
 
 export async function updateShortlink(userId: string, args: {id: string, shortlink: QIEditableShortlinkProps}): Promise<ResultDoc<ShortlinkDocument> | null> {
   const user = await User.findById(userId)
+
+  if(args.shortlink.location)
+    await checkBanlist(args.shortlink.location, 'location')
 
   let newShortlink = _.defaults({}, args.shortlink)
 
